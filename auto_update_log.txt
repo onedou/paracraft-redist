@@ -1,3 +1,0 @@
-2018-05-16 08:20:50 prepare to download:http://tmlog.paraengine.com/version.php?dt=20180516082049
-2018-05-16 08:20:50 downloading:146/146 http://tmlog.paraengine.com/version.php?dt=20180516082049
-2018-05-16 08:20:50 onSuccess:VERSION_ID
