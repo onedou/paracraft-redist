@@ -1,0 +1,279 @@
+2018-05-17 20:16:08|8852|NPL Runtime started
+NPL bin dir: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\
+no packages at: 
+WorkingDir: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist
+WritablePath: C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/
+OS information:
+OS version:Microsoft  (build 9200), 64-bit
+Number of processors:4
+Processor type:586
+TotalPhysicalMemory:8249976
+FreePhysicalMemory:4093172
+
+ParaEngine Root Dir is C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/
+Archive: main_mobile_res.pkg is opened and read 613 entries
+Archive: main150727.pkg is opened and read 2773 entries
+Archive: main.pkg is opened and read 7536 entries
+./packages dir: C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/
+main loop: script/apps/Aries/main_loop.lua 
+Asset manifest file assets_manifest.txt is loaded
+CAssetManifest loaded 48209 files
+CAsyncLoader QueueID:0(Local) has 1 worker threads
+CAsyncLoader QueueID:1(Asset) has 2 worker threads
+CAsyncLoader QueueID:2(Web) has 1 worker threads
+CAsyncLoader QueueID:3(Asset_BigFile) has 1 worker threads
+CAsyncLoader QueueID:4(AudioFile) has 1 worker threads
+CAsyncLoader is started with 1 IO thread and 6 worker threads
+Absolute path is used for dll: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\PhysicsBT.dll
+Plug-in loaded: PhysicsBT.dll version: 1 
+Default window thread started. and a window is created in it
+Window is native: 3d window: 3d0630, top level: 3d0630
+DEBUG: main thread wnd handle : 3999280
+update d3d window size: width: 960, height:560, left:26, top:26
+Best full screen mode is (1280, 600)
+Window is native: 3d window: 3d0630, top level: 3d0630
+Absolute path is used for dll: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\cAudioEngine.dll
+Plug-in loaded: cAudioEngine.dll version: 1 
+Available Audio Playback Devices: 
+0 : Generic Software on 扬声器 (Cirrus Logic CS8409 (AB 54)) [DEFAULT]
+1 : Generic Software on S32F351 (英特尔(R) 显示器音频)
+font Tahoma;12;bold is created 
+font Tahoma;12;norm is created 
+Graphics Stats:
+HAL (pure hw vp): Intel(R) Iris(TM) Graphics 550|
+VS:3 PS:3
+ParaEngine LuaJIT 32bits version:LuaJIT 2.0.5
+Jit status:true, CMOV, SSE2, SSE3, SSE4.1, fold, cse, dce, fwd, dse, narrow, loop, abc, sink, fuse 
+ffi loaded shared lib: ParaEngineClient
+FFI for ParaTerrain installed 
+2018-05-17 20:16:08 4282734||system|os|hook cm_m_down_hook of type 1 is created
+2018-05-17 20:16:08 4282734||system|os|hook cm_m_move_hook of type 1 is created
+2018-05-17 20:16:08 4282734||system|os|hook cm_m_wheel_hook of type 1 is created
+2018-05-17 20:16:08 4282734||system|os|hook cm_m_up_hook of type 1 is created
+2018-05-17 20:16:08 4282734||system|os|hook cm_keydown of type 1 is created
+directory does not exist C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/packages/ 
+WARN:unable to load rule mapping from rule file script/AI/animations/mount.rules.table
+2018-05-17 20:16:08 4282781|main|warn|REST|RPC paraworld.users.GetNIDByOtherAccountID is overriden by GameServer.rest.client.CreateRPCWrapper. Remove duplicate calls with the same name.
+IPC debugger started in NPL state main: queue name NPLDebug
+2018-05-17 20:16:08 4282796|main|info|language|config/language.txt is not found
+2018-05-17 20:16:08 4282796|main|info|language|UI locale set to: zhCN. system default is zhCN
+2018-05-17 20:16:08 4282796|main|info|TranslationGettext|load mo file config/Aries/creator/language/paracraft_zhCN.mo with 1 entries
+2018-05-17 20:16:08 4282796|main|debug|cur_url|
+2018-05-17 20:16:08 4282796|main|info|Log|log level is set to info
+2018-05-17 20:16:08 4282796|main|info|AssetManifest|use local file first
+database:Database/apps.db (Database\apps.db) opened
+Absolute path is used for dll: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\sqlite.dll
+LibInitParaEngine in sqlite.cpp
+Plug-in loaded: sqlite.dll version: 1 
+application database has 4 installed apps
+font Tahoma;18;bold is created 
+font Tahoma;14;norm is created 
+font Tahoma;14;bold is created 
+client version is 0.7.363
+2018-05-17 20:16:08 4282859|main|info|Url protocol|paracraft:// found in registry as "C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\ParaEngineClient.exe" mc="true" %1
+Archive: npl_packages/ParacraftBuildinMod.zip is opened and read 264 entries
+2018-05-17 20:16:08 4282875|main|info|ParaXExporter|plugin initialized
+2018-05-17 20:16:08 4282875|main|info|PluginManager|mod: ParaXExporter (ParaXExporter) is added
+2018-05-17 20:16:08 4282875|main|info|NPLCAD|plugin initialized
+2018-05-17 20:16:08 4282875|main|info|PluginManager|mod: NPLCAD (NPLCAD) is added
+2018-05-17 20:16:08 4282875|main|info|STLExporter|plugin initialized
+2018-05-17 20:16:08 4282875|main|info|PluginManager|mod: STLExporter (STLExporter) is added
+2018-05-17 20:16:08 4282890|main|info|PluginManager|mod: WorldShare (WorldShare) is added
+2018-05-17 20:16:08 4282890|main|info|EMapMod|plugin initialized
+2018-05-17 20:16:08 4282890|main|info|MapBlock|init
+2018-05-17 20:16:08 4282890|main|info|PluginManager|mod: EMapMod (EMapMod) is added
+2018-05-17 20:16:08 4282890|main|info|TexturePackageList|LoadTexturePackageList
+database:Database/userdata.db (Database\userdata.db) opened
+2018-05-17 20:16:08 4282890|main|info|TexturePackageList|TexturePackageList initialized
+Unexpired local version is used for http://www.paraengine.com/twiki/bin/view/CCWeb/RecommendedTextureListData
+2018-05-17 20:16:08 4282890|main|info|MainLogin|loading world: http://git.keepwork.com/gitlab_rls_janice/world_base32_5cgzjzm3vxs3bd7fvwta/repository/archive.zip?ref=1dd468c747b7c107b71e8d101652516042d861f6
+CRenderTarget: _miniscenegraph_DownloadWorld128 render target renewed (128 128)
+database:Database/localserver.db (Database\localserver.db) opened
+FileIO Error: hr = 80004005; key=Texture/blocks/jukebox.dds; filename=
+2018-05-17 20:16:12 4286250|main|info|FileDownloader|DeleteCacheFile temp/webcache/paraengine.com/http_/_default_1[1]_localserver/20180517T121612.407673-0-archive.zip
+2018-05-17 20:16:12 4286250|main|info|FileDownloader|successfully downloaded file from http://git.keepwork.com/gitlab_rls_janice/world_base32_5cgzjzm3vxs3bd7fvwta/repository/archive.zip?ref=1dd468c747b7c107b71e8d101652516042d861f6 to C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/worlds/DesignHouse/userworlds/http_git_keepwork_com_gitlab_rls_janice_world_base32_5cgzjzm3vxs3bd7fvwta_repository_archive_r.zip
+camera attribute object refreshed 
+unable to prepare wave file 
+2018-05-17 20:16:12 4286250|main|info|PlayerAssetFile|51 assets loaded from config/Aries/creator/PlayerAssetFile.xml
+2018-05-17 20:16:12 4286250|main|info|PlayerSkins|38 skins loaded from config/Aries/creator/PlayerSkins.xml
+2018-05-17 20:16:12 4286250|main|info|Aries|Forcing standalone mode since user is not connected. 
+font Tahoma;16;norm is created 
+2018-05-17 20:16:12 4286375|main|info|LoadWorld|real terrain is totally disabled for block world
+Archive: C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/worlds/DesignHouse/userworlds/http_git_keepwork_com_gitlab_rls_janice_world_base32_5cgzjzm3vxs3bd7fvwta_repository_archive_r.zip is opened and read 75 entries
+2018-05-17 20:16:12 4286375|main|info|ParaSandBox.reset|new sandbox created.
+scene has been reset
+Global terrain engine disabled hence C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/worlds/DesignHouse/userworlds/world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6/worldconfig.txt is ignored.
+warn: can not open database 1 times: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\attribute.db, because unable to open database file
+warn: can not open database 2 times: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\attribute.db, because unable to open database file
+warn: can not open database 3 times: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\attribute.db, because unable to open database file
+warn: can not open database: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\attribute.db
+failed open database file C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\attribute.dbwarn: can not open database 1 times: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\NPC.db, because unable to open database file
+warn: can not open database 2 times: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\NPC.db, because unable to open database file
+warn: can not open database 3 times: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\NPC.db, because unable to open database file
+warn: can not open database: C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\NPC.db
+failed open database file C:\Users\chenliao\Documents\code\ParaCraftSDK\redist\worlds\DesignHouse\userworlds\world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6\NPC.dbunable to open database filecamera attribute object refreshed 
+font Tahoma;13;bold is created 
+echo:"load world 90% before render:----->4288406"
+echo:"load world 90% after render:----->4288406"
+echo:"load world 99%:----->4288421"
+2018-05-17 20:16:14 4288421|main|info|UserProfile|UserLoginProcess for nid 0
+database:Database/creator_profile.db (Database\creator_profile.db) opened
+2018-05-17 20:16:14 4288421|main|info|APISandbox|cleaned up sandbox scripting environment
+2018-05-17 20:16:14 4288421|main|info|AutoSaver|tip mode is on
+2018-05-17 20:16:14 4288437|main|info|NPLCAD|NPL CAD block is registered
+2018-05-17 20:16:14 4288437|main|info|MapBlock|block MapBlock (2333) is registered
+2018-05-17 20:16:14 4288437|main|info|MapBlock|block m_magma (2334) is registered
+2018-05-17 20:16:14 4288437|main|info|MapBlock|block m_brick (2335) is registered
+2018-05-17 20:16:14 4288437|main|info|MapBlock|block m_highway (2336) is registered
+2018-05-17 20:16:14 4288437|main|info|MapBlock|block m_wstone (2337) is registered
+2018-05-17 20:16:14 4288437|main|info|MapBlock|block m_water (2338) is registered
+2018-05-17 20:16:14 4288437|main|info|MapBlock|block m_waterStill (2339) is registered
+2018-05-17 20:16:14 4288468|main|info|block_types|loaded file from config/Aries/creator/block_types.xml
+warn: model: model/blockworld/StairsWood/StairsWood_corner.x is not coplanar. this will cost 4 times more memory. 
+warn: model: model/blockworld/StairsWood/StairsWood.x is not coplanar. this will cost 4 times more memory. 
+warn: model: model/blockworld/StairsWood/StairsWood_reverse_corner.x is not coplanar. this will cost 4 times more memory. 
+warn: model: model/blockworld/Bone/Bone.x is not coplanar. this will cost 4 times more memory. 
+2018-05-17 20:16:14 4288500|main|info|block_types|registering 266 block templates
+2018-05-17 20:16:14 4288500|main|info|GameLogic|remote_world:false, server_world: false
+Enter Block World  : max region cache 9
+2018-05-17 20:16:14 4288515|main|info|ItemClient|loaded block list category from file config/Aries/creator/block_list.xml
+loading local NPC file: C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/worlds/DesignHouse/userworlds/world_base32_5cgzjzm3vxs3bd7fvwta-master-1dd468c747b7c107b71e8d101652516042d861f6/LocalNPC.xml
+2018-05-17 20:16:14 4288515|main|info|WeatherEffect|CWeatherEffect created and added to scene
+2018-05-17 20:16:14 4288531|main|info|Translation|language translation zhCN defaults to zhCN
+2018-05-17 20:16:14 4288531|main|info|TexturePackage|texturepackage worlds/BlockTextures/official/Paracraft32xMixed_r1.zip already exist locally
+2018-05-17 20:16:14 4288531|main|info|TexturePackage|open texture package: worlds/BlockTextures/official/Paracraft32xMixed_r1.zip
+Archive: worlds/BlockTextures/official/Paracraft32xMixed_r1.zip is opened and read 120 entries
+2018-05-17 20:16:14 4288531|main|info|TexturePackage|Parent folder: worlds/BlockTextures/official/Paracraft32xMixed
+2018-05-17 20:16:14 4288531|main|info|TexturePackage|apply texture package: Paracraft32xMixed_r1.zip (119 textures)
+2018-05-17 20:16:14 4288531|main|info|options|actual render dist is set to 96
+2018-05-17 20:16:14 4288546|main|info|ModManager|plugins (mods) loaded in world
+2018-05-17 20:16:14 4288562|main|info|SceneContextManager|new context: base registered
+2018-05-17 20:16:14 4288562|main|info|SceneContextManager|new context: play registered
+2018-05-17 20:16:14 4288562|main|info|SceneContextManager|new context: edit registered
+2018-05-17 20:16:14 4288562|main|info|SceneContextManager|new context: movie registered
+2018-05-17 20:16:14 4288562|main|info|SceneContextManager|new context: tutorial registered
+2018-05-17 20:16:14 4288578|main|info|Game|Game.OnLogin finished
+Load region: 37 37, total regions: 0
+Block loading region 37 37 in Async mode
+warning: ParaX model file not found 
+Failed to Copy Data to Device Object:hr = 80004005; 
+2018-05-17 20:16:16 4290187|main|info|AutoFindVerticalPosition|player is spawned at highest solid block: 19200 5 19200
+Load region: 37 36, total regions: 1
+Block loading region 37 36 in Async mode
+Load region: 38 37, total regions: 2
+Block loading region 38 37 in Async mode
+Load region: 38 36, total regions: 3
+Block loading region 38 36 in Async mode
+CRenderTarget: _miniscenegraph_AvatarMyselfTabCharacter render target renewed (256 256)
+window frame object not found in WindowFrame.ZOrderFrame
+window frame object not found in WindowFrame.ZOrderFrame
+CRenderTarget: _miniscenegraph_block_icon_atlas_0 render target renewed (512 512)
+2018-05-17 20:18:57 4451062|main|info|TextureAtlas|block_icon_atlas redrawn
+2018-05-17 20:18:57 4451375|main|info|TextureAtlas|block_icon_atlas redrawn
+2018-05-17 20:19:00 4453875|main|info|TextureAtlas|block_icon_atlas redrawn
+2018-05-17 20:19:00 4454187|main|info|TextureAtlas|block_icon_atlas redrawn
+window frame object not found in WindowFrame.ZOrderFrame
+info: Object container automatically created for class: CBlockPieceParticle 
+Load region: 37 38, total regions: 4
+Block loading region 37 38 in Async mode
+Load region: 38 38, total regions: 5
+Block loading region 38 38 in Async mode
+info: Object container automatically created for class: COverlayObject 
+info: Object container automatically created for class: CRenderTarget 
+CRenderTarget: _miniscenegraph_overlay render target renewed (960 560)
+warning: global object with the name EntityCamera already exists. Thus a new object named EntityCamera7069 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC28384 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC9808 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC12871 is created instead.
+2018-05-17 20:20:50 4564484|main|warn|Entity:SetSkin|unknown skin student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC26047 is created instead.
+2018-05-17 20:20:50 4564500|main|warn|Entity:SetSkin|unknown skin xiaofangyuan03_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC15020 is created instead.
+2018-05-17 20:20:50 4564500|main|warn|Entity:SetSkin|unknown skin gril student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC19863 is created instead.
+font Tahoma;11;norm is created 
+warning: global object with the name EntityCamera already exists. Thus a new object named EntityCamera172 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC286 is created instead.
+warning: global object with the name EntityCamera already exists. Thus a new object named EntityCamera6491 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC26457 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC15597 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC28409 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC11312 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC30571 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC22089 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC23667 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC29781 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC13691 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC32726 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC16083 is created instead.
+2018-05-17 20:21:03 4577484|main|warn|Entity:SetSkin|unknown skin student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC4446 is created instead.
+2018-05-17 20:21:03 4577484|main|warn|Entity:SetSkin|unknown skin student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC28194 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC4571 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC4884 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC15083 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC11981 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC1824 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC16303 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC31008 is created instead.
+font Tahoma;13;norm is created 
+warning: global object with the name EntityCamera already exists. Thus a new object named EntityCamera17209 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC3585 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC10283 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC11162 is created instead.
+2018-05-17 20:21:31 4605359|main|warn|Entity:SetSkin|unknown skin student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC10043 is created instead.
+2018-05-17 20:21:31 4605359|main|warn|Entity:SetSkin|unknown skin xiaofangyuan03_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC28542 is created instead.
+2018-05-17 20:21:31 4605359|main|warn|Entity:SetSkin|unknown skin gril student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC15991 is created instead.
+warning: global object with the name EntityCamera already exists. Thus a new object named EntityCamera3763 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC2355 is created instead.
+warning: global object with the name EntityCamera already exists. Thus a new object named EntityCamera7080 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC2977 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC31098 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC31822 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC15783 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC20307 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC16282 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC19347 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC27439 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC29685 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC19521 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC12086 is created instead.
+2018-05-17 20:21:44 4618343|main|warn|Entity:SetSkin|unknown skin student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC14269 is created instead.
+2018-05-17 20:21:44 4618343|main|warn|Entity:SetSkin|unknown skin student_32bits.png
+warning: global object with the name NPC already exists. Thus a new object named NPC27428 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC1641 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC32474 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC14009 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC27574 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC13924 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC23324 is created instead.
+warning: global object with the name NPC already exists. Thus a new object named NPC22941 is created instead.
+update d3d window size: width: 960, height:561, left:355, top:209
+update d3d window size: width: 959, height:561, left:355, top:209
+2018-05-17 20:21:47 4621234|main|info|AutoSaver|tip mode is on
+program exited with code 0
+Default window thread exit
+
+
+error: reference count of d3ddevice is non-zero 60 when exit
+
+NPL State main exited
+sql db closed: Database/creator_profile.db
+sql db closed: Database/localserver.db
+sql db closed: Database/userdata.db
+sql db closed: Database/apps.db
+		NPL thread local memory allocator released 26869760 bytes
+CAsyncLoader worker thread 0 of 6 is exited
+CAsyncLoader worker thread 1 of 6 is exited
+CAsyncLoader worker thread 2 of 6 is exited
+CAsyncLoader worker thread 3 of 6 is exited
+CAsyncLoader worker thread 4 of 6 is exited
+CAsyncLoader worker thread 5 of 6 is exited
+CAsyncLoader IO thread is exited
+directory does not exist C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/temp/composeface/ 
+directory does not exist C:/Users/chenliao/Documents/code/ParaCraftSDK/redist/temp/composeskin/ 

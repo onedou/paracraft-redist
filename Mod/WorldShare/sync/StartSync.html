@@ -1,0 +1,41 @@
+<!-- "script/apps/Aries/Creator/Game/Login/InternetLoadWorld.html" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>StartSync,by big,2017.4.18</title>
+</head>
+<body>
+    <pe:mcml>
+        <script type="text/npl" refresh="false">
+            <![CDATA[
+                SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+
+                SyncMain.setSyncPage();
+             ]]>
+        </script>
+        <div style="width:500px;height:270px;">
+            <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与数据源同步" %>' onclose="SyncMain.closeSyncPage">
+            	<div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
+            		<div style="margin-left:80px;margin-top:40px;">
+                        <%=L"远程版本号：" %>
+                		<%=SyncMain.remoteRevison%>
+                		<pe:if condition="<%=SyncMain.compareFinish and SyncMain.remoteRevison ~= 0%>">
+                             <input onclick="SyncMain.useRemote()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用远程版本" %>' />
+                		</pe:if>
+	                </div>
+	                <div style="margin-left:80px;margin-top:30px;">
+                        <%=L"本地版本号：" %><%=SyncMain.currentRevison %>
+	                	<pe:if condition="<%=not SyncMain.compareFinish%>">
+	                		<input onclick="SyncMain.useOffline()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
+	                	</pe:if>
+	                	<pe:if condition="<%=SyncMain.compareFinish%>">
+	                		<input onclick="SyncMain.useLocal()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地版本" %>' />
+	                	</pe:if>
+	                </div>
+            	</div>
+            </aries:window>
+        </div>
+    </pe:mcml>
+</body>
+</html>
+
