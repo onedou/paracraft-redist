@@ -1212,31 +1212,43 @@ function SyncMain:genThemeMD(callback)
 end
 
 function SyncMain:genWorldMD(worldInfor, callback)
-    local contentUrl = "projects/" .. loginMain.keepWorkDataSourceId .. "/repository/files/" .. loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md?ref=master";
-    local worldUrl   = "";
+    local contentUrl = format(
+        "projects/%s/repository/files/%s/paracraft/world_%s.md?ref=master",
+        loginMain.keepWorkDataSourceId,
+        loginMain.username,
+        worldInfor.worldsName
+    );
 
+    local worldUrl = "";
     if(loginMain.dataSourceType == "gitlab") then
-        worldUrl = "http://git.keepwork.com/" .. loginMain.dataSourceUsername .. "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/repository/archive.zip?ref=" .. worldInfor.commitId;
+        worldUrl = format(
+            "%s/%s/%s/repository/archive.zip?ref=%s",
+            loginMain.rawBaseUrl,
+            loginMain.dataSourceUsername,
+            GitEncoding.base32(SyncMain.foldername.utf8),
+            worldInfor.commitId
+        );
     end
 
-    local worldFilePath = loginMain.username .. "/paracraft/world_" .. worldInfor.worldsName .. ".md";
+    local worldFilePath = format("%s/paracraft/world_%s.md", loginMain.username, worldInfor.worldsName);
     local worldTag      = LocalService:GetTag(SyncMain.foldername.default);
 
-    self:getUrl(contentUrl , function(data, err)
-        if(err == 404) then
-            local world3D = {
-                link_world_name   = worldTag.name,
-                link_world_url    = worldUrl,
-                media_logo        = worldInfor.preview,
-                link_desc         = "",
-                link_username     = loginMain.username,
-                link_update_date  = worldInfor.modDate,
-                link_version      = worldInfor.revision,
-                link_opus_id      = worldInfor.opusId,
-                link_files_totals = worldInfor.filesTotals,
-            }
+    local world3D = {
+        link_world_name   = worldTag.name,
+        link_world_url    = worldUrl,
+        media_logo        = worldInfor.preview,
+        link_desc         = "",
+        link_username     = loginMain.username,
+        link_update_date  = worldInfor.modDate,
+        link_version      = worldInfor.revision,
+        link_opus_id      = worldInfor.opusId,
+        link_files_totals = worldInfor.filesTotals,
+    }
 
-            world3D = KeepworkGen:setCommand("paracraft",world3D);
+    world3D = KeepworkGen:setCommand("paracraft", world3D);
+
+    self:getUrl(contentUrl , function(data, err)
+        if (err == 404) then
 
             if(not worldInfor.readme) then
                 worldInfor.readme = "";
@@ -1256,22 +1268,9 @@ function SyncMain:genWorldMD(worldInfor, callback)
                 end,
                 loginMain.keepWorkDataSourceId
             );
-        elseif(err == 200 or err == 304) then
+        elseif (err == 200 or err == 304) then
             data = Encoding.unbase64(data.content);
 
-            local world3D = {
-                link_world_name   = worldTag.name,
-                link_world_url    = worldUrl,
-                media_logo        = worldInfor.preview,
-                link_desc         = "",
-                link_username     = loginMain.username,
-                link_update_date  = worldInfor.modDate,
-                link_version      = worldInfor.revision,
-                link_opus_id      = worldInfor.opusId,
-                link_files_totals = worldInfor.filesTotals,
-            }
-
-            world3D = KeepworkGen:setCommand("paracraft",world3D);
             SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, world3D);
 
             SyncMain:updateService(
