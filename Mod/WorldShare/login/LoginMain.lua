@@ -138,9 +138,9 @@ function loginMain.setModalPage()
     loginMain.ModalPage = document:GetPageCtrl();
 end
 
-function loginMain.refreshPage()
+function loginMain.refreshPage(time)
     if(loginMain.LoginPage) then
-        loginMain.LoginPage:Refresh();
+        loginMain.LoginPage:Refresh(time or 0.01);
     end
 end
 

@@ -2,3 +2,7 @@ log.txt
 PWD
 auto_update_log.txt
 qconfig.ini
+worlds/
+temp/
+database/
+caches/
