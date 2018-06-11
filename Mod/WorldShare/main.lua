@@ -24,7 +24,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib
 
 WorldShare:Property({"Name", "WorldShare"});
 
-LOG.SetLogLevel("DEBUG");
+-- LOG.SetLogLevel("DEBUG");
 
 function WorldShare:ctor()
 end
