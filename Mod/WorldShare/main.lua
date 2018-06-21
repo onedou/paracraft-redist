@@ -17,7 +17,7 @@ NPL.load("(gl)script/ide/Files.lua");
 
 local GameLogic  = commonlib.gettable("MyCompany.Aries.Game.GameLogic");
 local Encoding   = commonlib.gettable("commonlib.Encoding");
-local loginMain  = commonlib.gettable("Mod.WorldShare.login.loginMain");
+local LoginMain  = commonlib.gettable("Mod.WorldShare.login.LoginMain");
 local SyncMain   = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"),commonlib.gettable("Mod.WorldShare"));
@@ -41,8 +41,8 @@ function WorldShare:init()
     -- replace load world page
     GameLogic.GetFilters():add_filter("InternetLoadWorld.ShowPage",function (bEnable, bShow)
         NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
-        local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain");
-        loginMain.ShowPage();
+        local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain");
+        LoginMain.ShowPage();
         return false;
     end);
 

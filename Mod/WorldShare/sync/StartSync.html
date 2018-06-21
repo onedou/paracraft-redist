@@ -11,6 +11,30 @@
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 
                 SyncMain.setSyncPage();
+
+                function useLocal()
+                    SyncMain.SyncPage:CloseWindow();
+
+                    if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
+                        SyncMain:useLocalGUI();
+                    elseif(tonumber(SyncMain.currentRevison) >= tonumber(SyncMain.remoteRevison)) then
+                        SyncMain:syncToDataSource();
+                    end
+                end
+
+                function useRemote()
+                    SyncMain.SyncPage:CloseWindow();
+
+                    if(tonumber(SyncMain.remoteRevison) < tonumber(SyncMain.currentRevison)) then
+                        SyncMain:useDataSourceGUI();
+                    elseif(tonumber(SyncMain.remoteRevison) >= tonumber(SyncMain.currentRevison)) then
+                        SyncMain:syncToLocal();
+                    end
+                end
+
+                function useOffline()
+                    SyncMain.ComparePage:CloseWindow();
+                end
              ]]>
         </script>
         <div style="width:500px;height:270px;">
@@ -20,16 +44,16 @@
                         <%=L"远程版本号：" %>
                 		<%=SyncMain.remoteRevison%>
                 		<pe:if condition="<%=SyncMain.compareFinish and SyncMain.remoteRevison ~= 0%>">
-                             <input onclick="SyncMain.useRemote()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用远程版本" %>' />
+                             <input onclick="useRemote()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用远程版本" %>' />
                 		</pe:if>
 	                </div>
 	                <div style="margin-left:80px;margin-top:30px;">
                         <%=L"本地版本号：" %><%=SyncMain.currentRevison %>
 	                	<pe:if condition="<%=not SyncMain.compareFinish%>">
-	                		<input onclick="SyncMain.useOffline()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
+	                		<input onclick="useOffline()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
 	                	</pe:if>
 	                	<pe:if condition="<%=SyncMain.compareFinish%>">
-	                		<input onclick="SyncMain.useLocal()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地版本" %>' />
+	                		<input onclick="useLocal()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地版本" %>' />
 	                	</pe:if>
 	                </div>
             	</div>
