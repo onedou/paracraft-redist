@@ -19,6 +19,8 @@ NPL.load("(gl)Mod/WorldShare/main.lua")
 NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
+NPL.load("(gl)Mod/WorldShare/store/Global.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncToDataSource.lua")
 
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
@@ -30,6 +32,8 @@ local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
+local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 
@@ -78,7 +82,10 @@ end
 
 function SyncMain.closeSyncPage()
     SyncMain.isStart = false
-    SyncMain.SyncPage:CloseWindow()
+
+    if (SyncMain.SyncPage) then
+        SyncMain.SyncPage:CloseWindow()
+    end
 end
 
 function SyncMain.closeBeyondPage()
@@ -144,9 +151,20 @@ function SyncMain:syncToLocal(callback)
 end
 
 function SyncMain:syncToDataSource()
+    SyncToDataSource:init()
+end
+
+function SyncMain.GetCurrentRevision()
+    return tonumber(GlobalStore.get('currentRevision'))
+end
+
+function SyncMain.GetRemoteRevision()
+    return tonumber(GlobalStore.get('remoteRevision'))
 end
 
 function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
+    echo(SyncMain.foldername, true)
+
     SyncMain:getCommits(
         SyncMain.foldername.base32,
         function(data, err)
@@ -277,10 +295,13 @@ function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
 end
 
 function SyncMain:checkWorldSize()
-    local filesTotal = LocalService:GetWorldSize(SyncMain.worldDir.default)
+    local worldDir = GlobalStore.get("worldDir")
+    local userType = GlobalStore.get("userType")
+
+    local filesTotal = LocalService:GetWorldSize(worldDir.default)
     local maxSize = 0
 
-    if (loginMain.userType == "vip") then
+    if (userType == "vip") then
         maxSize = 50 * 1024 * 1024
     else
         maxSize = 25 * 1024 * 1024

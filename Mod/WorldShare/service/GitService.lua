@@ -11,10 +11,10 @@ local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 ]]
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 
-local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
+local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 
-local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
+local GitService = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.GitService"))
 
 function GitService:ctor()
     self.dataSourceInfo = GlobalStore.get("dataSourceInfo")
@@ -23,81 +23,72 @@ end
 
 function GitService:create(foldername, callback)
     if (self.dataSourceType == "github") then
-        GithubService:create(foldername, callback)
+        GithubService:new():create(foldername, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:create(foldername, callback)
+        GitlabService:new():create(foldername, callback)
     end
 end
 
 function GitService:getContent(foldername, path, projectId, callback)
     if (self.dataSourceType == "github") then
-        GithubService:getContent(foldername, path, callback)
+        GithubService:new():getContent(foldername, path, callback)
     elseif (self.dataSourceType == "gitlab") then
-        echo(123123213)
-        GitlabService:getContent(path, projectId, callback)
+        GitlabService:new():getContent(path, projectId, callback)
     end
 end
 
 function GitService:getContentWithRaw()
     if (self.dataSourceType == "github") then
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:getContentWithRaw(path, callback, projectId)
+        GitlabService:new():getContentWithRaw(path, callback, projectId)
     end
 end
 
-function GitService:upload(foldername, filename, file_content_t, callback, projectId)
+function GitService:upload(projectId, foldername, filename, content, callback)
     if (self.dataSourceType == "github") then
-        GithubService:upload(foldername, filename, file_content_t, callback)
+        GithubService:new():upload(foldername, filename, content, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:writeFile(filename, file_content_t, callback, projectId, foldername)
+        GitlabService:new():upload(projectId, filename, content, callback)
     end
 end
 
-function GitService:update(foldername, filename, file_content_t, sha, callback, projectId)
+function GitService:update(projectId, foldername, filename, content, sha, callback)
     if (self.dataSourceType == "github") then
-        GithubService:update(foldername, filename, file_content_t, sha, callback)
+        GithubService:new():update(foldername, filename, content, sha, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:update(filename, file_content_t, sha, callback, projectId, foldername)
+        GitlabService:new():update(projectId, filename, content, callback)
     end
 end
 
 function GitService:deleteFile(foldername, path, sha, callback, projectId)
     if (self.dataSourceType == "github") then
-        GithubService:deleteFile(foldername, path, sha, callback)
+        GithubService:new():deleteFile(foldername, path, sha, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:deleteFile(path, sha, callback, projectId, foldername)
+        GitlabService:new():deleteFile(path, sha, callback, projectId, foldername)
     end
 end
 
-function GitService:getTree(foldername, callback, commitId, projectId)
+function GitService:getTree(projectId, foldername, commitId, callback)
     if (self.dataSourceType == "github") then
-        GithubService:getTree(foldername, callback)
+        GithubService:new():getTree(foldername, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:getTree(callback, commitId, projectId, foldername)
+        GitlabService:new():getTree(projectId, commitId, callback)
     end
 end
 
 function GitService:getCommits(foldername, callback, projectId)
     if (loginMain.dataSourceType == "github") then
-        GithubService:getCommits(foldername, callback)
+        GithubService:new():getCommits(foldername, callback)
     elseif (loginMain.dataSourceType == "gitlab") then
-        GitlabService:getCommits(callback, projectId, foldername)
+        GitlabService:new():getCommits(callback, projectId, foldername)
     end
 end
 
--- function GitService:getUrl(url, callback)
---     if(loginMain.dataSourceType == "github") then
-
---     elseif(loginMain.dataSourceType == "gitlab") then
---         GitlabService:apiGet(url, callback);
---     end
--- end
-
-function GitService:getWorldRevison(foldername, callback)
+function GitService:getWorldRevision(foldername, callback)
     if (self.dataSourceType == "github") then
-        GithubService:getWorldRevison(foldername, callback)
+        GithubService:new():getWorldRevision(foldername, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:getWorldRevison(foldername, callback)
+        GitlabService:new():getWorldRevision(foldername, callback)
     end
 end
 
@@ -111,17 +102,17 @@ end
 function GitService.setProjectId(projectId)
     if (self.dataSourceType == "github") then
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:setProjectId(foldername)
+        GitlabService:new():setProjectId(foldername)
     end
 end
 
-function GitService:getProjectIdByName(datasource, callback)
-    GitlabService:getProjectIdByName(datasource, callback)
+function GitService:getProjectIdByName(name, callback)
+    GitlabService:new():getProjectIdByName(name, callback)
 end
 
 function GitService:deleteResp(foldername, callback)
     if (self.dataSourceType == "github") then
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:deleteResp(foldername, callback)
+        GitlabService:new():deleteResp(foldername, callback)
     end
 end

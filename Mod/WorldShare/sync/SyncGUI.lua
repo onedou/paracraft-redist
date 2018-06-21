@@ -5,8 +5,8 @@ Date: 	2017.4.17
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua");
-local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI");
+NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua")
+local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
@@ -60,8 +60,10 @@ function SyncGUI:OnInit()
     SyncGUI.progressbar = SyncPage:GetNode("progressbar");
 end
 
-function SyncGUI:refresh()
-    SyncPage:Refresh(0.01);
+function SyncGUI:refresh(delayTimeMs)
+    if(SyncPage) then
+        SyncPage:Refresh(delayTimeMs or 0.01);
+    end
 end
 
 function SyncGUI.closeWindow()

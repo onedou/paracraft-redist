@@ -15,6 +15,8 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua")
 NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+NPL.load("(gl)Mod/WorldShare/store/Global.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
@@ -27,6 +29,8 @@ local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkService")
+local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
@@ -241,9 +245,9 @@ function LoginWorldList.syncWorldsList(callback)
     local function handleWorldList(response, err)
         local localWorlds = InternetLoadWorld.cur_ds or {}
         local remoteWorldsList = response.data
-    
-        store.set("remoteWorldsList", remoteWorldsList)
-        store.set("localWorlds", localWorlds)
+
+        GlobalStore.set("remoteWorldsList", remoteWorldsList)
+        GlobalStore.set("localWorlds", localWorlds)
 
         -- 处理本地网络同时存在 本地不存在 网络存在 的世界
         if (type(remoteWorldsList) ~= "table") then
@@ -306,9 +310,9 @@ function LoginWorldList.syncWorldsList(callback)
             for i = 1, #localWorlds - 1 do
                 for j = 1, #localWorlds - i do
                     if
-                        LoginMain:formatDate(localWorlds[j].modifyTime) <
-                            LoginMain:formatDate(localWorlds[j + 1].modifyTime)
-                        then
+                        LoginWorldList:formatDate(localWorlds[j].modifyTime) <
+                            LoginWorldList:formatDate(localWorlds[j + 1].modifyTime)
+                     then
                         tmp = localWorlds[j]
                         localWorlds[j] = localWorlds[j + 1]
                         localWorlds[j + 1] = tmp
@@ -385,43 +389,35 @@ function LoginWorldList:formatDate(modDate)
 end
 
 function LoginWorldList.syncNow(index)
-    if (LoginMain.IsSignedIn() and not LoginMain.isVerified) then
-        _guihelper.MessageBox(
-            L "您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
-            function(res)
-                if (res and res == _guihelper.DialogResult.Yes) then
-                    ParaGlobal.ShellExecute("open", format("%s/wiki/user_center", LoginMain.site), "", "", 1)
-                end
-            end,
-            _guihelper.MessageBoxButtons.YesNo
-        )
-
-        return
+    if (not LoginUserInfo.IsSignedIn() or LoginUserInfo.CheckoutVerified()) then
+        return false
     end
 
     local index = tonumber(index)
+    local selectedWorldInfo = InternetLoadWorld.cur_ds[index]
 
-    SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index]
-
-    if (LoginMain.IsSignedIn()) then
-        if (SyncMain.selectedWorldInfor.status ~= nil and SyncMain.selectedWorldInfor.status ~= 2) then
-            if (SyncMain.selectedWorldInfor.is_zip) then
-                _guihelper.MessageBox(L "不能同步ZIP文件")
-                return
-            end
-
-            SyncMain.foldername.utf8 = SyncMain.selectedWorldInfor.foldername
-            SyncMain.foldername.default = Encoding.Utf8ToDefault(SyncMain.foldername.utf8)
-
-            SyncMain.worldDir.utf8 = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.utf8 .. "/"
-            SyncMain.worldDir.default = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/"
-
-            SyncMain.syncCompare(true)
-        else
-            LoginMain.downloadWorld()
+    if (selectedWorldInfo.status ~= nil and selectedWorldInfo.status ~= 2) then
+        if (selectedWorldInfo.is_zip) then
+            _guihelper.MessageBox(L "不能同步ZIP文件")
+            return
         end
+
+        local foldername = {}
+
+        foldername.utf8 = selectedWorldInfo.foldername
+        foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
+
+        local worldDir = {}
+
+        worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
+        worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+
+        GlobalStore.set("foldername", foldername)
+        GlobalStore.set("worldDir", worldDir)
+
+        SyncCompare:syncCompare(true) -- sync on login status
     else
-        _guihelper.MessageBox(L "登陆后才能同步")
+        LoginWorldList.downloadWorld()
     end
 end
 

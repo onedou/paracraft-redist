@@ -191,7 +191,7 @@ function GithubService:getWorldRevison()
 	local contentUrl = format("%s/%s/%s/master/revision.xml", loginMain.rawBaseUrl, loginMain.dataSourceUsername, foldername.base32)
 end
 
-function GitService.deleteWorldGithub(_password)
+function GithubService.deleteWorldGithub(_password)
     local foldername = SyncMain.selectedWorldInfor.foldername;
     foldername = Encoding.Utf8ToDefault(foldername);
 

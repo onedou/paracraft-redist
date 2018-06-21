@@ -5,17 +5,26 @@ Date:  2018.6.20
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/SyncToDataSource.lua");
-local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource");
+NPL.load("(gl)Mod/WorldShare/sync/SyncToDataSource.lua")
+local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource")
 ------------------------------------------------------------
 ]]
-local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource")
+NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua")
+NPL.load("(gl)Mod/WorldShare/store/Global.lua")
+
+local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
+local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+
+local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource")
 
 SyncToDataSource.remoteSync = {}
 
 function SyncToDataSource:init()
+    local foldername = GlobalStore.get("foldername")
+    local remoteRevision = GlobalStore.get("remoteRevision")
+
     if (SyncMain:checkWorldSize()) then
         return false
     end
@@ -25,10 +34,10 @@ function SyncToDataSource:init()
     self.syncToDataSourceGUI:refresh()
     self.finish = false
 
-    if (SyncMain.remoteRevison == 0) then
+    if (remoteRevision == 0) then
         --"首次同步"
         GitService:create(
-            SyncMain.foldername.base32,
+            foldername.base32,
             function(data, status)
                 if (data == true) then
                     self:syncToDataSource()
@@ -41,90 +50,103 @@ function SyncToDataSource:init()
         )
     else
         --"非首次同步"
-        GitService:setProjectId(self.foldername.utf8, self.remoteWorldsList)
         self:syncToDataSource()
     end
 end
 
 function SyncToDataSource:syncToDataSource()
-    if (SyncMain.worldDir.default == "") then
+    local worldDir = GlobalStore.get("worldDir")
+    local foldername = GlobalStore.get("foldername")
+
+    if (not worldDir or not worldDir.default or worldDir.default == "") then
         _guihelper.MessageBox(L "上传失败，将使用离线模式，原因：上传目录为空")
-        return
-    else
-        self.curUpdateIndex = 1
-        self.curUploadIndex = 1
-        self.totalLocalIndex = nil
-        self.totalDataSourceIndex = nil
-        self.dataSourceFiles = {}
+        return false
+    end
 
-        self.revisionUpload = false
-        self.revisionUpdate = false
+    self.curUpdateIndex = 1
+    self.curUploadIndex = 1
+    self.totalLocalIndex = nil
+    self.totalDataSourceIndex = nil
+    self.dataSourceFiles = {}
 
-        local syncGUItotal = 0
-        local syncGUIIndex = 0
-        local syncGUIFiles = ""
+    self.revisionUpload = false
+    self.revisionUpdate = false
 
-        syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L "获取文件sha列表")
+    local syncGUItotal = 0
+    local syncGUIIndex = 0
+    local syncGUIFiles = ""
 
-        -- 获取数据源仓文件
-        SyncMain:getFileShaListService(
-            SyncMain.foldername.base32,
-            function(data, err)
-                SyncMain.localFiles = LocalService:new():LoadFiles(SyncMain.worldDir.default) --再次获取本地文件，保证上传的内容为最新
+    self.syncToDataSourceGUI:updateDataBar(syncGUIIndex, syncGUItotal, L "获取文件sha列表")
 
-                local hasReadme = false
+    local function handleSyncToDataSource(data, err)
+        local localFiles = LocalService:new():LoadFiles(worldDir.default) --再次获取本地文件，保证上传的内容为最新
 
-                for key, value in ipairs(SyncMain.localFiles) do
-                    if (string.upper(value.filename) == "README.MD") then
-                        if (value.filename == "README.md") then
-                            hasReadme = true
-                        else
-                            LocalService:delete(SyncMain.foldername.utf8, value.filename)
-                            hasReadme = false
-                        end
-                    end
-                end
+        local hasReadme = false
 
-                if (not hasReadme) then
-                    local filePath = SyncMain.worldDir.default .. "README.md"
-                    local file = ParaIO.open(filePath, "w")
-                    local content = KeepworkGen.readmeDefault
-
-                    file:write(content, #content)
-                    file:close()
-
-                    local readMeFiles = {
-                        filename = "README.md",
-                        file_path = filePath,
-                        file_content_t = content
-                    }
-
-                    local otherFile = commonlib.copy(SyncMain.localFiles[#SyncMain.localFiles])
-                    SyncMain.localFiles[#SyncMain.localFiles] = readMeFiles
-                    SyncMain.localFiles[#SyncMain.localFiles + 1] = otherFile
-                end
-
-                self.totalLocalIndex = #SyncMain.localFiles
-                syncGUItotal = #SyncMain.localFiles
-
-                for i = 1, #SyncMain.localFiles do
-                    SyncMain.localFiles[i].needChange = true
-                    i = i + 1
-                end
-
-                if (err ~= 409 and err ~= 404) then --409代表已经创建过此仓
-                    self.dataSourceFiles = data
-                    self.totalDataSourceIndex = #self.dataSourceFiles
-
-                    if (self.totalDataSourceIndex ~= 0) then
-                        SyncMain.remoteSync.updateOne()
-                    end
+        for key, value in ipairs(localFiles) do
+            if (string.upper(value.filename) == "README.MD") then
+                if (value.filename == "README.md") then
+                    hasReadme = true
                 else
-                    SyncMain.remoteSync.uploadOne()
+                    LocalService:new():delete(foldername, value.filename)
+                    hasReadme = false
                 end
             end
-        )
+        end
+
+        if (not hasReadme) then
+            local filePath = format("%sREADME.md", worldDir.default)
+            local file = ParaIO.open(filePath, "w")
+            local content = KeepworkGen.readmeDefault
+
+            file:write(content, #content)
+            file:close()
+
+            local readMeFiles = {
+                filename = "README.md",
+                file_path = filePath,
+                file_content_t = content
+            }
+
+            local otherFile = commonlib.copy(localFiles[#SyncMain.localFiles])
+
+            localFiles[#localFiles] = readMeFiles
+            localFiles[#localFiles + 1] = otherFile
+        end
+
+        self.totalLocalIndex = #localFiles
+
+        syncGUItotal = #localFiles
+
+        for i = 1, #localFiles do
+            localFiles[i].needChange = true
+            i = i + 1
+        end
+
+        if (err ~= 409 and err ~= 404) then --409代表已经创建过此仓
+            self.dataSourceFiles = data
+            self.totalDataSourceIndex = #self.dataSourceFiles
+
+            if (self.totalDataSourceIndex ~= 0) then
+                self.updateOne()
+            end
+        else
+            self.uploadOne()
+        end
     end
+
+    GitService:new():getProjectIdByName(
+        foldername.base32,
+        function(projectId)
+            -- 获取数据源仓文件
+            GitService:new():getTree(
+                projectId, --projectId
+                foldername.base32,
+                nil, --commitId
+                handleSyncToDataSource
+            )
+        end
+    )
 end
 
 function SyncToDataSource:revision(callback)

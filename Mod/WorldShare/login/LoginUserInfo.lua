@@ -184,6 +184,8 @@ function loginResponse(page, response, err, callback)
                             LoginUserInfo.userType = "normal"
                         end
 
+                        GlobalStore.set("userType", userType)
+
                         for _, value in ipairs(userinfo["dataSource"]) do
                             if (value.type == defaultSiteDataSource.type) then
                                 dataSourceSetting = value
@@ -271,7 +273,7 @@ function loginResponse(page, response, err, callback)
                                 end
 
                                 GenerateMdPage:genIndexMD()
-                                GenerateMdPage:genThemeMD()
+                                -- GenerateMdPage:genThemeMD()
                             end
                         )
                     end
@@ -289,6 +291,22 @@ end
 
 function LoginUserInfo.IsSignedIn()
     return LoginUserInfo.token ~= nil
+end
+
+function LoginUserInfo.CheckoutVerified()
+    if (LoginUserInfo.IsSignedIn() and not LoginUserInfo.isVerified) then
+        _guihelper.MessageBox(
+            L "您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
+            function(res)
+                if (res and res == _guihelper.DialogResult.Yes) then
+                    ParaGlobal.ShellExecute("open", format("%s/wiki/user_center", LoginUserInfo.site), "", "", 1)
+                end
+            end,
+            _guihelper.MessageBoxButtons.YesNo
+        )
+
+        return false
+    end
 end
 
 function LoginUserInfo.GetValidAvatarFilename(playerName)

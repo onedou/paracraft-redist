@@ -5,8 +5,8 @@ Date:  2017.4.15
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua");
-local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService");
+NPL.load("(gl)Mod/WorldShare/service/GitlabService.lua")
+local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
@@ -23,7 +23,7 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 
-local GitlabService = commonlib.gettable("Mod.WorldShare.service.GitlabService")
+local GitlabService = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.GitlabService"))
 
 GitlabService.inited = false
 GitlabService.tree = {}
@@ -32,10 +32,12 @@ GitlabService.blob = {}
 GitlabService.getTreePage = 1
 GitlabService.getTreePer_page = 100
 
-function GitlabService:ctor()
+function GitlabService:ctor(projectId)
     self.dataSourceInfo = GlobalStore.get("dataSourceInfo")
+
     self.dataSourceToken = self.dataSourceInfo.dataSourceToken
     self.apiBaseUrl = self.dataSourceInfo.apiBaseUrl
+    self.projectId = projectId
 end
 
 function GitlabService:checkSpecialCharacter(filename)
@@ -89,7 +91,7 @@ function GitlabService:checkProjectId(projectId, foldername, callback)
 end
 
 function GitlabService:apiGet(url, callback)
-    if(not url) then
+    if (not url or not self.apiBaseUrl) then
         return false
     end
 
@@ -113,7 +115,11 @@ function GitlabService:apiGet(url, callback)
 end
 
 function GitlabService:apiPost(url, params, callback)
-    url = loginMain.apiBaseUrl .. "/" .. url
+    if (not url or not params) then
+        return false
+    end
+
+    url = format("%s/%s", self.apiBaseUrl, url)
 
     HttpRequest:GetUrl(
         {
@@ -121,7 +127,7 @@ function GitlabService:apiPost(url, params, callback)
             url = url,
             json = true,
             headers = {
-                ["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
+                ["PRIVATE-TOKEN"] = self.dataSourceToken,
                 ["User-Agent"] = "npl",
                 ["content-type"] = "application/json"
             },
@@ -136,7 +142,11 @@ function GitlabService:apiPost(url, params, callback)
 end
 
 function GitlabService:apiPut(url, params, callback)
-    url = loginMain.apiBaseUrl .. "/" .. url
+    if (not url or not params) then
+        return false
+    end
+
+    url = format("%s/%s", self.apiBaseUrl, url)
 
     HttpRequest:GetUrl(
         {
@@ -144,7 +154,7 @@ function GitlabService:apiPut(url, params, callback)
             url = url,
             json = true,
             headers = {
-                ["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
+                ["PRIVATE-TOKEN"] = self.dataSourceToken,
                 ["User-Agent"] = "npl",
                 ["content-type"] = "application/json"
             },
@@ -182,6 +192,10 @@ function GitlabService:apiDelete(url, params, callback)
 end
 
 function GitlabService:getFileUrlPrefix(projectId)
+    if (not projectId) then
+        return false
+    end
+
     return format("projects/%s/repository/files/", projectId)
 end
 
@@ -190,104 +204,99 @@ function GitlabService:getCommitMessagePrefix()
 end
 
 -- 获得文件列表
-function GitlabService:getTree(callback, commitId, projectId, foldername)
-    local function go(projectId)
-        local url = "projects/" .. projectId .. "/repository/tree?"
+function GitlabService:getTree(projectId, commitId, callback)
+    local url = format("projects/%s/repository/tree?", projectId)
 
-        if (commitId) then
-            url = url .. "?ref=" .. commitId
-        end
-
-        GitlabService.blob = {}
-        GitlabService.tree = {}
-
-        GitlabService:getTreeApi(
-            url,
-            function(data, err)
-                if (err == 404) then
-                    if (type(callback) == "function") then
-                        callback(data, err)
-                    end
-                else
-                    if (type(data) == "table") then
-                        for key, value in ipairs(data) do
-                            if (value.type == "tree") then
-                                GitlabService.tree[#GitlabService.tree + 1] = value
-                            end
-
-                            if (value.type == "blob") then
-                                GitlabService.blob[#GitlabService.blob + 1] = value
-                            end
-                        end
-
-                        local fetchTimes = 0
-
-                        local function getSubTree()
-                            if (#GitlabService.tree ~= 0) then
-                                for key, value in ipairs(GitlabService.tree) do
-                                    GitlabService:getSubTree(
-                                        function(subTree, subFolderName, commitId, projectId)
-                                            for checkKey, checkValue in ipairs(GitlabService.tree) do
-                                                if (checkValue.path == subFolderName) then
-                                                    if (not checkValue.alreadyGet) then
-                                                        checkValue.alreadyGet = true
-                                                    else
-                                                        return
-                                                    end
-                                                end
-                                            end
-
-                                            fetchTimes = fetchTimes + 1
-
-                                            for subKey, subValue in ipairs(subTree) do
-                                                GitlabService.newTree[#GitlabService.newTree + 1] = subValue
-                                            end
-
-                                            if (#GitlabService.tree == fetchTimes) then
-                                                fetchTimes = 0
-                                                GitlabService.tree = commonlib.copy(GitlabService.newTree)
-                                                GitlabService.newTree = {}
-
-                                                getSubTree()
-                                            end
-                                        end,
-                                        value.path,
-                                        commitId,
-                                        projectId
-                                    )
-                                end
-                            elseif (#GitlabService.tree == 0) then
-                                for cbKey, cbValue in ipairs(GitlabService.blob) do
-                                    cbValue.sha = cbValue.id
-                                end
-
-                                if (type(callback) == "function") then
-                                    callback(GitlabService.blob, 200)
-                                end
-                            end
-                        end
-
-                        getSubTree()
-                    else
-                        _guihelper.MessageBox(L "获取sha文件失败")
-                    end
-                end
-            end
-        )
+    if (commitId) then
+        url = format("%sref=%s", url, commitId)
     end
 
-    GitlabService:checkProjectId(projectId, foldername, go)
+    local fetchTimes = 0
+    local function getSubTree()
+        if (#self.tree ~= 0) then
+            for key, value in ipairs(self.tree) do
+                self:getSubTree(
+                    function(subTree, subFolderName, commitId, projectId)
+                        for checkKey, checkValue in ipairs(self.tree) do
+                            if (checkValue.path == subFolderName) then
+                                if (not checkValue.alreadyGet) then
+                                    checkValue.alreadyGet = true
+                                else
+                                    return
+                                end
+                            end
+                        end
+
+                        fetchTimes = fetchTimes + 1
+
+                        for subKey, subValue in ipairs(subTree) do
+                            self.newTree[#self.newTree + 1] = subValue
+                        end
+
+                        if (#self.tree == fetchTimes) then
+                            fetchTimes = 0
+                            self.tree = commonlib.copy(self.newTree)
+                            self.newTree = {}
+
+                            getSubTree()
+                        end
+                    end,
+                    value.path,
+                    commitId,
+                    projectId
+                )
+            end
+        elseif (#self.tree == 0) then
+            for cbKey, cbValue in ipairs(self.blob) do
+                cbValue.sha = cbValue.id
+            end
+
+            if (type(callback) == "function") then
+                callback(self.blob, 200)
+            end
+        end
+    end
+
+    self.blob = {}
+    self.tree = {}
+
+    self:getTreeApi(
+        url,
+        function(data, err)
+            if (err == 404) then
+                if (type(callback) == "function") then
+                    callback(data, err)
+                end
+            else
+                if (type(data) == "table") then
+                    for key, value in ipairs(data) do
+                        if (value.type == "tree") then
+                            self.tree[#self.tree + 1] = value
+                        end
+
+                        if (value.type == "blob") then
+                            self.blob[#self.blob + 1] = value
+                        end
+                    end
+
+                    getSubTree()
+                else
+                    _guihelper.MessageBox(L "获取sha文件失败")
+                end
+            end
+        end
+    )
 end
 
 function GitlabService:getSubTree(callback, path, commitId, projectId)
-    local url = "projects/" .. projectId .. "/repository/tree" .. "?path=" .. path
+    local url = format("projects/%s/repository/tree%s?path=", projectId, path)
 
     if (commitId) then
-        url = url .. "&ref=" .. commitId
+        url = format("%s&ref=%s", url, commitId)
     end
 
     local tree = {}
-    GitlabService:getTreeApi(
+    self:getTreeApi(
         url,
         function(data, err)
             for key, value in ipairs(data) do
@@ -296,7 +305,7 @@ function GitlabService:getSubTree(callback, path, commitId, projectId)
                 end
 
                 if (value.type == "blob") then
-                    GitlabService.blob[#GitlabService.blob + 1] = value
+                    self.blob[#GitlabService.blob + 1] = value
                 end
             end
 
@@ -308,17 +317,17 @@ function GitlabService:getSubTree(callback, path, commitId, projectId)
 end
 
 function GitlabService:getTreeApi(url, callback)
-    local url = url .. "&page=" .. GitlabService.getTreePage .. "&per_page=" .. GitlabService.getTreePer_page
+    local url = url .. "&page=" .. self.getTreePage .. "&per_page=" .. self.getTreePer_page
 
-    GitlabService:apiGet(
+    self:apiGet(
         url,
         function(data, err)
             if (#data == 0) then
-                GitlabService.getTreePage = 1
+                self.getTreePage = 1
 
-                if (GitlabService.tmpTree) then
+                if (self.tmpTree) then
                     if (type(callback) == "function") then
-                        callback(GitlabService.tmpTree, err)
+                        callback(self.tmpTree, err)
                     end
                 else
                     if (type(callback) == "function") then
@@ -326,18 +335,18 @@ function GitlabService:getTreeApi(url, callback)
                     end
                 end
 
-                GitlabService.tmpTree = nil
+                self.tmpTree = nil
             else
-                if (GitlabService.tmpTree) then
+                if (self.tmpTree) then
                     for _, value in ipairs(data) do
-                        GitlabService.tmpTree[#GitlabService.tmpTree + 1] = value
+                        self.tmpTree[#self.tmpTree + 1] = value
                     end
                 else
-                    GitlabService.tmpTree = data
+                    self.tmpTree = data
                 end
 
-                GitlabService.getTreePage = GitlabService.getTreePage + 1
-                GitlabService:getTreeApi(url, callback)
+                self.getTreePage = self.getTreePage + 1
+                self:getTreeApi(url, callback)
             end
         end
     )
@@ -404,69 +413,63 @@ function GitlabService:getCommits(callback, projectId, foldername)
 end
 
 -- 写文件
-function GitlabService:writeFile(filename, content, callback, projectId, foldername)
-    local function go(projectId)
-        --[[if(GitlabService:checkSpecialCharacter(_filename)) then
-            _callback(false, _filename);
-            return;
-        end]]
-        local url = GitlabService:getFileUrlPrefix(projectId) .. Encoding.url_encode(filename)
-
-        local params = {
-            commit_message = GitlabService:getCommitMessagePrefix() .. filename,
-            branch = "master",
-            content = content
-        }
-
-        GitlabService:apiPost(
-            url,
-            params,
-            function(data, err)
-                if (err == 201 and type(callback) == "function") then
-                    callback(true, filename, data, err)
-                else
-                    GitlabService:update(filename, content, sha, callback, projectId)
-                end
-            end
-        )
+function GitlabService:upload(projectId, filename, content, callback)
+    if (not projectId or not filename or not content) then
+        return false
     end
 
-    GitlabService:checkProjectId(projectId, foldername, go)
+    local url = format("%s%s", self:getFileUrlPrefix(projectId), Encoding.url_encode(filename))
+
+    local params = {
+        commit_message = format("%s%s", GitlabService:getCommitMessagePrefix(), filename),
+        branch = "master",
+        content = content
+    }
+
+    self:apiPost(
+        url,
+        params,
+        function(data, err)
+            if (err == 201) then
+                if (type(callback) == "function") then
+                    callback(true, filename, data, err)
+                end
+            else
+                self:update(projectId, filename, content, callback)
+            end
+        end
+    )
 end
 
 --更新文件
-function GitlabService:update(filename, content, sha, callback, projectId, foldername)
-    local function go(projectId)
-        --[[if(GitlabService:checkSpecialCharacter(_filename)) then
-            _callback(false, _filename);
-            return;
-        end]]
-        local url = GitlabService:getFileUrlPrefix(projectId) .. Encoding.url_encode(filename)
-
-        local params = {
-            commit_message = GitlabService:getCommitMessagePrefix() .. filename,
-            branch = "master",
-            content = content
-        }
-
-        GitlabService:apiPut(
-            url,
-            params,
-            function(data, err)
-                if (err == 200) then
-                    if (type(callback) == "function") then
-                        callback(true, filename, data, err)
-                    end
-                else
-                    if (type(callback) == "function") then
-                        callback(false, filename, data, err)
-                    end
-                end
-            end
-        )
+function GitlabService:update(projectId, filename, content, callback)
+    if (not projectId or not filename or not content) then
+        return false
     end
 
-    GitlabService:checkProjectId(projectId, foldername, go)
+    local url = format("%s%s", self:getFileUrlPrefix(projectId), Encoding.url_encode(filename))
+
+    local params = {
+        commit_message = format("%s%s", GitlabService:getCommitMessagePrefix(), filename),
+        branch = "master",
+        content = content
+    }
+
+    self:apiPut(
+        url,
+        params,
+        function(data, err)
+            if (err == 200) then
+                if (type(callback) == "function") then
+                    callback(true, filename, data, err)
+                end
+            else
+                if (type(callback) == "function") then
+                    callback(false, filename, data, err)
+                end
+            end
+        end
+    )
 end
 
 -- 获取文件
@@ -475,9 +478,9 @@ function GitlabService:getContent(path, projectId, callback)
         return false
     end
 
-    local url = format("%s%s?ref=master", GitlabService:getFileUrlPrefix(projectId), path)
+    local url = format("%s%s?ref=master", self:getFileUrlPrefix(projectId), path)
 
-    GitlabService:apiGet(
+    self:apiGet(
         url,
         function(data, err)
             if (type(callback) == "function") then
@@ -492,7 +495,8 @@ function GitlabService:getContentWithRaw(foldername, path, callback)
     local foldername = GitEncoding.base32(foldername)
     local dataSourceInfo = GlobalStore.get("dataSourceInfo")
 
-    local url = format("%s/%s/%s/raw/master/%s", dataSourceInfo.rawBaseUrl, dataSourceInfo.dataSourceUsername, foldername, path)
+    local url =
+        format("%s/%s/%s/raw/master/%s", dataSourceInfo.rawBaseUrl, dataSourceInfo.dataSourceUsername, foldername, path)
 
     HttpRequest:GetUrl(
         {
@@ -551,12 +555,40 @@ function GitlabService:deleteResp(foldername, callback, projectId)
     GitlabService:checkProjectId(projectId, foldername, go)
 end
 
+function GitlabService:getWorldRevision(foldername, callback)
+    if (type(foldername) == "function") then
+        return false
+    end
+
+    local contentUrl = ""
+    local commitId = self:getCommitIdByFoldername(foldername.utf8)
+
+    if (commitId) then
+        contentUrl =
+            format(
+            "%s/%s/%s/raw/%s/revision.xml",
+            self.dataSourceInfo.rawBaseUrl,
+            self.dataSourceInfo.dataSourceUsername,
+            foldername.base32,
+            commitId
+        )
+    else
+        contentUrl =
+            format(
+            "%s/%s/%s/raw/master/revision.xml",
+            self.dataSourceInfo.rawBaseUrl,
+            self.dataSourceInfo.dataSourceUsername,
+            foldername.base32
+        )
+    end
+
+    HttpRequest:GetUrl(contentUrl, callback, {0, 502})
+end
+
 --通过仓名获取仓ID
 function GitlabService:getProjectIdByName(name, callback)
-    local url = "projects"
-
-    GitlabService:apiGet(
-        url .. "?owned=true&page=1&per_page=100",
+    self:apiGet(
+        "projects?owned=true&page=1&per_page=100",
         function(projectList, err)
             for i = 1, #projectList do
                 if (string.lower(projectList[i].name) == string.lower(name)) then
@@ -575,33 +607,6 @@ function GitlabService:getProjectIdByName(name, callback)
     )
 end
 
-function GitlabService:getWorldRevison(foldername, callback)
-    local dataSourceInfo = GlobalStore.get("dataSourceInfo")
-    local contentUrl = ""
-    local commitId = GitlabService:getCommitIdByFoldername(foldername)
-
-    if (commitId) then
-        contentUrl =
-            format(
-            "%s/%s/%s/raw/%s/revision.xml",
-            dataSourceInfo.rawBaseUrl,
-            dataSourceInfo.dataSourceUsername,
-            foldername,
-            commitId
-        )
-    else
-        contentUrl =
-            format(
-            "%s/%s/%s/raw/master/revision.xml",
-            dataSourceInfo.rawBaseUrl,
-            dataSourceInfo.dataSourceUsername,
-            foldername
-        )
-    end
-
-    HttpRequest:GetUrl(contentUrl, callback, {0, 502})
-end
-
 function GitlabService:getCommitIdByFoldername(foldername)
     local remoteWorldsList = GlobalStore.get("remoteWorldsList") or {}
 
@@ -615,15 +620,15 @@ end
 function GitlabService:setProjectId(foldername, remoteWorldsList)
     local remoteWorldsList = GlobalStore.get("remoteWorldsList") or {}
 
-    if(self.dataSourceType == "gitlab") then
-        for key,value in ipairs(remoteWorldsList) do
-            if(value.worldsName == foldername) then
-                GitlabService.projectId = value.gitlabProjectId;
-    
-                return;
+    if (self.dataSourceType == "gitlab") then
+        for key, value in ipairs(remoteWorldsList) do
+            if (value.worldsName == foldername) then
+                GitlabService.projectId = value.gitlabProjectId
+
+                return
             end
         end
-    
-        GitlabService.projectId = nil;
+
+        GitlabService.projectId = nil
     end
 end

@@ -9,31 +9,36 @@
         <script type="text/npl" refresh="false">
             <![CDATA[
                 SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+                SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 
                 SyncMain.setSyncPage();
 
                 function useLocal()
-                    SyncMain.SyncPage:CloseWindow();
+                    SyncMain.closeSyncPage()
 
-                    if(tonumber(SyncMain.currentRevison) < tonumber(SyncMain.remoteRevison)) then
+                    if(SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision()) then
                         SyncMain:useLocalGUI();
-                    elseif(tonumber(SyncMain.currentRevison) >= tonumber(SyncMain.remoteRevison)) then
+                    elseif(SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision()) then
                         SyncMain:syncToDataSource();
                     end
                 end
 
                 function useRemote()
-                    SyncMain.SyncPage:CloseWindow();
+                    SyncMain.closeSyncPage()
 
-                    if(tonumber(SyncMain.remoteRevison) < tonumber(SyncMain.currentRevison)) then
+                    if(SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision()) then
                         SyncMain:useDataSourceGUI();
-                    elseif(tonumber(SyncMain.remoteRevison) >= tonumber(SyncMain.currentRevison)) then
+                    elseif(SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision()) then
                         SyncMain:syncToLocal();
                     end
                 end
 
                 function useOffline()
-                    SyncMain.ComparePage:CloseWindow();
+                    SyncMain.closeSyncPage()
+                end
+
+                function beShowUseRemote()
+                    return SyncCompare.IsCompareFinish() and SyncMain.GetRemoteRevision() ~= 0
                 end
              ]]>
         </script>
@@ -41,18 +46,18 @@
             <aries:window mode="thin" width="500" height="270" style="float:left;" title='<%=L"与数据源同步" %>' onclose="SyncMain.closeSyncPage">
             	<div style="padding:20px;font-size:18px;base-font-size:18px;color:#ffffff">
             		<div style="margin-left:80px;margin-top:40px;">
-                        <%=L"远程版本号：" %>
-                		<%=SyncMain.remoteRevison%>
-                		<pe:if condition="<%=SyncMain.compareFinish and SyncMain.remoteRevison ~= 0%>">
+                        <%= L"远程版本号：" %>
+                		<%= SyncMain.GetRemoteRevision()%>
+                		<pe:if condition="<%=beShowUseRemote()%>">
                              <input onclick="useRemote()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用远程版本" %>' />
                 		</pe:if>
 	                </div>
 	                <div style="margin-left:80px;margin-top:30px;">
-                        <%=L"本地版本号：" %><%=SyncMain.currentRevison %>
-	                	<pe:if condition="<%=not SyncMain.compareFinish%>">
+                        <%=L"本地版本号：" %><%= SyncMain.GetCurrentRevision() %>
+	                	<pe:if condition="<%=not SyncCompare.IsCompareFinish()%>">
 	                		<input onclick="useOffline()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地离线版本" %>' />
 	                	</pe:if>
-	                	<pe:if condition="<%=SyncMain.compareFinish%>">
+	                	<pe:if condition="<%=SyncCompare.IsCompareFinish()%>">
 	                		<input onclick="useLocal()" class="button_highlight" style="margin-left:10px;width: 130px;height:30px;" type="button" value='<%=L"使用本地版本" %>' />
 	                	</pe:if>
 	                </div>

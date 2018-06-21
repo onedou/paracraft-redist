@@ -5,8 +5,8 @@ Date:  2017.4.22
 Desc: 
 use the lib: corvent base32 and fit to github or gitlab
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua");
-local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding");
+NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 ------------------------------------------------------------
 ]]
 
