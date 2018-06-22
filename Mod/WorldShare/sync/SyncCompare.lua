@@ -81,7 +81,7 @@ function SyncCompare:compareRevision(callback)
             GlobalStore.set("foldername", foldername)
 
             if (loginMain.LoginPage or loginMain.ModalPage) then
-                loginMain.RefreshCurrentServerList(SyncCompare.comparePrepare)
+                loginMain.RefreshCurrentServerList(self.comparePrepare)
             else
                 self:comparePrepare()
             end
@@ -203,15 +203,15 @@ function SyncCompare:comparePrepare()
         return
     end
 
-    local dataSource = InternetLoadWorld.GetCurrentServerPage().ds
+    -- local dataSource = InternetLoadWorld.GetCurrentServerPage().ds
 
-    if (dataSource) then
-        for _, value in ipairs(dataSource) do
-            if (value.foldername == foldername.utf8) then
-                SyncMain.selectedWorldInfor = value
-            end
-        end
-    end
+    -- if (dataSource) then
+    --     for _, value in ipairs(dataSource) do
+    --         if (value.foldername == foldername.utf8) then
+    --             SyncMain.selectedWorldInfor = value
+    --         end
+    --     end
+    -- end
 
-    SyncCompare:compare()
+    self:compare()
 end

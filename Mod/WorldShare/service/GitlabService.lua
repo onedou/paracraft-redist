@@ -59,36 +59,36 @@ function GitlabService:checkSpecialCharacter(filename)
     return false
 end
 
-function GitlabService:checkProjectId(projectId, foldername, callback)
-    if (not projectId) then
-        projectId = GitlabService.projectId
-    end
+-- function GitlabService:checkProjectId(projectId, foldername, callback)
+--     if (not projectId) then
+--         projectId = GitlabService.projectId
+--     end
 
-    if (not projectId) then
-        if (foldername) then
-            GitlabService:getProjectIdByName(
-                foldername,
-                function(projectId)
-                    if (projectId) then
-                        GitlabService.projectId = projectId
+--     if (not projectId) then
+--         if (foldername) then
+--             GitlabService:getProjectIdByName(
+--                 foldername,
+--                 function(projectId)
+--                     if (projectId) then
+--                         GitlabService.projectId = projectId
 
-                        if (type(callback) == "function") then
-                            callback(projectId)
-                        end
-                    else
-                        _guihelper.MessageBox(L "获取projectId失败")
-                    end
-                end
-            )
-        else
-            _guihelper.MessageBox(L "获取projectId失败")
-        end
-    else
-        if (type(callback) == "function") then
-            callback(projectId)
-        end
-    end
-end
+--                         if (type(callback) == "function") then
+--                             callback(projectId)
+--                         end
+--                     else
+--                         _guihelper.MessageBox(L "获取projectId失败")
+--                     end
+--                 end
+--             )
+--         else
+--             _guihelper.MessageBox(L "获取projectId失败")
+--         end
+--     else
+--         if (type(callback) == "function") then
+--             callback(projectId)
+--         end
+--     end
+-- end
 
 function GitlabService:apiGet(url, callback)
     if (not url or not self.apiBaseUrl) then
@@ -169,7 +169,7 @@ function GitlabService:apiPut(url, params, callback)
 end
 
 function GitlabService:apiDelete(url, params, callback)
-    url = loginMain.apiBaseUrl .. "/" .. url
+    url = self.apiBaseUrl .. "/" .. url
 
     HttpRequest:GetUrl(
         {
@@ -177,7 +177,7 @@ function GitlabService:apiDelete(url, params, callback)
             url = url,
             json = true,
             headers = {
-                ["PRIVATE-TOKEN"] = loginMain.dataSourceToken,
+                ["PRIVATE-TOKEN"] = self.dataSourceToken,
                 ["User-Agent"] = "npl",
                 ["content-type"] = "application/json"
             },
@@ -205,7 +205,11 @@ end
 
 -- 获得文件列表
 function GitlabService:getTree(projectId, commitId, callback)
+    local that = self
     local url = format("projects/%s/repository/tree?", projectId)
+
+    that.blob = {}
+    that.tree = {}
 
     if (commitId) then
         url = format("%sref=%s", url, commitId)
@@ -213,11 +217,11 @@ function GitlabService:getTree(projectId, commitId, callback)
 
     local fetchTimes = 0
     local function getSubTree()
-        if (#self.tree ~= 0) then
-            for key, value in ipairs(self.tree) do
-                self:getSubTree(
+        if (#that.tree ~= 0) then
+            for key, value in ipairs(that.tree) do
+                that:getSubTree(
                     function(subTree, subFolderName, commitId, projectId)
-                        for checkKey, checkValue in ipairs(self.tree) do
+                        for checkKey, checkValue in ipairs(that.tree) do
                             if (checkValue.path == subFolderName) then
                                 if (not checkValue.alreadyGet) then
                                     checkValue.alreadyGet = true
@@ -230,13 +234,13 @@ function GitlabService:getTree(projectId, commitId, callback)
                         fetchTimes = fetchTimes + 1
 
                         for subKey, subValue in ipairs(subTree) do
-                            self.newTree[#self.newTree + 1] = subValue
+                            that.newTree[#that.newTree + 1] = subValue
                         end
 
-                        if (#self.tree == fetchTimes) then
+                        if (#that.tree == fetchTimes) then
                             fetchTimes = 0
-                            self.tree = commonlib.copy(self.newTree)
-                            self.newTree = {}
+                            that.tree = commonlib.copy(that.newTree)
+                            that.newTree = {}
 
                             getSubTree()
                         end
@@ -246,36 +250,33 @@ function GitlabService:getTree(projectId, commitId, callback)
                     projectId
                 )
             end
-        elseif (#self.tree == 0) then
-            for cbKey, cbValue in ipairs(self.blob) do
+        elseif (#that.tree == 0) then
+            for cbKey, cbValue in ipairs(that.blob) do
                 cbValue.sha = cbValue.id
             end
 
             if (type(callback) == "function") then
-                callback(self.blob, 200)
+                callback(that.blob, 200)
             end
         end
     end
 
-    self.blob = {}
-    self.tree = {}
-
-    self:getTreeApi(
+    that:getTreeApi(
         url,
         function(data, err)
             if (err == 404) then
                 if (type(callback) == "function") then
-                    callback(data, err)
+                    callback({})
                 end
             else
                 if (type(data) == "table") then
                     for key, value in ipairs(data) do
                         if (value.type == "tree") then
-                            self.tree[#self.tree + 1] = value
+                            that.tree[#that.tree + 1] = value
                         end
 
                         if (value.type == "blob") then
-                            self.blob[#self.blob + 1] = value
+                            that.blob[#that.blob + 1] = value
                         end
                     end
 
@@ -289,7 +290,7 @@ function GitlabService:getTree(projectId, commitId, callback)
 end
 
 function GitlabService:getSubTree(callback, path, commitId, projectId)
-    local url = format("projects/%s/repository/tree%s?path=", projectId, path)
+    local url = format("projects/%s/repository/tree?path=%s", projectId, path)
 
     if (commitId) then
         url = format("%s&ref=%s", url, commitId)
@@ -305,7 +306,7 @@ function GitlabService:getSubTree(callback, path, commitId, projectId)
                 end
 
                 if (value.type == "blob") then
-                    self.blob[#GitlabService.blob + 1] = value
+                    self.blob[#self.blob + 1] = value
                 end
             end
 
@@ -317,7 +318,7 @@ function GitlabService:getSubTree(callback, path, commitId, projectId)
 end
 
 function GitlabService:getTreeApi(url, callback)
-    local url = url .. "&page=" .. self.getTreePage .. "&per_page=" .. self.getTreePer_page
+    local url = format("%s&page=%s&per_page=%s", url, self.getTreePage, self.getTreePer_page)
 
     self:apiGet(
         url,
@@ -354,21 +355,21 @@ end
 
 -- 初始化
 function GitlabService:create(foldername, callback)
-    local url = "projects"
+    local projectId
 
-    GitlabService:apiGet(
-        url .. "?owned=true&page=1&per_page=100",
+    self:apiGet(
+        "projects?owned=true&page=1&per_page=100",
         function(projectList, err)
             if (projectList) then
                 for i = 1, #projectList do
                     if (projectList[i].name == foldername) then
-                        GitlabService.projectId = projectList[i].id
+                        projectId = projectList[i].id
 
                         if (type(callback) == "function") then
-                            callback(true, "exist")
+                            callback(projectId)
                         end
 
-                        return
+                        return false
                     end
                 end
 
@@ -378,24 +379,24 @@ function GitlabService:create(foldername, callback)
                     request_access_enabled = true
                 }
 
-                GitlabService:apiPost(
-                    url,
+                self:apiPost(
+                    "projects",
                     params,
                     function(data, err)
                         if (data.id ~= nil) then
-                            GitlabService.projectId = data.id
+                            projectId = data.id
 
                             if (type(callback) == "function") then
-                                callback(true, "create")
+                                callback(projectId)
                             end
 
-                            return
+                            return false
                         end
                     end
                 )
             else
                 if (type(callback) == "function") then
-                    callback(false, err)
+                    callback()
                 end
             end
         end
@@ -516,43 +517,43 @@ function GitlabService:getContentWithRaw(foldername, path, callback)
 end
 
 -- 删除文件
-function GitlabService:deleteFile(path, sha, callback, projectId, foldername)
-    local function go(projectId)
-        local url = GitlabService:getFileUrlPrefix(projectId) .. path
-
-        local params = {
-            commit_message = GitlabService:getCommitMessagePrefix() .. path,
-            branch = "master"
-        }
-
-        GitlabService:apiDelete(
-            url,
-            params,
-            function(data, err)
-                if (err == 204) then
-                    if (type(callback) == "function") then
-                        callback(true)
-                    end
-                else
-                    if (type(callback) == "function") then
-                        callback(false)
-                    end
-                end
-            end
-        )
+function GitlabService:deleteFile(projectId, path, callback)
+    if (not projectId) then
+        return false
     end
 
-    GitlabService:checkProjectId(projectId, foldername, go)
+    local url = format("%s%s", self:getFileUrlPrefix(projectId), path)
+
+    local params = {
+        commit_message = format("%s%s", self:getCommitMessagePrefix(), path),
+        branch = "master"
+    }
+
+    self:apiDelete(
+        url,
+        params,
+        function(data, err)
+            if (err == 204) then
+                if (type(callback) == "function") then
+                    callback(true)
+                end
+            else
+                if (type(callback) == "function") then
+                    callback(false)
+                end
+            end
+        end
+    )
 end
 
 --删除仓
-function GitlabService:deleteResp(foldername, callback, projectId)
-    local function go(projectId)
-        local url = "/projects/" .. projectId
-        GitlabService:apiDelete(url, {}, callback)
+function GitlabService:deleteResp(projectId, callback)
+    if (not projectId) then
+        return false
     end
 
-    GitlabService:checkProjectId(projectId, foldername, go)
+    local url = format("projects/%s", projectId)
+    self:apiDelete(url, {}, callback)
 end
 
 function GitlabService:getWorldRevision(foldername, callback)
@@ -582,7 +583,13 @@ function GitlabService:getWorldRevision(foldername, callback)
         )
     end
 
-    HttpRequest:GetUrl(contentUrl, callback, {0, 502})
+    HttpRequest:GetUrl(
+        contentUrl,
+        function(data, err)
+            callback(tonumber(data) or 0)
+        end,
+        {0, 502}
+    )
 end
 
 --通过仓名获取仓ID

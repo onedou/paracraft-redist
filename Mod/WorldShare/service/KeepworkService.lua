@@ -25,8 +25,9 @@ function getHeader()
     return { Authorization = format("Bearer %s", LoginUserInfo.token) }
 end
 
-function getParams(url, params, callback)
+function getParams(url, method, params, callback)
     local params = {
+        method = method or 'GET',
         url = getApi(url),
         json = true,
         headers = getHeader(),
@@ -42,5 +43,17 @@ function KeepworkService.getWorldsList(callback)
     end
 
     local params = {amount = 100}
-    getParams("/api/mod/worldshare/models/worlds", params, callback)
+    getParams("/api/mod/worldshare/models/worlds", nil, params, callback)
+end
+
+function KeepworkService.deleteWorld(foldername, callback)
+    if (not LoginUserInfo.IsSignedIn()) then
+        return false
+    end
+
+    local params = {
+        worldsName = foldername
+    }
+
+    getParams("/api/mod/worldshare/models/worlds", 'DELETE', params, callback)
 end

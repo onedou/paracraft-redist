@@ -17,6 +17,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua")
 NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
+NPL.load("(gl)Mod/WorldShare/login/DeleteWorld.lua")
 
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
@@ -31,8 +32,11 @@ local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkService")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
+local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
 
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
+
+LoginWorldList.localWorlds = {}
 
 function LoginWorldList.CreateNewWorld()
     LoginMain.LoginPage:CloseWindow()
@@ -60,22 +64,12 @@ function LoginWorldList.GetCurWorldInfo(info_type, world_index)
     end
 end
 
-function LoginWorldList.updateWorldInfo(worldIndex, callback)
-    local selectWorld = LocalLoadWorld.BuildLocalWorldList(true)[worldIndex]
+function LoginWorldList.UpdateLocalWorlds()
+    localWorlds = GlobalStore.get('localWorlds')
 
-    if (type(selectWorld) == "table") then
-        local filesize = LocalService:GetWorldSize(selectWorld.worldpath)
-        local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(selectWorld.foldername))
-
-        worldTag.size = filesize
-
-        LocalService:SetTag(selectWorld.worldpath, worldTag)
-
-        InternetLoadWorld.GetCurrentServerPage().ds[worldIndex].size = filesize
-    end
-
-    if (type(callback) == "function") then
-        callback()
+    if(LoginMain.LoginPage) then
+        LoginMain.LoginPage:GetNode("gw_world_ds"):SetAttribute("DataSource", localWorlds)
+        LoginWorldList.OnSwitchWorld(1)
     end
 end
 
@@ -88,8 +82,9 @@ function LoginWorldList.RefreshCurrentServerList(callback)
                 function()
                     LoginWorldList.changeRevision(
                         function()
+                            LoginWorldList.UpdateLocalWorlds()
                             LoginMain.setPageRefreshing(false)
-
+                            
                             if (type(callback) == "function") then
                                 callback()
                             end
@@ -106,6 +101,7 @@ function LoginWorldList.RefreshCurrentServerList(callback)
                         function()
                             LoginWorldList.syncWorldsList(
                                 function()
+                                    LoginWorldList.UpdateLocalWorlds()
                                     LoginMain.setPageRefreshing(false)
 
                                     if (type(callback) == "function") then
@@ -118,8 +114,6 @@ function LoginWorldList.RefreshCurrentServerList(callback)
                 end
             )
         end
-
-        LoginMain.refreshPage()
     end
 
     if (LoginMain.ModalPage) then
@@ -167,6 +161,8 @@ function LoginWorldList.getLocalWorldList(callback)
             ServerPage.ds = serverlist.worlds or {}
             InternetLoadWorld.OnChangeServerPage()
 
+            GlobalStore.set('localWorlds', ServerPage.ds)
+
             if (callback) then
                 callback()
             end
@@ -175,7 +171,7 @@ function LoginWorldList.getLocalWorldList(callback)
 end
 
 function LoginWorldList.changeRevision(callback)
-    local localWorlds = InternetLoadWorld.GetCurrentServerPage().ds
+    local localWorlds = GlobalStore.get('localWorlds')
 
     if (localWorlds) then
         for key, value in ipairs(localWorlds) do
@@ -215,9 +211,7 @@ function LoginWorldList.changeRevision(callback)
             end
         end
 
-        if (LoginMain.LoginPage) then
-            LoginMain.LoginPage:Refresh()
-        end
+        LoginMain.refreshPage()
 
         if (callback) then
             callback()
@@ -225,7 +219,7 @@ function LoginWorldList.changeRevision(callback)
 
         return
     else
-        LoginMain.changeRevision()
+        LoginWorldList.changeRevision()
     end
 end
 
@@ -243,11 +237,8 @@ status代码含义:
 ]]
 function LoginWorldList.syncWorldsList(callback)
     local function handleWorldList(response, err)
-        local localWorlds = InternetLoadWorld.cur_ds or {}
+        local localWorlds = GlobalStore.get('localWorlds') or {}
         local remoteWorldsList = response.data
-
-        GlobalStore.set("remoteWorldsList", remoteWorldsList)
-        GlobalStore.set("localWorlds", localWorlds)
 
         -- 处理本地网络同时存在 本地不存在 网络存在 的世界
         if (type(remoteWorldsList) ~= "table") then
@@ -320,6 +311,9 @@ function LoginWorldList.syncWorldsList(callback)
                 end
             end
         end
+
+        GlobalStore.set("localWorlds", localWorlds)
+        GlobalStore.set("remoteWorldsList", remoteWorldsList)
 
         LoginMain.refreshPage()
 
@@ -422,18 +416,7 @@ function LoginWorldList.syncNow(index)
 end
 
 function LoginWorldList.deleteWorld(index)
-    local index = tonumber(index)
-
-    SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index]
-
-    if (SyncMain.tagInfor) then
-        if (SyncMain.tagInfor.name == SyncMain.selectedWorldInfor.foldername) then
-            _guihelper.MessageBox(L "不能刪除正在编辑的世界")
-            return
-        end
-    end
-
-    SyncMain.deleteWorld()
+    DeleteWorld.DeleteWorld(index)
 end
 
 function LoginWorldList.GetWorldType()
@@ -445,6 +428,29 @@ function LoginWorldList.OnSwitchWorld(index)
     LoginWorldList.updateWorldInfo(index, LoginMain.refreshPage)
 end
 
+function LoginWorldList.updateWorldInfo(worldIndex, callback)
+    local currentWorld = LocalLoadWorld.BuildLocalWorldList(true)[worldIndex] --origin list
+    local localWorlds = GlobalStore.get('localWorlds')
+
+    if (type(currentWorld) == "table") then
+        local filesize = LocalService:GetWorldSize(currentWorld.worldpath)
+        local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(currentWorld.foldername))
+    
+        worldTag.size = filesize
+        LocalService:SetTag(currentWorld.worldpath, worldTag)
+        localWorlds[worldIndex].size = filesize
+    end
+
+    local selectWorld = localWorlds[worldIndex]
+
+    GlobalStore.set('selectWorldIndex', worldIndex)
+    GlobalStore.set('selectWorld', selectWorld)
+
+    if (type(callback) == "function") then
+        callback()
+    end
+end
+
 function LoginWorldList.GetDesForWorld()
     local str = ""
     return str
@@ -452,10 +458,12 @@ end
 
 function LoginWorldList.enterWorld(index)
     local index = tonumber(index)
-    SyncMain.selectedWorldInfor = InternetLoadWorld.cur_ds[index]
+    local enterWorldInfor = InternetLoadWorld.cur_ds[index]
 
-    if (SyncMain.selectedWorldInfor.status == 2) then
-        LoginMain.downloadWorld()
+    GlobalStore.set("enterWorldInfor", enterWorldInfor)
+
+    if (enterWorldInfor.status == 2) then
+        LoginWorldList.downloadWorld()
     else
         InternetLoadWorld.EnterWorld(index)
     end
@@ -499,36 +507,6 @@ end
 function LoginWorldList.sharePersonPage()
     local url = LoginMain.personPageUrl --LoginMain.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. login.userid;
     ParaGlobal.ShellExecute("open", url, "", "", 1)
-end
-
-function LoginWorldList.GetWorldSize(size, unit)
-    local s
-    size = tonumber(size)
-
-    function GetPreciseDecimal(nNum, n)
-        if type(nNum) ~= "number" then
-            return nNum
-        end
-
-        n = n or 0
-        n = math.floor(n)
-        local fmt = "%." .. n .. "f"
-        local nRet = tonumber(string.format(fmt, nNum))
-
-        return nRet
-    end
-
-    if (size and size ~= "") then
-        if (not unit) then
-            s = GetPreciseDecimal(size / 1024 / 1024, 2) .. "M"
-        elseif (unit == "KB") then
-            s = GetPreciseDecimal(size / 1024, 2) .. "KB"
-        end
-    else
-        s = nil
-    end
-
-    return s or "0"
 end
 
 function LoginWorldList.formatStatus(_status)

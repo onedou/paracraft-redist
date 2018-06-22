@@ -6,6 +6,7 @@
                 LoginMain         = commonlib.gettable("Mod.WorldShare.login.LoginMain")
                 LoginUserInfo     = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
                 LoginWorldList    = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
+                Utils             = commonlib.gettable("Mod.WorldShare.helper.Utils")
 
                 LoginMain.setLoginPage()
 
@@ -97,7 +98,7 @@
                 end
 
                 function get_world_size()
-                    return LoginWorldList.GetWorldSize(Eval("size"))
+                    return Utils.formatFileSize(Eval("size"))
                 end
 
                 function can_be_sync(cmd)
@@ -272,7 +273,7 @@
                 <div style="float:left;margin-top:5px;margin-left:10px;">
                     <input class="nav_button" style="<%=header_back()%>" type="button" tooltip='<%=L"返回"%>' />
                     <input class="nav_button" style="<%=header_forward()%>" type="button" tooltip='<%=L"前进"%>' />
-                    <input class="nav_button" style="<%=header_refresh()%>" type="button" onclick="LoginMain.RefreshCurrentServerList()" tooltip='<%=L"刷新本地目录或远程网址"%>'
+                    <input class="nav_button" style="<%=header_refresh()%>" type="button" onclick="LoginWorldList.RefreshCurrentServerList()" tooltip='<%=L"刷新本地目录或远程网址"%>'
                     />
                 </div>
                 <div style="float:left;margin-left:5px;margin-top:2px;">
@@ -344,8 +345,12 @@
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= LoginMain.refreshing%>">
                         <%=L"正在刷新, 请稍候 ... " %>
                     </pe:if>
-                    <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="50" DefaultNodeHeight="85" ItemsPerLine="1"
-                        name="gw_world_ds" DataSource='<%=InternetLoadWorld.DS_Func_Worlds%>'>
+                    <pe:gridview RememberScrollPos="true"
+                                 AllowPaging="false"
+                                 VerticalScrollBarStep="50"
+                                 DefaultNodeHeight="85"
+                                 ItemsPerLine="1"
+                                 name="gw_world_ds" >
                         <Columns>
                             <!--选中的项-->
                             <pe:if condition='<%= beSelected()%>'>
@@ -398,17 +403,29 @@
                                             <pe:if condition='<%= not can_be_sync("is_zip")%>'>
                                                 <div class="share_button" style="float:left" />
                                             </pe:if>
-                                            <input type="button" class="share_button" style="<%= getShareButton('delete') %>" onclick='LoginWorldList.deleteWorld()'
-                                                tooltip='<%=L"删除"%>' name='<%=Eval("index")%>' />
                                             <!-- 删除 -->
+                                            <input type="button"
+                                                   class="share_button"
+                                                   style="<%= getShareButton('delete') %>"
+                                                   onclick='LoginWorldList.deleteWorld()'
+                                                   tooltip='<%=L"删除"%>'
+                                                   name='<%=Eval("index")%>' />
                                             <pe:if condition='<%= can_be_sync("is_zip")%>'>
-                                                <input type="button" class="share_button" style="<%= getShareButton('sync') %>" onclick="LoginWorldList.syncNow()" tooltip='<%=L"同步"%>'
-                                                    name='<%=Eval("index")%>' />
                                                 <!-- 手动同步 -->
+                                                <input type="button"
+                                                       class="share_button"
+                                                       style="<%= getShareButton('sync') %>"
+                                                       onclick="LoginWorldList.syncNow()"
+                                                       tooltip='<%=L"同步"%>'
+                                                       name='<%=Eval("index")%>' />
                                             </pe:if>
-                                            <input type="button" class="share_button" style="<%= getShareButton('enter') %>" onclick="LoginWorldList.enterWorld()" tooltip='<%=L"进入"%>'
-                                                name='<%=Eval("index")%>' />
                                             <!-- 进入 -->
+                                            <input type="button"
+                                                   class="share_button"
+                                                   style="<%= getShareButton('enter') %>"
+                                                   onclick="LoginWorldList.enterWorld()"
+                                                   tooltip='<%=L"进入"%>'
+                                                   name='<%=Eval("index")%>' />
                                         </div>
                                     </div>
                                 </div>

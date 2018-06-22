@@ -60,11 +60,11 @@ function GitService:update(projectId, foldername, filename, content, sha, callba
     end
 end
 
-function GitService:deleteFile(foldername, path, sha, callback, projectId)
+function GitService:deleteFile(projectId, foldername, path, sha, callback)
     if (self.dataSourceType == "github") then
         GithubService:new():deleteFile(foldername, path, sha, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:new():deleteFile(path, sha, callback, projectId, foldername)
+        GitlabService:new():deleteFile(projectId, path, callback)
     end
 end
 
@@ -110,9 +110,9 @@ function GitService:getProjectIdByName(name, callback)
     GitlabService:new():getProjectIdByName(name, callback)
 end
 
-function GitService:deleteResp(foldername, callback)
+function GitService:deleteResp(projectId, foldername, callback)
     if (self.dataSourceType == "github") then
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:new():deleteResp(foldername, callback)
+        GitlabService:new():deleteResp(projectId, callback)
     end
 end

@@ -102,6 +102,7 @@ end
 
 function LoginMain.setPageRefreshing(status)
     LoginMain.refreshing = status and true or false
+    LoginMain.refreshPage()
 end
 
 function LoginMain.showLoginModalImp(callback)

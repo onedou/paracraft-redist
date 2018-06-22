@@ -38,11 +38,8 @@ local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSourc
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 
 SyncMain.SyncPage = nil
-SyncMain.DeletePage = nil
 SyncMain.BeyondPage = nil
 SyncMain.finish = true
-SyncMain.worldDir = {}
-SyncMain.foldername = {}
 
 function SyncMain:ctor()
 end
@@ -68,16 +65,8 @@ function SyncMain.setSyncPage()
     SyncMain.SyncPage = document:GetPageCtrl()
 end
 
-function SyncMain.setDeletePage()
-    SyncMain.DeletePage = document:GetPageCtrl()
-end
-
 function SyncMain.setBeyondPage()
     SyncMain.BeyondPage = document:GetPageCtrl()
-end
-
-function SyncMain.closeDeletePage()
-    SyncMain.DeletePage:CloseWindow()
 end
 
 function SyncMain.closeSyncPage()
@@ -111,10 +100,6 @@ function SyncMain:showBeyondVolume()
     SyncMain:showDialog("Mod/WorldShare/sync/BeyondVolume.html", "BeyondVolume")
 end
 
-function SyncMain.deleteWorld()
-    SyncMain:showDialog("Mod/WorldShare/sync/DeleteWorld.html", "DeleteWorld")
-end
-
 function SyncMain.deleteWorldGithubLogin()
     SyncMain:showDialog("Mod/WorldShare/sync/DeleteWorldGithub.html", DeleteWorldGithub)
 end
@@ -143,7 +128,9 @@ function SyncMain:showDialog(url, name)
 end
 
 function SyncMain:backupWorld()
-    local world_revision = WorldRevision:new():init(SyncMain.worldDir.default)
+    local worldDir = GlobalStore.get('worldDir')
+
+    local world_revision = WorldRevision:new():init(worldDir.default)
     world_revision:Backup()
 end
 
@@ -314,152 +301,4 @@ function SyncMain:checkWorldSize()
     else
         return false
     end
-end
-
-function SyncMain.deleteServerWorld()
-    local zipPath = SyncMain.selectedWorldInfor.localpath
-
-    if (ParaIO.DeleteFile(zipPath)) then
-        loginMain.RefreshCurrentServerList()
-    else
-        _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
-    end
-
-    SyncMain.DeletePage:CloseWindow()
-end
-
-function SyncMain.deleteWorldLocal(callback)
-    local foldername = SyncMain.selectedWorldInfor.foldername
-
-    if (not SyncMain.selectedWorldInfor) then
-        _guihelper.MessageBox(L "请先选择世界")
-        return
-    end
-
-    local function deleteNow()
-        if (SyncMain.selectedWorldInfor.RemoveLocalFile and SyncMain.selectedWorldInfor:RemoveLocalFile()) then
-            InternetLoadWorld.RefreshAll()
-        elseif (SyncMain.selectedWorldInfor.remotefile) then
-            local targetDir = SyncMain.selectedWorldInfor.remotefile:gsub("^local://", "") -- local world, delete all files in folder and the folder itself.
-
-            if (SyncMain.selectedWorldInfor.is_zip) then
-                if (ParaIO.DeleteFile(targetDir)) then
-                    if (type(callback) == "function") then
-                        callback()
-                    end
-                else
-                    _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
-                end
-            else
-                if (GameLogic.RemoveWorldFileWatcher) then
-                    GameLogic.RemoveWorldFileWatcher() -- file watcher may make folder deletion of current world directory not working.
-                end
-
-                if (commonlib.Files.DeleteFolder(targetDir)) then
-                    if (type(callback) == "function") then
-                        callback(foldername)
-                    end
-                else
-                    _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
-                end
-            end
-
-            SyncMain.DeletePage:CloseWindow()
-            loginMain.RefreshCurrentServerList()
-        end
-    end
-
-    if (SyncMain.selectedWorldInfor.status == nil or SyncMain.selectedWorldInfor.status == 1) then
-        deleteNow()
-    else
-        _guihelper.MessageBox(
-            format(L "确定删除本地世界:%s?", SyncMain.selectedWorldInfor.text or ""),
-            function(res)
-                if (res and res == _guihelper.DialogResult.Yes) then
-                    deleteNow()
-                end
-            end,
-            _guihelper.MessageBoxButtons.YesNo
-        )
-    end
-end
-
-function SyncMain.deleteWorldGitlab()
-    local foldername = SyncMain.selectedWorldInfor.foldername
-
-    GitService:setGitlabProjectId(foldername)
-
-    _guihelper.MessageBox(
-        format(L "确定删除Gitlab远程世界:%s?", foldername or ""),
-        function(res)
-            SyncMain.DeletePage:CloseWindow()
-
-            loginMain.refreshing = true
-            loginMain.LoginPage:Refresh(0.01)
-
-            if (res and res == 6) then
-                GitService:deleteResp(
-                    foldername,
-                    function(data, err)
-                        if (err == 202) then
-                            SyncMain.deleteKeepworkWorldsRecord()
-                        else
-                            _guihelper.MessageBox(L "远程仓库不存在，记录将直接被删除")
-                            SyncMain.deleteKeepworkWorldsRecord()
-                        end
-                    end
-                )
-            end
-        end
-    )
-end
-
-function SyncMain.deleteKeepworkWorldsRecord()
-    local foldername = SyncMain.selectedWorldInfor.foldername
-    local url = loginMain.site .. "/api/mod/worldshare/models/worlds"
-
-    LOG.std(nil, "debug", "deleteKeepworkWorldsRecord", url)
-
-    HttpRequest:GetUrl(
-        {
-            method = "DELETE",
-            url = url,
-            form = {
-                worldsName = foldername
-            },
-            json = true,
-            headers = {
-                Authorization = "Bearer " .. loginMain.token
-            }
-        },
-        function(data, err)
-            LOG.std(nil, "debug", "deleteKeepworkWorldsRecord", data)
-            LOG.std(nil, "debug", "deleteKeepworkWorldsRecord", err)
-
-            if (err == 204 or err == 200) then
-                SyncMain:deleteWorldMD(
-                    foldername,
-                    function()
-                        loginMain.RefreshCurrentServerList()
-                    end
-                )
-            end
-        end
-    )
-end
-
-function SyncMain.deleteWorldRemote()
-    if (loginMain.dataSourceType == "github") then
-        SyncMain.deleteWorldGithubLogin()
-    elseif (loginMain.dataSourceType == "gitlab") then
-        SyncMain.deleteWorldGitlab()
-    end
-end
-
-function SyncMain.deleteWorldAll()
-    SyncMain.deleteWorldLocal(
-        function()
-            SyncMain.deleteWorldRemote()
-        end
-    )
 end
