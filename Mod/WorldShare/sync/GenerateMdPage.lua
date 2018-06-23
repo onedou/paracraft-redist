@@ -5,12 +5,12 @@ Date:  2018.6.20
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua");
-local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage");
+NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua")
+local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage")
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
-NPL.load("(gl)Mod/WorldShare/service/GitService.lua");
+NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local KeepworkGen = commonlib.gettable("Mod.WorldShare.helper.KeepworkGen")
@@ -51,17 +51,17 @@ function GenerateMdPage:genThemeMD(callback)
 
     -- local contentUrl =
     --     "projects/" ..
-    --     loginMain.keepWorkDataSourceId ..
-    --         "/repository/files/" .. loginMain.username .. "/paracraft/_theme.md?ref=master"
+    --     LoginMain.keepWorkDataSourceId ..
+    --         "/repository/files/" .. LoginMain.username .. "/paracraft/_theme.md?ref=master"
 
     -- self:getUrl(
     --     contentUrl,
     --     function(data, err)
     --         if (err == 404) then
-    --             local themePath = loginMain.username .. "/paracraft/_theme.md"
+    --             local themePath = LoginMain.username .. "/paracraft/_theme.md"
 
     --             SyncMain:uploadService(
-    --                 loginMain.keepWorkDataSource,
+    --                 LoginMain.keepWorkDataSource,
     --                 themePath,
     --                 KeepworkGen.paracraftContainer,
     --                 function(data, err)
@@ -69,88 +69,83 @@ function GenerateMdPage:genThemeMD(callback)
     --                         callback()
     --                     end
     --                 end,
-    --                 loginMain.keepWorkDataSourceId
+    --                 LoginMain.keepWorkDataSourceId
     --             )
     --         end
     --     end
     -- )
 end
 
-function GenerateMdPage:genWorldMD(callback)
-    -- local contentUrl =
-    --     format(
-    --     "projects/%s/repository/files/%s/paracraft/world_%s.md?ref=master",
-    --     loginMain.keepWorkDataSourceId,
-    --     loginMain.username,
-    --     self.worldInfo.worldsName
-    -- )
+function GenerateMdPage:genWorldMD(worldInfo, callback)
+    local dataSourceInfo, userinfo = GenerateMdPage:getSetting()
 
-    -- local worldFilePath = format("%s/paracraft/world_%s.md", loginMain.username, self.worldInfo.worldsName)
+    local worldFilePath = format("%s/paracraft/world_%s.md", userinfo.username, worldInfo.worldsName)
 
-    -- local paracraftParams = {
-    --     link_world_name = self.worldInfo.name,
-    --     link_world_url = self.worldInfo.download,
-    --     media_logo = self.worldInfo.preview,
-    --     link_desc = "",
-    --     link_username = loginMain.username,
-    --     link_update_date = self.worldInfo.modDate,
-    --     link_version = self.worldInfo.revision,
-    --     link_opus_id = self.worldInfo.opusId,
-    --     link_files_totals = self.worldInfo.filesTotals
-    -- }
+    local KPParacraftMod = {
+        link_world_name = worldInfo.name,
+        link_world_url = worldInfo.download,
+        media_logo = worldInfo.preview,
+        link_desc = "",
+        link_username = userinfo.username,
+        link_update_date = worldInfo.modDate,
+        link_version = worldInfo.revision,
+        link_opus_id = worldInfo.opusId,
+        link_files_totals = worldInfo.filesTotals
+    }
 
-    -- local paracraftCommand = KeepworkGen:setCommand("paracraft", paracraftParams)
+    local KPParacraftCMD = KeepworkGen:setCommand("paracraft", KPParacraftMod)
 
-    -- self:getUrl(
-    --     contentUrl,
-    --     function(data, err)
-    --         if (err == 404) then
-    --             if (not self.worldInfo.readme) then
-    --                 self.worldInfo.readme = ""
-    --             end
+    local worldFile = KeepworkGen:SetAutoGenContent(worldInfo.readme, KPParacraftCMD)
+    worldFile = format("%s\r\n%s", worldFile, KeepworkGen:setCommand("comment"))
 
-    --             SyncMain.worldFile = KeepworkGen:SetAutoGenContent(self.worldInfo.readme, paracraftCommand)
-    --             SyncMain.worldFile = SyncMain.worldFile .. "\r\n" .. KeepworkGen:setCommand("comment")
+    local function upload()
+        GitService:new():upload(
+            dataSourceInfo.keepWorkDataSourceId,
+            nil,
+            worldFilePath,
+            worldFile,
+            function(data, err)
+                if (type(callback) == "function") then
+                    callback()
+                end
+            end
+        )
+    end
 
-    --             SyncMain:uploadService(
-    --                 loginMain.keepWorkDataSource,
-    --                 worldFilePath,
-    --                 SyncMain.worldFile,
-    --                 function(data, err)
-    --                     if (type(callback) == "function") then
-    --                         callback()
-    --                     end
-    --                 end,
-    --                 loginMain.keepWorkDataSourceId
-    --             )
-    --         elseif (err == 200 or err == 304) then
-    --             data = Encoding.unbase64(data.content)
+    local function update()
+        GitService:new():update(
+            dataSourceInfo.keepWorkDataSourceId,
+            nil,
+            worldFilePath,
+            worldFile,
+            nil,
+            function(isSuccess, path)
+                if (type(callback) == "function") then
+                    callback()
+                end
+            end
+        )
+    end
 
-    --             SyncMain.worldFile = KeepworkGen:SetAutoGenContent(data, paracraftCommand)
-
-    --             GitService:updateService(
-    --                 loginMain.keepWorkDataSource,
-    --                 worldFilePath,
-    --                 SyncMain.worldFile,
-    --                 "",
-    --                 function(isSuccess, path)
-    --                     if (type(callback) == "function") then
-    --                         callback()
-    --                     end
-    --                 end,
-    --                 loginMain.keepWorkDataSourceId
-    --             )
-    --         end
-    --     end
-    -- )
+    GitService:new():getContent(
+        dataSourceInfo.keepWorkDataSourceId,
+        nil,
+        worldFilePath,
+        function(data, err)
+            if(err == 200) then
+                update()
+            else
+                upload()
+            end
+        end
+    )
 end
 
 function GenerateMdPage:deleteWorldMD(_path, callback)
     -- local function deleteFile(keepworkId)
-    --     local path = loginMain.username .. "/paracraft/world_" .. _path .. ".md"
-
+    --     local path = LoginMain.username .. "/paracraft/world_" .. _path .. ".md"
     --     GitService:deleteFileService(
-    --         loginMain.keepWorkDataSource,
+    --         LoginMain.keepWorkDataSource,
     --         path,
     --         "",
     --         function(data, err)
@@ -161,12 +156,11 @@ function GenerateMdPage:deleteWorldMD(_path, callback)
     --         keepworkId
     --     )
     -- end
-
-    -- if (loginMain.dataSourceType == "github") then
+    -- if (LoginMain.dataSourceType == "github") then
     --     deleteFile()
-    -- elseif (loginMain.dataSourceType == "gitlab") then
+    -- elseif (LoginMain.dataSourceType == "gitlab") then
     --     GitService:getProjectIdByName(
-    --         loginMain.keepWorkDataSource,
+    --         LoginMain.keepWorkDataSource,
     --         function(keepworkId)
     --             deleteFile(keepworkId)
     --         end

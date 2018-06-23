@@ -5,8 +5,8 @@ Date: 2017/4/11
 Desc: 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua");
-local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain");
+NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
+local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 LoginMain.ShowPage()
 ------------------------------------------------------------
 ]]

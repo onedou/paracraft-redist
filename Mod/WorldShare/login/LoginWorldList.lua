@@ -388,28 +388,10 @@ function LoginWorldList.syncNow(index)
     end
 
     local index = tonumber(index)
-    local selectedWorldInfo = InternetLoadWorld.cur_ds[index]
+    local selectWorld = GlobalStore.get('selectWorld')
 
-    if (selectedWorldInfo.status ~= nil and selectedWorldInfo.status ~= 2) then
-        if (selectedWorldInfo.is_zip) then
-            _guihelper.MessageBox(L "不能同步ZIP文件")
-            return
-        end
-
-        local foldername = {}
-
-        foldername.utf8 = selectedWorldInfo.foldername
-        foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
-
-        local worldDir = {}
-
-        worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
-        worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
-
-        GlobalStore.set("foldername", foldername)
-        GlobalStore.set("worldDir", worldDir)
-
-        SyncCompare:syncCompare(true) -- sync on login status
+    if (selectWorld.status ~= nil and selectWorld.status ~= 2) then
+        SyncCompare:syncCompare() -- sync on login status
     else
         LoginWorldList.downloadWorld()
     end
@@ -438,6 +420,9 @@ function LoginWorldList.updateWorldInfo(worldIndex, callback)
     
         worldTag.size = filesize
         LocalService:SetTag(currentWorld.worldpath, worldTag)
+
+        GlobalStore.set('worldTag', worldTag)
+
         localWorlds[worldIndex].size = filesize
     end
 

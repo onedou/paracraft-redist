@@ -10,11 +10,10 @@ NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 ------------------------------------------------------------
 ]]
-
 NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
-NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua");
+NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 
 local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
@@ -24,7 +23,7 @@ local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
-local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage");
+local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
@@ -120,7 +119,8 @@ function loginResponse(page, response, err, callback)
             -- 手机号或其他账号登陆时，重新获取用户名
             account = response.data.userinfo.defaultSiteDataSource.username
 
-            local getDataSourceApi = format("%s/api/wiki/models/site_data_source/getDefaultSiteDataSource", LoginUserInfo.site)
+            local getDataSourceApi =
+                format("%s/api/wiki/models/site_data_source/getDefaultSiteDataSource", LoginUserInfo.site)
 
             if (LoginUserInfo.token) then
                 HttpRequest:GetUrl(
@@ -160,7 +160,7 @@ function loginResponse(page, response, err, callback)
 
                         LoginUserInfo.username = userinfo["username"]
                         LoginUserInfo.userId = userinfo["_id"]
-                        
+
                         GlobalStore.set("userinfo", userinfo)
 
                         if (type(userinfo["vipInfo"]) == "table" and userinfo["vipInfo"]["endDate"]) then
@@ -198,20 +198,21 @@ function loginResponse(page, response, err, callback)
                             LoginMain.closeMessageInfo()
                             return
                         end
-                        
+
                         local dataSourceInfo = {
-                            dataSourceToken = defaultSiteDataSource["dataSourceToken"]; -- 数据源Token
-                            dataSourceUsername = defaultSiteDataSource["dataSourceUsername"]; -- 数据源用户名
-                            dataSourceType = defaultSiteDataSource["type"]; -- 数据源类型
-                            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"]; -- 数据源api
-                            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"]; -- 数据源raw
-                            keepWorkDataSource = defaultSiteDataSource["projectName"]; -- keepwork仓名
-                            keepWorkDataSourceId = defaultSiteDataSource["projectId"]; -- keepwork仓ID
+                            dataSourceToken = defaultSiteDataSource["dataSourceToken"], -- 数据源Token
+                            dataSourceUsername = defaultSiteDataSource["dataSourceUsername"], -- 数据源用户名
+                            dataSourceType = defaultSiteDataSource["type"], -- 数据源类型
+                            apiBaseUrl = defaultSiteDataSource["apiBaseUrl"], -- 数据源api
+                            rawBaseUrl = defaultSiteDataSource["rawBaseUrl"], -- 数据源raw
+                            keepWorkDataSource = defaultSiteDataSource["projectName"], -- keepwork仓名
+                            keepWorkDataSourceId = defaultSiteDataSource["projectId"] -- keepwork仓ID
                         }
 
-                        GlobalStore.set('dataSourceInfo', dataSourceInfo)
+                        GlobalStore.set("dataSourceInfo", dataSourceInfo)
 
-                        LoginUserInfo.personPageUrl = format("%s/%s/paracraft/index", LoginUserInfo.site, LoginUserInfo.username)
+                        LoginUserInfo.personPageUrl =
+                            format("%s/%s/paracraft/index", LoginUserInfo.site, LoginUserInfo.username)
 
                         --判断paracraf站点是否存在，不存在则创建
                         HttpRequest:GetUrl(
@@ -236,19 +237,19 @@ function loginResponse(page, response, err, callback)
                                 if (not site.siteinfo) then
                                     --创建站点
                                     local siteParams = {
-                                        categoryId = 1;
-                                        categoryName = "作品网站";
-                                        desc = "paracraft作品集";
-                                        displayName = LoginUserInfo.username;
-                                        domain = "paracraft";
-                                        logoUrl = "/wiki/assets/imgs/paracraft.png";
-                                        name = "paracraft";
-                                        styleId = 1;
-                                        styleName = "WIKI样式";
-                                        templateId = 1;
-                                        templateName = "WIKI模板";
-                                        userId = LoginUserInfo.userId;
-                                        username = LoginUserInfo.username;
+                                        categoryId = 1,
+                                        categoryName = "作品网站",
+                                        desc = "paracraft作品集",
+                                        displayName = LoginUserInfo.username,
+                                        domain = "paracraft",
+                                        logoUrl = "/wiki/assets/imgs/paracraft.png",
+                                        name = "paracraft",
+                                        styleId = 1,
+                                        styleName = "WIKI样式",
+                                        templateId = 1,
+                                        templateName = "WIKI模板",
+                                        userId = LoginUserInfo.userId,
+                                        username = LoginUserInfo.username
                                     }
 
                                     HttpRequest:GetUrl(
@@ -501,7 +502,7 @@ function LoginUserInfo.getRememberPassword()
 end
 
 function LoginUserInfo.setSite()
-    if(not LoginMain.ModalPage) then
+    if (not LoginMain.ModalPage) then
         return false
     end
 
@@ -620,7 +621,7 @@ function LoginUserInfo.autoLoginAction(type)
 end
 
 function LoginUserInfo.LoginActionApi(account, password, callback)
-    local url = format("%s/api/wiki/models/user/login", LoginUserInfo.site) 
+    local url = format("%s/api/wiki/models/user/login", LoginUserInfo.site)
 
     local params = {
         username = account,

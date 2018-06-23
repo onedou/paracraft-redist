@@ -11,34 +11,32 @@ local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
 ]]
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
+local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 
 local SyncGUI = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.sync.SyncGUI"))
 
 local SyncPage
+local current = 0
+local total = 0
+local files = ""
+local finish
+local broke
 
-SyncGUI.current = 0
-SyncGUI.total = 0
-SyncGUI.files = ""
+function SyncGUI:ctor(sync)
+    current = 0
+    total = 0
+    files = L "同步中，请稍后..."
+    finish = false
+    broke = false
 
-function SyncGUI:ctor()
-    SyncGUI.current = 0
-    SyncGUI.total = 0
-    SyncGUI.files = L "同步中，请稍后..."
+    self.sync = sync
 
-    SyncMain.curUpdateIndex = 1
-    SyncMain.curUploadIndex = 1
-    SyncMain.totalLocalIndex = nil
-    SyncMain.totalDataSourceIndex = nil
-    SyncMain.dataSourceFiles = {}
-
-    SyncMain.curDownloadIndex = 1
-    SyncMain.dataSourceIndex = 0
-
-    Utils.ShowWindow(550, 320, "Mod/WorldShare/sync/SyncGUI.html", "SyncGUI")
+    Utils:ShowWindow(550, 320, "Mod/WorldShare/sync/SyncGUI.html", "SyncGUI")
 end
 
 function SyncGUI:OnInit()
@@ -56,28 +54,29 @@ function SyncGUI:refresh(delayTimeMs)
 end
 
 function SyncGUI.closeWindow()
-    SyncPage:CloseWindow()
+    if (SyncPage) then
+        SyncPage:CloseWindow()
+    end
 end
 
-function SyncGUI.finish(callback)
-    SyncMain.finish = true
-
-    SyncGUI.files = L "正在等待上次同步完成，请稍后..."
-    SyncGUI:refresh(0.01)
+function SyncGUI.cancel(callback)
+    files = L "正在等待上次同步完成，请稍后..."
+    self:SetBroke(true)
+    self:refresh()
 
     local function checkFinish()
-        commonlib.TimerManager.SetTimeout(
+        Utils.SetTimeOut(
             function()
-                if (SyncMain.isFetching) then
+                if (self.sync.finish) then
                     checkFinish()
                 else
-                    SyncPage:CloseWindow()
-                    if (type(callback) == "function") then
+                    self:CloseWindow()
+
+                    if(type(callback) == 'function') then
                         callback()
                     end
                 end
-            end,
-            100
+            end
         )
     end
 
@@ -85,47 +84,67 @@ function SyncGUI.finish(callback)
 end
 
 function SyncGUI:retry()
-    SyncGUI.finish(
+    self.finish(
         function()
-            if (SyncMain.syncType == "sync") then
-                SyncMain.syncCompare(true)
-            elseif (SyncMain.syncType == "share") then
-                ShareWorld.shareCompare()
-            else
-                SyncMain.syncCompare(true)
-            end
-
-            SyncMain.syncType = nil
+            SyncCompare:syncCompare()
         end
     )
+
+    -- if (SyncMain.syncType == "sync") then
+    --     SyncMain.syncCompare(true)
+    -- elseif (SyncMain.syncType == "share") then
+    --     ShareWorld.shareCompare()
+    -- else
+    --     SyncMain.syncCompare(true)
+    -- end
 end
 
-function SyncGUI:updateDataBar(current, total, files)
-    self.current = current
-    self.total = total
+function SyncGUI:updateDataBar(pCurrent, pTotal, pFiles, pFinish)
+    current = pCurrent
+    total = pTotal
+    files = pFiles
+    finish = pFinish
 
-    if (files) then
-        self.files = files
-    else
-        self.files = L "同步中，请稍后..."
+    if (not files) then
+        files = L "同步中，请稍后..."
     end
 
-    LOG.std(
-        "SyncGUI",
-        "debug",
-        "SyncGUI",
-        "Totals : %s , Current : %s, Status : %s",
-        SyncGUI.total,
-        SyncGUI.current,
-        SyncGUI.files
-    )
+    LOG.std("SyncGUI", "debug", "SyncGUI", format("Totals : %s , Current : %s, Status : %s", total, current, files))
 
-    self:GetProgressBar():SetAttribute("Maximum", SyncGUI.total)
-    self:GetProgressBar():SetAttribute("Value", SyncGUI.current)
+    self:GetProgressBar():SetAttribute("Maximum", total)
+    self:GetProgressBar():SetAttribute("Value", current)
 
     self:refresh()
 end
 
 function SyncGUI.copy()
     ParaMisc.CopyTextToClipboard(ShareWorld.getWorldUrl(true))
+end
+
+function SyncGUI.GetCurrent()
+    return current
+end
+
+function SyncGUI.GetTotal()
+    return total
+end
+
+function SyncGUI.GetFiles()
+    return files
+end
+
+function SyncGUI.GetFinish()
+    return finish
+end
+
+function SyncGUI.GetBroke()
+    return broke
+end
+
+function SyncGUI:SetBroke(value)
+    broke = value
+end
+
+function SyncGUI:SetFinish(value)
+    finish = value
 end

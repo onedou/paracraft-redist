@@ -13,9 +13,11 @@ NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
+NPL.load("(gl)script/ide/Encoding.lua")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
-local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
+local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
@@ -24,18 +26,19 @@ local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
+local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
+local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 
 SyncCompare.compareFinish = false
-SyncCompare.LoginStatus = nil
 
-function SyncCompare:syncCompare(LoginStatus)
-    self:setLoginStatus(LoginStatus)
+function SyncCompare:syncCompare()
+    local IsEnterWorld = GlobalStore.get("IsEnterWorld")
 
     self:compareRevision(
         function(result)
-            if (LoginStatus) then
+            if (IsEnterWorld) then
                 if (result == "justLocal") then
                     SyncMain.syncToDataSource()
                 else
@@ -47,7 +50,7 @@ function SyncCompare:syncCompare(LoginStatus)
                 elseif (result == "tryAgain") then
                     commonlib.TimerManager.SetTimeout(
                         function()
-                            SyncMain.syncCompare()
+                            SyncCompare.syncCompare()
                         end,
                         1000
                     )
@@ -61,14 +64,13 @@ function SyncCompare:IsCompareFinish()
     return SyncCompare.compareFinish == true
 end
 
-function SyncCompare:setLoginStatus(LoginStatus)
-    SyncCompare.LoginStatus = LoginStatus
-end
-
 function SyncCompare:compareRevision(callback)
+    local IsEnterWorld = GlobalStore.get("IsEnterWorld")
+
     if (LoginUserInfo.IsSignedIn()) then
-        if (not SyncCompare.LoginStatus) then
+        if (IsEnterWorld) then
             local worldDir = {}
+
             worldDir.default = GameLogic.GetWorldDirectory():gsub("\\", "/")
             worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
 
@@ -80,24 +82,45 @@ function SyncCompare:compareRevision(callback)
             GlobalStore.set("worldDir", worldDir)
             GlobalStore.set("foldername", foldername)
 
-            if (loginMain.LoginPage or loginMain.ModalPage) then
-                loginMain.RefreshCurrentServerList(self.comparePrepare)
+            if (LoginMain.LoginPage or LoginMain.ModalPage) then
+                LoginMain.RefreshCurrentServerList(self.comparePrepare)
             else
                 self:comparePrepare()
             end
         else
+            local selectWorld = GlobalStore.get('selectWorld')
+
+            if (selectWorld.is_zip) then
+                _guihelper.MessageBox(L "不能同步ZIP文件")
+                return
+            end
+    
+            local foldername = {}
+    
+            foldername.utf8 = selectWorld.foldername
+            foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
+    
+            local worldDir = {}
+    
+            worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
+            worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+    
+            GlobalStore.set("foldername", foldername)
+            GlobalStore.set("worldDir", worldDir)
+
             self:compare(callback)
         end
     else
-        loginMain.LoginWithTokenApi(
+        LoginMain.LoginWithTokenApi(
             function()
-                self:compareRevision(LoginStatus, callback)
+                self:compareRevision(callback)
             end
         )
     end
 end
 
 function SyncCompare:compare(callback)
+    local IsEnterWorld = GlobalStore.get("IsEnterWorld")
     local foldername = GlobalStore.get("foldername")
     foldername.base32 = GitEncoding.base32(foldername.utf8)
 
@@ -116,7 +139,7 @@ function SyncCompare:compare(callback)
             break
         end
     end
-    
+
     if (hasRevision and currentRevision ~= 0 and currentRevision ~= 1) then
         local function handleRevision(data, err)
             if (err == 0 or err == 502) then
@@ -141,7 +164,7 @@ function SyncCompare:compare(callback)
             elseif (currentRevision == remoteRevision) then
                 result = "equal"
             end
-            
+
             if (remoteRevision ~= 0) then
                 local isWorldInRemoteLists = false
 
@@ -152,18 +175,24 @@ function SyncCompare:compare(callback)
                 end
 
                 if (not isWorldInRemoteLists) then
-                    SyncMain:refreshRemoteWorldLists(
-                        nil,
-                        function()
-                            SyncCompare.compareFinish = true
+                    LoginMain.showMessageInfo("请稍后...")
 
-                            if (type(callback) == "function") then
-                                callback("tryAgain")
-                            end
+                    SyncMain:RefreshKeepworkList(
+                        function()
+                            LoginWorldList.RefreshCurrentServerList(
+                                function()
+                                    SyncCompare.compareFinish = true
+                                    LoginMain.closeMessageInfo()
+
+                                    if (type(callback) == "function") then
+                                        callback("tryAgain")
+                                    end
+                                end
+                            )
                         end
                     )
 
-                    return
+                    return false
                 end
             end
 
@@ -176,7 +205,7 @@ function SyncCompare:compare(callback)
 
         GitService:new():getWorldRevision(foldername, handleRevision)
     else
-        if (not LoginStatus) then
+        if (not IsEnterWorld) then
             CommandManager:RunCommand("/save")
 
             SyncCompare.compareFinish = true

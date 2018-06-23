@@ -2,7 +2,7 @@
 Title: GitService
 Author(s):  big
 Date:  2018.6.20
-Desc: 
+Place: Foshan
 use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
@@ -29,11 +29,11 @@ function GitService:create(foldername, callback)
     end
 end
 
-function GitService:getContent(foldername, path, projectId, callback)
+function GitService:getContent(projectId, foldername, path, callback)
     if (self.dataSourceType == "github") then
         GithubService:new():getContent(foldername, path, callback)
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:new():getContent(path, projectId, callback)
+        GitlabService:new():getContent(projectId, path, callback)
     end
 end
 
@@ -76,11 +76,11 @@ function GitService:getTree(projectId, foldername, commitId, callback)
     end
 end
 
-function GitService:getCommits(foldername, callback, projectId)
-    if (loginMain.dataSourceType == "github") then
+function GitService:getCommits(projectId, foldername, callback)
+    if (self.dataSourceType == "github") then
         GithubService:new():getCommits(foldername, callback)
-    elseif (loginMain.dataSourceType == "gitlab") then
-        GitlabService:new():getCommits(callback, projectId, foldername)
+    elseif (self.dataSourceType == "gitlab") then
+        GitlabService:new():getCommits(projectId, callback)
     end
 end
 
@@ -89,20 +89,6 @@ function GitService:getWorldRevision(foldername, callback)
         GithubService:new():getWorldRevision(foldername, callback)
     elseif (self.dataSourceType == "gitlab") then
         GitlabService:new():getWorldRevision(foldername, callback)
-    end
-end
-
-function GitService.getProjectId()
-    if (self.dataSourceType == "github") then
-    elseif (self.dataSourceType == "gitlab") then
-        return GitlabService.projectId
-    end
-end
-
-function GitService.setProjectId(projectId)
-    if (self.dataSourceType == "github") then
-    elseif (self.dataSourceType == "gitlab") then
-        GitlabService:new():setProjectId(foldername)
     end
 end
 

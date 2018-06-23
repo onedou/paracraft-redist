@@ -8,37 +8,36 @@ NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 -------------------------------------------------------
 ]]
-
-local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils");
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 
 function Utils:ShowWindow(width, height, url, name, x, y)
-    if(not x) then
+    if (not x) then
         x = width
     end
 
-    if(not y) then
+    if (not y) then
         y = height
     end
 
     local params = {
-        url            = url, 
-        name           = name, 
+        url = url,
+        name = name,
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
-        style          = CommonCtrl.WindowFrame.ContainerStyle,
-        zorder         = 0,
-        allowDrag      = true,
-        bShow          = bShow,
+        style = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder = 0,
+        allowDrag = true,
+        bShow = bShow,
         directPosition = true,
-        align          = "_ct",
-        x              = -x/2,
-        y              = -y/2,
-        width          = width,
-        height         = height,
-        cancelShowAnimation = true,
+        align = "_ct",
+        x = -x / 2,
+        y = -y / 2,
+        width = width,
+        height = height,
+        cancelShowAnimation = true
     }
 
-    System.App.Commands.Call("File.MCMLWindowFrame", params);
+    System.App.Commands.Call("File.MCMLWindowFrame", params)
 
     return params
 end
@@ -71,4 +70,8 @@ function Utils.formatFileSize(size, unit)
     end
 
     return s or "0"
+end
+
+function Utils.SetTimeOut(callback, times)
+    commonlib.TimerManager.SetTimeout(callback, times or 100)
 end

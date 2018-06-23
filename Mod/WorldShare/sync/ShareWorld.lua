@@ -103,27 +103,27 @@ function ShareWorld.getWorldSize()
 end
 
 function ShareWorld.shareCompare()
-    SyncMain:compareRevision(
-        nil,
-        function(result)
-            if (result and result == "tryAgain") then
-                ShareWorld.shareCompare()
-            elseif (result == "zip") then
-                _guihelper.MessageBox(L "不能同步ZIP文件")
-                loginMain.closeMessageInfo()
-            elseif (result) then
-                ShareWorld.ShowPageImp()
-                ShareWorld.CompareResult = result
-                ShareWorld.SharePage:Refresh()
-                ShareWorld:init()
-                loginMain.closeMessageInfo()
-            else
-                if (ShareWorld.SharePage) then
-                    ShareWorld.SharePage:CloseWindow()
-                end
-            end
-        end
-    )
+    -- SyncMain:compareRevision(
+    --     nil,
+    --     function(result)
+    --         if (result and result == "tryAgain") then
+    --             ShareWorld.shareCompare()
+    --         elseif (result == "zip") then
+    --             _guihelper.MessageBox(L "不能同步ZIP文件")
+    --             loginMain.closeMessageInfo()
+    --         elseif (result) then
+    --             ShareWorld.ShowPageImp()
+    --             ShareWorld.CompareResult = result
+    --             ShareWorld.SharePage:Refresh()
+    --             ShareWorld:init()
+    --             loginMain.closeMessageInfo()
+    --         else
+    --             if (ShareWorld.SharePage) then
+    --                 ShareWorld.SharePage:CloseWindow()
+    --             end
+    --         end
+    --     end
+    -- )
 end
 
 function ShareWorld.shareNow()

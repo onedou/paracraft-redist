@@ -57,3 +57,12 @@ function KeepworkService.deleteWorld(foldername, callback)
 
     getParams("/api/mod/worldshare/models/worlds", 'DELETE', params, callback)
 end
+
+function KeepworkService:RefreshKeepworkList(worldInfo, callback)
+    if (not LoginUserInfo.IsSignedIn()) then
+        return false
+    end
+
+    getParams("/api/mod/worldshare/models/worlds/refresh", 'POST', worldInfo, callback)
+
+end

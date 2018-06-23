@@ -21,11 +21,13 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncToDataSource.lua")
+NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua");
 
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
 local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
-local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
+local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
 local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
@@ -34,6 +36,8 @@ local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource")
+local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkService")
+local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 
@@ -45,10 +49,11 @@ function SyncMain:ctor()
 end
 
 function SyncMain:init()
-    SyncMain.worldName = nil
+end
 
+function SyncMain:SyncWillEnterWorld()
     -- 没有登陆则直接使用离线模式
-    if (loginMain.IsSignedIn()) then
+    if (LoginMain.IsSignedIn()) then
         SyncCompare:syncCompare()
     end
 end
@@ -128,7 +133,7 @@ function SyncMain:showDialog(url, name)
 end
 
 function SyncMain:backupWorld()
-    local worldDir = GlobalStore.get('worldDir')
+    local worldDir = GlobalStore.get("worldDir")
 
     local world_revision = WorldRevision:new():init(worldDir.default)
     world_revision:Backup()
@@ -142,141 +147,105 @@ function SyncMain:syncToDataSource()
 end
 
 function SyncMain.GetCurrentRevision()
-    return tonumber(GlobalStore.get('currentRevision'))
+    return tonumber(GlobalStore.get("currentRevision"))
 end
 
 function SyncMain.GetRemoteRevision()
-    return tonumber(GlobalStore.get('remoteRevision'))
+    return tonumber(GlobalStore.get("remoteRevision"))
 end
 
-function SyncMain:refreshRemoteWorldLists(syncGUI, callback)
-    echo(SyncMain.foldername, true)
+function SyncMain:RefreshKeepworkList(callback)
+    local foldername = GlobalStore.get("foldername")
+    local projectId
 
-    SyncMain:getCommits(
-        SyncMain.foldername.base32,
-        function(data, err)
-            if (data and data[1]) then
-                local lastCommits = data[1]
-                local lastCommitFile = lastCommits.title:gsub("keepwork commit: ", "")
-                local lastCommitSha = lastCommits.id
+    local function handleKeepworkList(data, err)
+        if (not data or not data[1]) then
+            _guihelper.MessageBox(L "获取Commit列表失败")
+            return false
+        end
 
-                if (lastCommitFile ~= "revision.xml") then
-                    _guihelper.MessageBox(L "上一次同步到数据源同步失败，请重新同步世界到数据源")
-                    return
-                end
+        local lastCommits = data[1]
+        local lastCommitFile = lastCommits.title:gsub("keepwork commit: ", "")
+        local lastCommitSha = lastCommits.id
 
-                local modDateTable = {}
-                local readme = ""
+        if (lastCommitFile ~= "revision.xml") then
+            _guihelper.MessageBox(L "上一次同步到数据源同步失败，请重新同步世界到数据源")
+            return false
+        end
 
-                if (SyncMain.selectedWorldInfor and SyncMain.selectedWorldInfor.tooltip) then
-                    for modDateEle in string.gmatch(SyncMain.selectedWorldInfor.tooltip, "[^:]+") do
-                        modDateTable[#modDateTable + 1] = modDateEle
-                    end
+        local worldDir = GlobalStore.get("worldDir")
+        local selectWorld = GlobalStore.get("selectWorld")
+        local worldTag = GlobalStore.get("worldTag")
+        local dataSourceInfo = GlobalStore.get("dataSourceInfo")
+        local localFiles = LocalService:new():LoadFiles(worldDir.default)
 
-                    modDateTable = modDateTable[1]
-                else
-                    modDateTable = os.date("%Y-%m-%d-%H-%M-%S")
-                end
+        GlobalStore.set("localFiles", localFiles)
 
-                local hasPreview = false
-
-                for key, value in ipairs(SyncMain.localFiles) do
-                    if (value.filename == "preview.jpg") then
-                        hasPreview = true
-                    end
-                end
-
-                for key, value in ipairs(SyncMain.localFiles) do
-                    if (value.filename == "README.md") then
-                        readme = LocalService:getFileContent(SyncMain.worldDir.default .. "README.md")
-                    end
-                end
-
-                local preview =
-                    loginMain.rawBaseUrl ..
-                    "/" ..
-                        loginMain.dataSourceUsername ..
-                            "/" .. GitEncoding.base32(SyncMain.foldername.utf8) .. "/raw/master/preview.jpg"
-
-                local filesTotals = 0
-                if (SyncMain.selectedWorldInfor) then
-                    filesTotals = SyncMain.selectedWorldInfor.size
-                end
-
-                local worldTag = LocalService:GetTag(SyncMain.foldername.default)
-
-                self.worldInfo = {}
-                self.worldInfo.modDate = modDateTable
-                self.worldInfo.worldsName = SyncMain.foldername.utf8
-                self.worldInfo.revision = SyncMain.currentRevison
-                self.worldInfo.hasPreview = hasPreview
-                self.worldInfo.dataSourceType = loginMain.dataSourceType
-                self.worldInfo.gitlabProjectId = GitService.getProjectId()
-                self.worldInfo.readme = readme
-                self.worldInfo.preview = preview
-                self.worldInfo.filesTotals = filesTotals
-                self.worldInfo.commitId = lastCommitSha
-                self.worldInfo.name = worldTag.name
-                self.worldInfo.download =
-                    format(
-                    "%s/%s/%s/repository/archive.zip?ref=%s",
-                    loginMain.rawBaseUrl,
-                    loginMain.dataSourceUsername,
-                    GitEncoding.base32(SyncMain.foldername.utf8),
-                    self.worldInfo.commitId
-                )
-
-                loginMain.refreshing = true
-                loginMain.refreshPage()
-
-                HttpRequest:GetUrl(
-                    {
-                        url = loginMain.site .. "/api/mod/worldshare/models/worlds/refresh",
-                        json = true,
-                        form = self.worldInfo,
-                        headers = {
-                            Authorization = "Bearer " .. loginMain.token,
-                            ["content-type"] = "application/json"
-                        }
-                    },
-                    function(response, err)
-                        if (err == 200) then
-                            if (type(response) == "table" and response.error.id == 0) then
-                                self.worldInfo.opusId = response.data.opusId
-                            else
-                                _guihelper.MessageBox(L "更新服务器列表失败")
-                                return
-                            end
-
-                            local function refresh()
-                                SyncMain.finish = true
-
-                                if (syncGUI) then
-                                    syncGUI:refresh()
-                                end
-
-                                loginMain.RefreshCurrentServerList(
-                                    function()
-                                        if (type(callback) == "function") then
-                                            callback()
-                                        end
-                                    end
-                                )
-                            end
-
-                            SyncMain:genWorldMD(refresh)
-                        end
-                    end
-                )
-
-                if (SyncMain.firstCreate) then
-                    SyncMain.firstCreate = false
-                end
-            else
-                _guihelper.MessageBox(L "获取Commit列表失败")
+        local readme = ""
+        for key, value in ipairs(localFiles) do
+            if (value.filename == "README.md") then
+                readme = value.file_content_t
             end
+        end
 
-            GitService.setProjectId(nil)
+        local preview =
+            format(
+            "%s/%s/%s/raw/master/preview.jpg",
+            dataSourceInfo.rawBaseUrl,
+            dataSourceInfo.dataSourceUsername,
+            foldername.base32
+        )
+
+        local filesTotals = selectWorld and selectWorld.size or 0
+
+        local worldInfo = {}
+
+        worldInfo.modDate = SyncMain:GetWorldDateTable()
+        worldInfo.worldsName = foldername.utf8
+        worldInfo.revision = GlobalStore.get("currentRevision")
+        worldInfo.dataSourceType = dataSourceInfo.dataSourceType
+        worldInfo.gitlabProjectId = projectId
+        worldInfo.readme = readme
+        worldInfo.preview = preview
+        worldInfo.filesTotals = filesTotals
+        worldInfo.commitId = lastCommitSha
+        worldInfo.name = worldTag.name
+        worldInfo.download =
+            format(
+            "%s/%s/%s/repository/archive.zip?ref=%s",
+            dataSourceInfo.rawBaseUrl,
+            dataSourceInfo.dataSourceUsername,
+            foldername.base32,
+            worldInfo.commitId
+        )
+
+        LoginMain.setPageRefreshing(true)
+
+        GenerateMdPage:genWorldMD(
+            worldInfo,
+            function()
+                KeepworkService:RefreshKeepworkList(
+                    worldInfo,
+                    function(data, err)
+                        if (err ~= 200 or type(data) ~= "table" or data.error.id ~= 0) then
+                            _guihelper.MessageBox(L "更新服务器列表失败")
+                            return false
+                        end
+
+                        worldInfo.opusId = data.data.opusId
+                        GenerateMdPage:genWorldMD(worldInfo, callback)
+                    end
+                )
+            end
+        )
+    end
+
+    GitService:new():getProjectIdByName(
+        foldername.base32,
+        function(pProjectId)
+            projectId = pProjectId
+
+            GitService:new():getCommits(projectId, foldername.base32, handleKeepworkList)
         end
     )
 end
@@ -301,4 +270,21 @@ function SyncMain:checkWorldSize()
     else
         return false
     end
+end
+
+function SyncMain:GetWorldDateTable()
+    local selectWorld = GlobalStore.get("selectWorld")
+    local date = {}
+
+    if (selectWorld and selectWorld.tooltip) then
+        for item in string.gmatch(selectWorld.tooltip, "[^:]+") do
+            date[#date + 1] = item
+        end
+
+        date = date[1]
+    else
+        date = os.date("%Y-%m-%d-%H-%M-%S")
+    end
+
+    return date
 end

@@ -404,13 +404,9 @@ function GitlabService:create(foldername, callback)
 end
 
 -- commit
-function GitlabService:getCommits(callback, projectId, foldername)
-    local function go(projectId)
-        local url = "projects/" .. projectId .. "/repository/commits"
-        GitlabService:apiGet(url, callback)
-    end
-
-    GitlabService:checkProjectId(projectId, foldername, go)
+function GitlabService:getCommits(projectId, callback)
+    local url = format("projects/%s/repository/commits", projectId)
+    self:apiGet(url, callback)
 end
 
 -- 写文件
@@ -474,7 +470,7 @@ function GitlabService:update(projectId, filename, content, callback)
 end
 
 -- 获取文件
-function GitlabService:getContent(path, projectId, callback)
+function GitlabService:getContent(projectId, path, callback)
     if (not projectId or not path) then
         return false
     end
