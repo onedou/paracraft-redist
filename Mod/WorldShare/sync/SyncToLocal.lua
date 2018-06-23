@@ -2,292 +2,309 @@
 Title: SyncToLocal
 Author(s):  big
 Date:  2018.6.20
-Desc: 
+Place: Foshan 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/SyncToLocal.lua");
-local SyncToLocal = commonlib.gettable("Mod.WorldShare.sync.SyncToLocal");
+NPL.load("(gl)Mod/WorldShare/sync/SyncToLocal.lua")
+local SyncToLocal = commonlib.gettable("Mod.WorldShare.sync.SyncToLocal")
 ------------------------------------------------------------
 ]]
-local SyncToLocal = commonlib.gettable("Mod.WorldShare.sync.SyncToLocal")
+NPL.load("(gl)Mod/WorldShare/store/Global.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua")
+NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
+NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
+
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
+local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
+local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local Encoding = commonlib.gettable("commonlib.Encoding")
+local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
-SyncToLocal.localSync = {}
-SyncMain.finish = false
+local SyncToLocal = commonlib.gettable("Mod.WorldShare.sync.SyncToLocal")
 
--- 加载进度UI界面
-local syncToLocalGUI = SyncGUI:new()
+local UPDATE = "UPDATE"
+local DELETE = "DELETE"
+local DOWNLOAD = "DOWNLOAD"
 
-if (loginMain.dataSourceType == "gitlab") then
-    GitService:setGitlabProjectId(SyncMain.foldername.utf8)
-end
+function SyncToLocal:init(callback)
+    self.worldDir = GlobalStore.get("worldDir")
+    self.foldername = GlobalStore.get("foldername")
+    local selectWorld = GlobalStore.get("selectWorld")
 
-if (SyncMain.worldDir.default == "") then
-    _guihelper.MessageBox(L "下载失败，原因：下载目录为空")
-    return
-else
-    SyncMain.curUpdateIndex = 1
-    SyncMain.curDownloadIndex = 1
-    SyncMain.totalLocalIndex = nil
-    SyncMain.totalDataSourceIndex = nil
-    SyncMain.dataSourceFiles = {}
+    if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
+        _guihelper.MessageBox(L "下载失败，原因：下载目录为空")
+        return false
+    end
 
-    local syncGUItotal = 0
-    local syncGUIIndex = 0
-    local syncGUIFiles = ""
+    if (selectWorld.status == 2) then
+        -- down zip
+        self:DownloadZIP(callback)
+        return false
+    end
 
-    SyncMain.finish = false
+    -- 加载进度UI界面
+    self.syncGUI = SyncGUI:new()
+    self:SetFinish(false)
 
-    syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L "获取文件sha列表")
-
-    -- 获取数据源仓文件
-    GitService:getFileShaListService(
-        SyncMain.foldername.utf8,
-        function(data, err)
-            if (err ~= 404) then
-                if (err == 409) then
-                    _guihelper.MessageBox(L "数据源上暂无数据")
-                    syncToLocalGUI.finish()
-                    return
-                end
-
-                SyncMain.localFiles = LocalService:new():LoadFiles(SyncMain.worldDir.default)
-                SyncMain.dataSourceFiles = data
-
-                SyncMain.totalLocalIndex = #SyncMain.localFiles
-                SyncMain.totalDataSourceIndex = #SyncMain.dataSourceFiles
-
-                for key, value in ipairs(SyncMain.dataSourceFiles) do
-                    value.needChange = true
-
-                    if (value.type == "blob") then
-                        syncGUItotal = syncGUItotal + 1
-                    end
-                end
-
-                syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L "开始同步")
-
-                if (SyncMain.totalLocalIndex ~= 0) then
-                    SyncMain.localSync.updateOne()
-                else
-                    --downloadOne();
-                    --如果文档文件夹为空，则直接开始下载
-                    LocalService:downloadZip(
-                        SyncMain.foldername.utf8,
-                        SyncMain.commitId,
-                        function(bSuccess, remoteRevison)
-                            if (bSuccess) then
-                                SyncMain.remoteRevison = remoteRevison
-                                syncGUIIndex = syncGUItotal
-                                SyncMain.localSync.finish()
-                                loginMain.RefreshCurrentServerList()
-                            else
-                                _guihelper.MessageBox(L "下载失败，请稍后再试")
-                            end
-                        end
-                    )
-                end
-            else
-                _guihelper.MessageBox(L "获取数据源文件失败，请稍后再试！")
-                syncToLocalGUI.finish()
+    GitService:new():getProjectIdByName(
+        self.foldername.base32,
+        function(projectId)
+            if (not projectId) then
+                _guihelper.MessageBox(L "数据源异常")
+                SyncGUI.closeWindow()
+                return false
             end
-        end,
-        SyncMain.commitId
+
+            self.projectId = projectId
+            selectWorld.projectId = projectId
+            GlobalStore.set("selectWorld", selectWorld)
+
+            self:syncToLocal()
+        end
     )
 end
 
+function SyncToLocal:syncToLocal()
+    self.compareListIndex = 1
+    self.compareListTotal = 0
 
-function SyncMain.localSync.finish()
-    syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, L "同步完成")
-    local localWorlds = InternetLoadWorld.cur_ds
+    self.syncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
 
-    for key, value in ipairs(localWorlds) do
-        if (SyncMain.foldername.utf8 == value["foldername"]) then
-            --LOG.std(nil,"debug","SyncMain.foldername",SyncMain.foldername.utf8);
-            localWorlds[key].status = 3
-            localWorlds[key].revision = SyncMain.remoteRevison
-            loginMain.refreshPage()
+    local function handleSyncToLocal(data, err)
+        self.localFiles = LocalService:new():LoadFiles(self.worldDir.default)
+        self.dataSourceFiles = data
+
+        GlobalStore.set("localFiles", localFiles)
+
+        self:GetCompareList()
+        self:HandleCompareList()
+    end
+
+    GitService:new():getTree(self.projectId, nil, nil, handleSyncToLocal)
+end
+
+function SyncToLocal:GetCompareList()
+    self.compareList = commonlib.vector:new()
+
+    for DKey, DItem in ipairs(self.dataSourceFiles) do
+        local bIsExisted = false
+
+        for LKey, LItem in ipairs(self.localFiles) do
+            if (DItem.path == LItem.filename) then
+                bIsExisted = true
+                break
+            end
+        end
+
+        local currentItem = {
+            file = DItem.path,
+            status = bIsExisted and UPDATE or DOWNLOAD
+        }
+
+        self.compareList:push_back(currentItem)
+    end
+
+    for LKey, LItem in ipairs(self.localFiles) do
+        local bIsExisted = false
+
+        for DKey, DItem in ipairs(self.dataSourceFiles) do
+            if (LItem.filename == DItem.path) then
+                bIsExisted = true
+                break
+            end
+        end
+
+        if (not bIsExisted) then
+            local currentItem = {
+                file = LItem.filename,
+                status = DELETE
+            }
+
+            self.compareList:push_back(currentItem)
         end
     end
 
-    --成功是返回信息给login
-    if (type(callback) == "function") then
-        local params = {}
-        params.revison = SyncMain.remoteRevison
-
-        callback(true, params)
-    end
-
-    SyncMain.finish = true
+    self.compareListTotal = #self.compareList
 end
 
--- 下载新文件
-function SyncMain.localSync.downloadOne()
-    LOG.std(
-        "SyncMain",
-        "debug",
-        "NumbersToLCDL",
-        "totals : %s , current : %s",
-        SyncMain.totalDataSourceIndex,
-        SyncMain.curDownloadIndex
-    )
-
-    if (SyncMain.finish) then
-        LOG.std("SyncMain", "debug", "强制中断")
-        return
-    end
-
-    if (SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].needChange) then
-        if (SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].type == "blob") then
-            -- LOG.std(nil,"debug","githubFiles.tree[SyncMain.curDownloadIndex].type",githubFiles.tree[SyncMain.curDownloadIndex].type);
-
-            SyncMain.isFetching = true
-            LocalService:download(
-                SyncMain.foldername.utf8,
-                SyncMain.dataSourceFiles[SyncMain.curDownloadIndex].path,
-                function(bIsDownload, response)
-                    if (bIsDownload) then
-                        syncGUIIndex = syncGUIIndex + 1
-                        syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename)
-
-                        if (response.filename == "revision.xml") then
-                            SyncMain.remoteRevison = response.content
-                        end
-
-                        if (SyncMain.curDownloadIndex == SyncMain.totalDataSourceIndex) then
-                            SyncMain.localSync.finish()
-                        else
-                            SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1
-                            SyncMain.localSync.downloadOne()
-                        end
-                    else
-                        --syncToLocalGUI.finish();
-                        --SyncMain.finish = true;
-                        _guihelper.MessageBox(L "下载失败，请稍后再试")
-                    end
-
-                    SyncMain.isFetching = false
+function SyncToLocal:RefreshList()
+    SyncMain:RefreshKeepworkList(
+        function()
+            LoginWorldList.RefreshCurrentServerList(
+                function()
+                    SyncGUI:SetFinish(true)
+                    SyncGUI:refresh()
                 end
             )
         end
-    else
-        if (SyncMain.curDownloadIndex == SyncMain.totalDataSourceIndex) then
-            SyncMain.localSync.finish()
-        else
-            SyncMain.curDownloadIndex = SyncMain.curDownloadIndex + 1
-            SyncMain.localSync.downloadOne()
+    )
+end
+
+function SyncToLocal:HandleCompareList()
+    if (self.compareListTotal < self.compareListIndex) then
+        self:SetFinish(true)
+        self:RefreshList()
+        
+        self.compareListIndex = 1
+        return false
+    end
+
+    if (self.broke) then
+        self:SetFinish(true)
+        LOG.std("SyncToDataSource", "debug", "下载被中断")
+        return false
+    end
+
+    local currentItem = self.compareList[self.compareListIndex]
+
+    local function retry()
+        self.syncGUI:updateDataBar(
+            self.compareListIndex,
+            self.compareListTotal,
+            format(L "%s 处理完成", currentItem.file),
+            self.finish
+        )
+
+        self.compareListIndex = self.compareListIndex + 1
+        self:HandleCompareList()
+    end
+
+    if (currentItem.status == UPDATE) then
+        self:updateOne(currentItem.file, retry)
+    end
+
+    if (currentItem.status == DOWNLOAD) then
+        self:downloadOne(currentItem.file, retry)
+    end
+
+    if (currentItem.status == DELETE) then
+        self:deleteOne(currentItem.file, retry)
+    end
+end
+
+function SyncToLocal:SetFinish(value)
+    self.finish = value
+end
+
+function SyncToLocal:GetLocalFileByFilename(filename)
+    for key, item in ipairs(self.localFiles) do
+        if (item.filename == filename) then
+            return item
         end
     end
 end
 
--- 删除文件
-function SyncMain.localSync.deleteOne()
-    if (SyncMain.finish) then
-        LOG.std("SyncMain", "debug", "强制中断")
-        return
+function SyncToLocal:GetRemoteFileByPath(path)
+    for key, item in ipairs(self.dataSourceFiles) do
+        if (item.path == path) then
+            return item
+        end
     end
+end
 
-    LocalService:delete(
-        SyncMain.foldername.utf8,
-        SyncMain.localFiles[SyncMain.curUpdateIndex].filename,
-        function(data, err)
-            if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
-                SyncMain.localSync.downloadOne()
-            else
-                SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1
-                SyncMain.localSync.updateOne()
+-- 下载新文件
+function SyncToLocal:downloadOne(file, callback)
+    local currentRemoteItem = self:GetRemoteFileByPath(file)
+
+    GitService:new():getContentWithRaw(
+        self.foldername.utf8,
+        currentRemoteItem.path,
+        function(content, size)
+            self.syncGUI:updateDataBar(
+                self.compareListIndex,
+                self.compareListTotal,
+                format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
+            )
+
+            LocalService:write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
+
+            if (type(callback) == "function") then
+                callback()
             end
         end
     )
 end
 
 -- 更新本地文件
-function SyncMain.localSync.updateOne()
-    LOG.std(
-        "SyncMain",
-        "debug",
-        "NumbersToLCUD",
-        "totals : %s , current : %s",
-        SyncMain.totalLocalIndex,
-        SyncMain.curUpdateIndex
-    )
+function SyncToLocal:updateOne(file, callback)
+    local currentLocalItem = self:GetLocalFileByFilename(file)
+    local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    if (SyncMain.finish) then
-        LOG.std("SyncMain", "debug", "强制中断")
-        return
-    end
-
-    local bIsExisted = false
-    local dataSourceIndex = nil
-
-    -- 用数据源的文件和本地的文件对比
-    for key, value in ipairs(SyncMain.dataSourceFiles) do
-        if (value.path == SyncMain.localFiles[SyncMain.curUpdateIndex].filename) then
-            --LOG.std(nil,"debug","value.path",value.path);
-            bIsExisted = true
-            dataSourceIndex = key
-            break
+    if (currentLocalItem.sha1 == currentRemoteItem.sha) then
+        if (type(callback) == "function") then
+            Utils.SetTimeOut(callback)
         end
+
+        return false
     end
 
-    -- 本地是否存在数据源上的文件
-    if (bIsExisted) then
-        SyncMain.dataSourceFiles[dataSourceIndex].needChange = false
-        LOG.std(
-            "SyncMain",
-            "debug",
-            "FilesShaToLCUP",
-            "File : %s, DSSha : %s , LCSha : %s",
-            SyncMain.dataSourceFiles[dataSourceIndex].path,
-            SyncMain.dataSourceFiles[dataSourceIndex].sha,
-            SyncMain.localFiles[SyncMain.curUpdateIndex].sha1
+    local function handleUpdate(content, size)
+        self.syncGUI:updateDataBar(
+            self.compareListIndex,
+            self.compareListTotal,
+            format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
         )
 
-        if (SyncMain.localFiles[SyncMain.curUpdateIndex].sha1 ~= SyncMain.dataSourceFiles[dataSourceIndex].sha) then
-            -- 更新已存在的文件
+        LocalService:write(self.foldername.default, Encoding.Utf8ToDefault(currentRemoteItem.path), content)
 
-            SyncMain.isFetching = true
-            LocalService:update(
-                SyncMain.foldername.utf8,
-                SyncMain.dataSourceFiles[dataSourceIndex].path,
-                function(bIsUpdate, response)
-                    if (bIsUpdate) then
-                        if (response.filename == "revision.xml") then
-                            SyncMain.remoteRevison = response.content
-                        end
+        if (type(callback) == "function") then
+            callback()
+        end
+    end
 
-                        syncGUIIndex = syncGUIIndex + 1
-                        syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, response.filename)
+    GitService:new():getContentWithRaw(
+        self.foldername.utf8,
+        currentRemoteItem.path,
+        handleUpdate
+    )
+end
 
-                        if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
-                            SyncMain.localSync.downloadOne()
-                        else
-                            SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1
-                            SyncMain.localSync.updateOne()
-                        end
-                    else
-                        --syncToLocalGUI.finish();
-                        --SyncMain.finish = true;
-                        _guihelper.MessageBox(L "更新失败,请稍后再试")
-                    end
+-- 删除文件
+function SyncToLocal:deleteOne(file, callback)
+    local currentLocalItem = self:GetLocalFileByFilename(file)
 
-                    SyncMain.isFetching = false
-                end
-            )
-        else
-            syncGUIIndex = syncGUIIndex + 1
-            syncToLocalGUI:updateDataBar(syncGUIIndex, syncGUItotal, SyncMain.dataSourceFiles[dataSourceIndex].path)
+    self.syncGUI:updateDataBar(
+        self.compareListIndex,
+        self.compareListTotal,
+        format(L "%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.size, "KB"))
+    )
 
-            if (SyncMain.curUpdateIndex == SyncMain.totalLocalIndex) then
-                SyncMain.localSync.downloadOne()
-            else
-                SyncMain.curUpdateIndex = SyncMain.curUpdateIndex + 1
-                SyncMain.localSync.updateOne()
+    LocalService:delete(self.foldername.default, Encoding.Utf8ToDefault(currentLocalItem.filename))
+
+    if (type(callback) == "function") then
+        callback()
+    end
+end
+
+function SyncToLocal:DownloadZIP()
+    ParaIO.CreateDirectory(self.worldDir.default)
+    -- SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8)
+
+    SyncMain:syncToLocal(
+        function(success, params)
+            if (success) then
+                SyncMain.selectedWorldInfor.status = 3
+                SyncMain.selectedWorldInfor.server = "local"
+                SyncMain.selectedWorldInfor.is_zip = false
+                SyncMain.selectedWorldInfor.icon = "Texture/blocks/items/1013_Carrot.png"
+                SyncMain.selectedWorldInfor.revision = params.revison
+                SyncMain.selectedWorldInfor.filesTotals = params.filesTotals
+                SyncMain.selectedWorldInfor.text = SyncMain.foldername.utf8
+                SyncMain.selectedWorldInfor.world_mode = "edit"
+                SyncMain.selectedWorldInfor.gs_nid = ""
+                SyncMain.selectedWorldInfor.force_nid = 0
+                SyncMain.selectedWorldInfor.ws_id = ""
+                SyncMain.selectedWorldInfor.author = ""
+                SyncMain.selectedWorldInfor.remotefile =
+                    "local://" .. SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default
+
+                LoginMain.LoginPage:Refresh()
             end
         end
-    else
-        -- 如果数据源不存在，则删除本地的文件
-        SyncMain.localSync.deleteOne()
-    end
+    )
 end

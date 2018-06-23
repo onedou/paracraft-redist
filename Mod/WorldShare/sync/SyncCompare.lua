@@ -15,6 +15,7 @@ NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginWorldList.lua")
 NPL.load("(gl)script/ide/Encoding.lua")
+NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
@@ -28,34 +29,46 @@ local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 local Encoding = commonlib.gettable("commonlib.Encoding")
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 
-SyncCompare.compareFinish = false
+local REMOTEBIGGER = "REMOTEBIGGER"
+local TRYAGAIN = "TRYAGAIN"
+local JUSTLOCAL = "JUSTLOCAL"
+local JUSTREMOTE = "JUSTREMOTE"
+local LOCALBIGGER = "LOCALBIGGER"
+local EQUAL = "EQUAL"
 
 function SyncCompare:syncCompare()
     local IsEnterWorld = GlobalStore.get("IsEnterWorld")
 
+    SyncCompare:SetFinish(false)
+    LoginMain.showMessageInfo(L "请稍后...")
+
     self:compareRevision(
         function(result)
             if (IsEnterWorld) then
-                if (result == "justLocal") then
-                    SyncMain.syncToDataSource()
-                else
+                if (result == REMOTEBIGGER) then
                     SyncMain:StartSyncPage()
+                elseif (result == TRYAGAIN) then
+                    Utils.SetTimeOut(SyncCompare.syncCompare, 1000)
                 end
             else
-                if (result == "remoteBigger") then
-                    SyncMain:StartSyncPage()
-                elseif (result == "tryAgain") then
-                    commonlib.TimerManager.SetTimeout(
-                        function()
-                            SyncCompare.syncCompare()
-                        end,
-                        1000
-                    )
+                if (result == JUSTLOCAL) then
+                    SyncMain.syncToDataSource()
+                    return true
                 end
+
+                if (result == JUSTREMOTE) then
+                    SyncMain.syncToLocal()
+                    return true
+                end
+                
+                SyncMain:StartSyncPage()
             end
+
+            LoginMain.closeMessageInfo()
         end
     )
 end
@@ -64,23 +77,27 @@ function SyncCompare:IsCompareFinish()
     return SyncCompare.compareFinish == true
 end
 
+function SyncCompare:SetFinish(value)
+    SyncCompare.compareFinish = value
+end
+
 function SyncCompare:compareRevision(callback)
     local IsEnterWorld = GlobalStore.get("IsEnterWorld")
 
     if (LoginUserInfo.IsSignedIn()) then
         if (IsEnterWorld) then
-            local worldDir = {}
+            -- local worldDir = {}
 
-            worldDir.default = GameLogic.GetWorldDirectory():gsub("\\", "/")
-            worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
+            -- worldDir.default = GameLogic.GetWorldDirectory():gsub("\\", "/")
+            -- worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
 
-            local foldername = {}
-            foldername.default = SyncMain.worldDir.default:match("([^/]*)/$")
-            foldername.utf8 = SyncMain.worldDir.utf8:match("([^/]*)/$")
+            -- local foldername = {}
+            -- foldername.default = SyncMain.worldDir.default:match("([^/]*)/$")
+            -- foldername.utf8 = SyncMain.worldDir.utf8:match("([^/]*)/$")
 
-            GlobalStore.set("tagInfo", WorldCommon.GetWorldInfo())
-            GlobalStore.set("worldDir", worldDir)
-            GlobalStore.set("foldername", foldername)
+            -- GlobalStore.set("tagInfo", WorldCommon.GetWorldInfo())
+            -- GlobalStore.set("worldDir", worldDir)
+            -- GlobalStore.set("foldername", foldername)
 
             if (LoginMain.LoginPage or LoginMain.ModalPage) then
                 LoginMain.RefreshCurrentServerList(self.comparePrepare)
@@ -88,30 +105,17 @@ function SyncCompare:compareRevision(callback)
                 self:comparePrepare()
             end
         else
-            local selectWorld = GlobalStore.get('selectWorld')
+            local selectWorld = GlobalStore.get("selectWorld")
 
             if (selectWorld.is_zip) then
                 _guihelper.MessageBox(L "不能同步ZIP文件")
                 return
             end
-    
-            local foldername = {}
-    
-            foldername.utf8 = selectWorld.foldername
-            foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
-    
-            local worldDir = {}
-    
-            worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
-            worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
-    
-            GlobalStore.set("foldername", foldername)
-            GlobalStore.set("worldDir", worldDir)
 
             self:compare(callback)
         end
     else
-        LoginMain.LoginWithTokenApi(
+        LoginUserInfo.LoginWithTokenApi(
             function()
                 self:compareRevision(callback)
             end
@@ -155,14 +159,24 @@ function SyncCompare:compare(callback)
 
             local result
 
+            if (remoteRevision == 0) then
+                result = JUSTLOCAL
+            end
+
+            if (currentRevision == 0) then
+                result = JUSTREMOTE
+            end
+
             if (currentRevision < remoteRevision) then
-                result = "remoteBigger"
-            elseif (remoteRevision == 0) then
-                result = "justLocal"
-            elseif (currentRevision > remoteRevision) then
-                result = "localBigger"
-            elseif (currentRevision == remoteRevision) then
-                result = "equal"
+                result = REMOTEBIGGER
+            end
+
+            if (currentRevision > remoteRevision) then
+                result = LOCALBIGGER
+            end
+
+            if (currentRevision == remoteRevision) then
+                result = EQUAL
             end
 
             if (remoteRevision ~= 0) then
@@ -175,7 +189,7 @@ function SyncCompare:compare(callback)
                 end
 
                 if (not isWorldInRemoteLists) then
-                    LoginMain.showMessageInfo("请稍后...")
+                    LoginMain.showMessageInfo(L "请稍后...")
 
                     SyncMain:RefreshKeepworkList(
                         function()
@@ -185,7 +199,7 @@ function SyncCompare:compare(callback)
                                     LoginMain.closeMessageInfo()
 
                                     if (type(callback) == "function") then
-                                        callback("tryAgain")
+                                        callback(TRYAGAIN)
                                     end
                                 end
                             )
@@ -208,14 +222,14 @@ function SyncCompare:compare(callback)
         if (not IsEnterWorld) then
             CommandManager:RunCommand("/save")
 
-            SyncCompare.compareFinish = true
+            SyncCompare:SetFinish(true)
 
             if (type(callback) == "function") then
-                callback("tryAgain")
+                callback(TRYAGAIN)
             end
         else
             _guihelper.MessageBox(L "本地世界沒有版本信息")
-            SyncCompare.compareFinish = true
+            SyncCompare:SetFinish(true)
             return
         end
     end

@@ -183,6 +183,14 @@ function LoginMain.ClosePage()
     end
 end
 
+function LoginMain.IsMCVersion()
+    if(System.options.mc) then
+        return true;
+    else
+        return false;
+    end
+end
+
 function LoginMain.OnImportWorld()
     ParaGlobal.ShellExecute("open", LocalLoadWorld.GetWorldFolderFullPath(), "", "", 1)
 end

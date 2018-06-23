@@ -479,9 +479,15 @@ function GitlabService:getContent(projectId, path, callback)
 
     self:apiGet(
         url,
-        function(data, err)
-            if (type(callback) == "function") then
-                callback(data.content, err)
+        function(data)
+            if(err == 200 and data) then
+                if (type(callback) == "function") then
+                    callback(Encoding.unbase64(data.content), data.size, err)
+                end
+            else
+                if (type(callback) == "function") then
+                    callback(false)
+                end
             end
         end
     )
@@ -506,7 +512,7 @@ function GitlabService:getContentWithRaw(foldername, path, callback)
         },
         function(data, err)
             if (err == 200 and type(callback) == "function") then
-                callback(data, err)
+                callback(data, #data, err)
             end
         end
     )

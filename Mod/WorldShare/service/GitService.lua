@@ -37,10 +37,10 @@ function GitService:getContent(projectId, foldername, path, callback)
     end
 end
 
-function GitService:getContentWithRaw()
+function GitService:getContentWithRaw(foldername, path, callback)
     if (self.dataSourceType == "github") then
     elseif (self.dataSourceType == "gitlab") then
-        GitlabService:new():getContentWithRaw(path, callback, projectId)
+        GitlabService:new():getContentWithRaw(foldername, path, callback)
     end
 end
 

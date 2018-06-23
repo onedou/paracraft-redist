@@ -65,9 +65,9 @@ function LoginWorldList.GetCurWorldInfo(info_type, world_index)
 end
 
 function LoginWorldList.UpdateLocalWorlds()
-    localWorlds = GlobalStore.get('localWorlds')
+    localWorlds = GlobalStore.get("localWorlds")
 
-    if(LoginMain.LoginPage) then
+    if (LoginMain.LoginPage) then
         LoginMain.LoginPage:GetNode("gw_world_ds"):SetAttribute("DataSource", localWorlds)
         LoginWorldList.OnSwitchWorld(1)
     end
@@ -84,7 +84,7 @@ function LoginWorldList.RefreshCurrentServerList(callback)
                         function()
                             LoginWorldList.UpdateLocalWorlds()
                             LoginMain.setPageRefreshing(false)
-                            
+
                             if (type(callback) == "function") then
                                 callback()
                             end
@@ -161,7 +161,7 @@ function LoginWorldList.getLocalWorldList(callback)
             ServerPage.ds = serverlist.worlds or {}
             InternetLoadWorld.OnChangeServerPage()
 
-            GlobalStore.set('localWorlds', ServerPage.ds)
+            GlobalStore.set("localWorlds", ServerPage.ds)
 
             if (callback) then
                 callback()
@@ -171,7 +171,7 @@ function LoginWorldList.getLocalWorldList(callback)
 end
 
 function LoginWorldList.changeRevision(callback)
-    local localWorlds = GlobalStore.get('localWorlds')
+    local localWorlds = GlobalStore.get("localWorlds")
 
     if (localWorlds) then
         for key, value in ipairs(localWorlds) do
@@ -237,7 +237,7 @@ status代码含义:
 ]]
 function LoginWorldList.syncWorldsList(callback)
     local function handleWorldList(response, err)
-        local localWorlds = GlobalStore.get('localWorlds') or {}
+        local localWorlds = GlobalStore.get("localWorlds") or {}
         local remoteWorldsList = response.data
 
         -- 处理本地网络同时存在 本地不存在 网络存在 的世界
@@ -388,13 +388,9 @@ function LoginWorldList.syncNow(index)
     end
 
     local index = tonumber(index)
-    local selectWorld = GlobalStore.get('selectWorld')
+    local selectWorld = GlobalStore.get("selectWorld")
 
-    if (selectWorld.status ~= nil and selectWorld.status ~= 2) then
-        SyncCompare:syncCompare() -- sync on login status
-    else
-        LoginWorldList.downloadWorld()
-    end
+    SyncCompare:syncCompare()
 end
 
 function LoginWorldList.deleteWorld(index)
@@ -412,24 +408,37 @@ end
 
 function LoginWorldList.updateWorldInfo(worldIndex, callback)
     local currentWorld = LocalLoadWorld.BuildLocalWorldList(true)[worldIndex] --origin list
-    local localWorlds = GlobalStore.get('localWorlds')
+    local localWorlds = GlobalStore.get("localWorlds")
 
     if (type(currentWorld) == "table") then
         local filesize = LocalService:GetWorldSize(currentWorld.worldpath)
         local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(currentWorld.foldername))
-    
+
         worldTag.size = filesize
         LocalService:SetTag(currentWorld.worldpath, worldTag)
 
-        GlobalStore.set('worldTag', worldTag)
+        GlobalStore.set("worldTag", worldTag)
 
         localWorlds[worldIndex].size = filesize
     end
 
     local selectWorld = localWorlds[worldIndex]
 
-    GlobalStore.set('selectWorldIndex', worldIndex)
-    GlobalStore.set('selectWorld', selectWorld)
+    GlobalStore.set("selectWorldIndex", worldIndex)
+    GlobalStore.set("selectWorld", selectWorld)
+
+    local foldername = {}
+
+    foldername.utf8 = selectWorld.foldername
+    foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
+
+    local worldDir = {}
+
+    worldDir.utf8 = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.utf8)
+    worldDir.default = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+
+    GlobalStore.set("foldername", foldername)
+    GlobalStore.set("worldDir", worldDir)
 
     if (type(callback) == "function") then
         callback()
@@ -441,52 +450,23 @@ function LoginWorldList.GetDesForWorld()
     return str
 end
 
-function LoginWorldList.enterWorld(index)
-    local index = tonumber(index)
-    local enterWorldInfor = InternetLoadWorld.cur_ds[index]
+function LoginWorldList.enterWorld()
+    local selectWorld = GlobalStore.get("selectWorld")
 
-    GlobalStore.set("enterWorldInfor", enterWorldInfor)
-
-    if (enterWorldInfor.status == 2) then
-        LoginWorldList.downloadWorld()
-    else
-        InternetLoadWorld.EnterWorld(index)
+    if(not LoginUserInfo.IsSignedIn()) then
+        InternetLoadWorld.EnterWorld()
+        return
     end
-end
 
-function LoginWorldList.downloadWorld()
-    SyncMain.foldername.utf8 = SyncMain.selectedWorldInfor.foldername
-    SyncMain.foldername.default = Encoding.Utf8ToDefault(SyncMain.foldername.utf8)
-
-    SyncMain.worldDir.utf8 = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.utf8 .. "/"
-    SyncMain.worldDir.default = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/"
-
-    SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8)
-
-    ParaIO.CreateDirectory(SyncMain.worldDir.default)
-
-    SyncMain:syncToLocal(
-        function(success, params)
-            if (success) then
-                SyncMain.selectedWorldInfor.status = 3
-                SyncMain.selectedWorldInfor.server = "local"
-                SyncMain.selectedWorldInfor.is_zip = false
-                SyncMain.selectedWorldInfor.icon = "Texture/blocks/items/1013_Carrot.png"
-                SyncMain.selectedWorldInfor.revision = params.revison
-                SyncMain.selectedWorldInfor.filesTotals = params.filesTotals
-                SyncMain.selectedWorldInfor.text = SyncMain.foldername.utf8
-                SyncMain.selectedWorldInfor.world_mode = "edit"
-                SyncMain.selectedWorldInfor.gs_nid = ""
-                SyncMain.selectedWorldInfor.force_nid = 0
-                SyncMain.selectedWorldInfor.ws_id = ""
-                SyncMain.selectedWorldInfor.author = ""
-                SyncMain.selectedWorldInfor.remotefile =
-                    "local://" .. SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default
-
-                LoginMain.LoginPage:Refresh()
+    if (selectWorld.status == 2) then
+        SyncToLocal.DownloadZIP(
+            function()
+                InternetLoadWorld.EnterWorld()
             end
-        end
-    )
+        )
+    else
+        InternetLoadWorld.EnterWorld()
+    end
 end
 
 function LoginWorldList.sharePersonPage()

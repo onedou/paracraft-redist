@@ -12,38 +12,36 @@ local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
-NPL.load("(gl)Mod/WorldShare/sync/SyncGUI.lua")
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 NPL.load("(gl)Mod/WorldShare/main.lua")
-NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncToDataSource.lua")
 NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua");
+NPL.load("(gl)Mod/WorldShare/sync/GenerateMdPage.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
+NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncToLocal.lua")
 
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
-local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
-local SyncGUI = commonlib.gettable("Mod.WorldShare.sync.SyncGUI")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local LocalService = commonlib.gettable("Mod.WorldShare.service.LocalService")
-local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
-local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local SyncToLocal = commonlib.gettable("Mod.WorldShare.sync.SyncToLocal")
 local SyncToDataSource = commonlib.gettable("Mod.WorldShare.sync.SyncToDataSource")
 local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkService")
 local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage")
+local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 
 SyncMain.SyncPage = nil
 SyncMain.BeyondPage = nil
-SyncMain.finish = true
 
 function SyncMain:ctor()
 end
@@ -53,7 +51,7 @@ end
 
 function SyncMain:SyncWillEnterWorld()
     -- 没有登陆则直接使用离线模式
-    if (LoginMain.IsSignedIn()) then
+    if (LoginUserInfo.IsSignedIn()) then
         SyncCompare:syncCompare()
     end
 end
@@ -87,49 +85,27 @@ function SyncMain.closeBeyondPage()
 end
 
 function SyncMain:StartSyncPage()
-    SyncMain.isStart = true
-    SyncMain.syncType = "sync"
-
-    SyncMain:showDialog("Mod/WorldShare/sync/StartSync.html", "StartSync")
+    SyncMain:ShowDialog("Mod/WorldShare/sync/StartSync.html", "StartSync")
 end
 
 function SyncMain:useLocalGUI()
-    SyncMain:showDialog("Mod/WorldShare/sync/StartSyncUseLocal.html", "StartSyncUseLocal")
+    SyncMain:ShowDialog("Mod/WorldShare/sync/StartSyncUseLocal.html", "StartSyncUseLocal")
 end
 
 function SyncMain:useDataSourceGUI()
-    SyncMain:showDialog("Mod/WorldShare/sync/StartSyncUseDataSource.html", "StartSyncUseDataSource")
+    SyncMain:ShowDialog("Mod/WorldShare/sync/StartSyncUseDataSource.html", "StartSyncUseDataSource")
 end
 
 function SyncMain:showBeyondVolume()
-    SyncMain:showDialog("Mod/WorldShare/sync/BeyondVolume.html", "BeyondVolume")
+    SyncMain:ShowDialog("Mod/WorldShare/sync/BeyondVolume.html", "BeyondVolume")
 end
 
 function SyncMain.deleteWorldGithubLogin()
-    SyncMain:showDialog("Mod/WorldShare/sync/DeleteWorldGithub.html", DeleteWorldGithub)
+    SyncMain:ShowDialog("Mod/WorldShare/sync/DeleteWorldGithub.html", DeleteWorldGithub)
 end
 
-function SyncMain:showDialog(url, name)
-    System.App.Commands.Call(
-        "File.MCMLWindowFrame",
-        {
-            url = url,
-            name = name,
-            isShowTitleBar = false,
-            DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory / false will only hide window
-            style = CommonCtrl.WindowFrame.ContainerStyle,
-            zorder = 0,
-            allowDrag = true,
-            bShow = bShow,
-            directPosition = true,
-            align = "_ct",
-            x = -500 / 2,
-            y = -270 / 2,
-            width = 500,
-            height = 270,
-            cancelShowAnimation = true
-        }
-    )
+function SyncMain:ShowDialog(url, name)
+    Utils:ShowWindow(500, 270, url, name)
 end
 
 function SyncMain:backupWorld()
@@ -139,11 +115,12 @@ function SyncMain:backupWorld()
     world_revision:Backup()
 end
 
-function SyncMain:syncToLocal(callback)
+function SyncMain:syncToLocal()
+    SyncToLocal:init()
 end
 
-function SyncMain:syncToDataSource()
-    SyncToDataSource:init()
+function SyncMain:syncToDataSource(callback)
+    SyncToDataSource:init(callback)
 end
 
 function SyncMain.GetCurrentRevision()

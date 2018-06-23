@@ -5,21 +5,24 @@ Date: 2017.5.12
 Desc:  It can take snapshot for the current world. It can quick save or full save the world to datasource. 
 use the lib:
 ------------------------------------------------------------
-NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua");
-local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld");
+NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
+local ShareWorld = commonlib.gettable("Mod.WorldShare.sync.ShareWorld")
 ShareWorld.ShowPage()
 -------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/WorldShare/sync/ShareWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
+NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
+local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
+local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 
 local ShareWorld = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.sync.ShareWorld"))
 
@@ -52,7 +55,7 @@ function ShareWorld.ShowPage()
             end
         )
     else
-        loginMain.showMessageInfo(L"正在获取，请稍后...")
+        loginMain.showMessageInfo(L "正在获取，请稍后...")
         ShareWorld.shareCompare()
     end
 end
@@ -167,24 +170,25 @@ function ShareWorld.UpdateImage(bRefreshAsset)
     end
 end
 
-function ShareWorld.getWorldUrl(bEncode)
-    if (loginMain.login_type == 1) then
+function ShareWorld.getWorldUrl()
+    if (not LoginUserInfo.IsSignedIn()) then
         return ""
     end
 
-    local foldername
+    local foldername = GlobalStore.get("foldername")
+    local userinfo = GlobalStore.get("userinfo")
 
-    if (bEncode) then
-        foldername = commonlib.Encoding.url_encode("world_" .. SyncMain.foldername.utf8)
-    else
-        foldername = "world_" .. SyncMain.foldername.utf8
-    end
-
-    local url = loginMain.site .. "/" .. loginMain.username .. "/paracraft/" .. foldername
-    return url
+    return format("%s/%s/paracraft/%s", LoginUserInfo.site, userinfo.username, foldername.utf8)
 end
 
 function ShareWorld.openWorldWebPage()
-    local url = ShareWorld.getWorldUrl(true)
+    if (not LoginUserInfo.IsSignedIn()) then
+        return ""
+    end
+
+    local foldername = GlobalStore.get("foldername")
+    local userinfo = GlobalStore.get("userinfo")
+
+    local url = format("%s/%s/paracraft/%s", LoginUserInfo.site, userinfo.username, foldername.default)
     ParaGlobal.ShellExecute("open", url, "", "", 1)
 end

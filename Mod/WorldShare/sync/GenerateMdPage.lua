@@ -33,53 +33,53 @@ function GenerateMdPage:genIndexMD(callback)
     local worldList = KeepworkGen:setCommand("WorldList", {userid = userinfo._id})
     local content = KeepworkGen:SetAutoGenContent("", worldList)
 
-    GitService:new():upload(
+    local function update()
+        GitService:new():update(
+            dataSourceInfo.keepWorkDataSourceId,
+            nil,
+            path,
+            content,
+            nil,
+            function(data, err)
+                if (type(callback) == "function") then
+                    callback()
+                end
+            end
+        )
+    end
+
+    local function upload()
+        GitService:new():upload(
+            dataSourceInfo.keepWorkDataSourceId,
+            nil,
+            path,
+            content,
+            function(data, err)
+                if (type(callback) == "function") then
+                    callback()
+                end
+            end
+        )
+    end
+
+    GitService:new():getContent(
         dataSourceInfo.keepWorkDataSourceId,
         nil,
         path,
-        content,
         function(data, err)
-            if (type(callback) == "function") then
-                callback()
+            if (err == 200) then
+                update()
+            else
+                upload()
             end
         end
     )
 end
 
-function GenerateMdPage:genThemeMD(callback)
-    local dataSourceInfo, userinfo = GenerateMdPage:getSetting()
-
-    -- local contentUrl =
-    --     "projects/" ..
-    --     LoginMain.keepWorkDataSourceId ..
-    --         "/repository/files/" .. LoginMain.username .. "/paracraft/_theme.md?ref=master"
-
-    -- self:getUrl(
-    --     contentUrl,
-    --     function(data, err)
-    --         if (err == 404) then
-    --             local themePath = LoginMain.username .. "/paracraft/_theme.md"
-
-    --             SyncMain:uploadService(
-    --                 LoginMain.keepWorkDataSource,
-    --                 themePath,
-    --                 KeepworkGen.paracraftContainer,
-    --                 function(data, err)
-    --                     if (type(callback) == "function") then
-    --                         callback()
-    --                     end
-    --                 end,
-    --                 LoginMain.keepWorkDataSourceId
-    --             )
-    --         end
-    --     end
-    -- )
-end
-
 function GenerateMdPage:genWorldMD(worldInfo, callback)
     local dataSourceInfo, userinfo = GenerateMdPage:getSetting()
 
-    local worldFilePath = format("%s/paracraft/world_%s.md", userinfo.username, worldInfo.worldsName)
+    local worldFilePath = format("%s/paracraft/%s.md", userinfo.username, worldInfo.worldsName)
 
     local KPParacraftMod = {
         link_world_name = worldInfo.name,
@@ -132,7 +132,7 @@ function GenerateMdPage:genWorldMD(worldInfo, callback)
         nil,
         worldFilePath,
         function(data, err)
-            if(err == 200) then
+            if (err == 200) then
                 update()
             else
                 upload()

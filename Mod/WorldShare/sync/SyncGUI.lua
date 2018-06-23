@@ -118,7 +118,7 @@ function SyncGUI:updateDataBar(pCurrent, pTotal, pFiles, pFinish)
 end
 
 function SyncGUI.copy()
-    ParaMisc.CopyTextToClipboard(ShareWorld.getWorldUrl(true))
+    ParaMisc.CopyTextToClipboard(ShareWorld.getWorldUrl())
 end
 
 function SyncGUI.GetCurrent()

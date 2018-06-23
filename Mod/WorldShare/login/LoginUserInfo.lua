@@ -445,12 +445,15 @@ function LoginUserInfo.SaveSigninInfo(info)
     if (not info) then
         ParaIO.DeleteFile(LoginMain.GetPasswordFile())
     else
-        local newStr = ""
-        newStr = newStr .. (info.account or "") .. "|"
-        newStr = newStr .. Encoding.PasswordEncodeWithMac(info.password or "") .. "|"
-        newStr = newStr .. (info.loginServer or "") .. "|"
-        newStr = newStr .. Encoding.PasswordEncodeWithMac(info.token or "") .. "|"
-        newStr = newStr .. (info.autoLogin and "true" or "false")
+        local newStr =
+            format(
+            "%s|%s|%s|%s|%s",
+            info.account or "",
+            Encoding.PasswordEncodeWithMac(info.password or ""),
+            (info.loginServer or ""),
+            Encoding.PasswordEncodeWithMac(info.token or ""),
+            (info.autoLogin and "true" or "false")
+        )
 
         local file = ParaIO.open(LoginUserInfo.GetPasswordFile(), "w")
         if (file) then
@@ -468,7 +471,7 @@ function LoginUserInfo.checkDoAutoSignin(callback)
     if (info) then
         if (info.autoLogin and info.account and info.password) then
             LoginMain.showMessageInfo(L "正在登陆，请稍后...")
-            LoginMain.LoginActionApi(
+            LoginUserInfo.LoginActionApi(
                 info.account,
                 info.password,
                 function(response, err)

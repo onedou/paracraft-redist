@@ -29,54 +29,53 @@ local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
 function SyncToDataSource:init()
-    local foldername = GlobalStore.get("foldername")
+    self.worldDir = GlobalStore.get("worldDir")
+    self.foldername = GlobalStore.get("foldername")
     local selectWorld = GlobalStore.get("selectWorld")
 
     if (SyncMain:checkWorldSize()) then
         return false
     end
 
-    -- 加载进度UI界面
-    self.syncGUI = SyncGUI:new(SyncToDataSource)
-    self.syncGUI:refresh()
-    self:SetFinish(false)
-
-    GitService:new():create(
-        foldername.base32,
-        function(projectId)
-            if (projectId) then
-                self.projectId = projectId
-                selectWorld.projectId = projectId
-                GlobalStore.set("selectWorld", selectWorld)
-
-                self:syncToDataSource()
-            else
-                _guihelper.MessageBox(L "数据源创建失败")
-                self.syncGUI.finish()
-                return false
-            end
-        end
-    )
-end
-
-function SyncToDataSource:syncToDataSource()
-    self.worldDir = GlobalStore.get("worldDir")
-    self.foldername = GlobalStore.get("foldername")
-
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
         _guihelper.MessageBox(L "上传失败，将使用离线模式，原因：上传目录为空")
         return false
     end
 
+    -- 加载进度UI界面
+    self.syncGUI = SyncGUI:new(SyncToDataSource)
+    self:SetFinish(false)
+
+    GitService:new():create(
+        self.foldername.base32,
+        function(projectId)
+            if (not projectId) then
+                _guihelper.MessageBox(L "数据源创建失败")
+                SyncGUI.closeWindow()
+                return false
+            end
+
+            self.projectId = projectId
+            selectWorld.projectId = projectId
+            GlobalStore.set("selectWorld", selectWorld)
+
+            self:syncToDataSource()
+        end
+    )
+end
+
+function SyncToDataSource:syncToDataSource()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    self.syncGUI:updateDataBar(self.compareListIndex, self.compareListTotal, L "正在对比文件列表...")
+    self.syncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
 
     local function handleSyncToDataSource(data, err)
         self.dataSourceFiles = data
         self.localFiles = LocalService:new():LoadFiles(self.worldDir.default) --再次获取本地文件，保证上传的内容为最新
 
+        GlobalStore.set('localFiles', localFiles)
+        
         self:CheckReadmeFile()
         self:GetCompareList()
         self:HandleCompareList()
@@ -186,8 +185,8 @@ function SyncToDataSource:RefreshList()
         function()
             LoginWorldList.RefreshCurrentServerList(
                 function()
-                    self.syncGUI:SetFinish(true)
-                    self.syncGUI:refresh()
+                    SyncGUI:SetFinish(true)
+                    SyncGUI:refresh()
                 end
             )
         end

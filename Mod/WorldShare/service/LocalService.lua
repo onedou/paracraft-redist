@@ -119,13 +119,27 @@ function LocalService:filesFind(result, path, subPath)
     end
 end
 
-function LocalService:getFileContent(_filePath)
-    local file = ParaIO.open(_filePath, "r")
+function LocalService:getFileContent(filePath)
+    local file = ParaIO.open(filePath, "r")
     if (file:IsValid()) then
         local fileContent = file:GetText(0, -1)
         file:close()
         return fileContent
     end
+end
+
+function LocalService:write(foldername, path, content)
+    local writePath = format("%s/%s/%s", SyncMain.GetWorldFolderFullPath(), foldername, path)
+    local write = ParaIO.open(writePath, "w")
+
+    write:write(content, #content)
+    write:close()
+end
+
+function LocalService:delete(foldername, filename)
+    local deletePath = format("%s/%s/%s", SyncMain.GetWorldFolderFullPath(), foldername, filename)
+
+    ParaIO.DeleteFile(deletePath)
 end
 
 function LocalService:isZip(path)
@@ -134,6 +148,7 @@ function LocalService:isZip(path)
 
     if (file:IsValid()) then
         local o = {}
+
         file:ReadBytes(2, o)
 
         if (o[1] and o[2]) then
@@ -148,14 +163,6 @@ function LocalService:isZip(path)
     else
         return false
     end
-end
-
-function LocalService:update(_foldername, _path, _callback)
-    LocalService:FileDownloader(_foldername, _path, _callback)
-end
-
-function LocalService:download(_foldername, _path, _callback)
-    LocalService:FileDownloader(_foldername, _path, _callback)
 end
 
 function LocalService:downloadZip(_foldername, _commitId, _callback)
@@ -285,16 +292,6 @@ function LocalService:FileDownloader(_foldername, _path, _callback)
     )
 end
 
-function LocalService:delete(foldername, filename, callback)
-    local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. foldername.default .. "/"
-
-    ParaIO.DeleteFile(bashPath .. filename)
-
-    if (type(_callback) == "function") then
-        _callback()
-    end
-end
-
 function LocalService:GetWorldSize(WorldDir)
     local files =
         commonlib.Files.Find(
@@ -377,21 +374,5 @@ function LocalService:GetTag(foldername)
         return tag[1][1]["attr"]
     else
         return {}
-    end
-end
-
-function LocalService:getDataSourceContent(foldername, path, callback)
-    if (loginMain.dataSourceType == "github") then
-        GithubService:getContent(foldername, path, callback)
-    elseif (loginMain.dataSourceType == "gitlab") then
-        GitlabService:getContent(path, callback)
-    end
-end
-
-function LocalService:getDataSourceContentWithRaw(foldername, path, callback)
-    if (loginMain.dataSourceType == "github") then
-        GithubService:getContentWithRaw(foldername, path, callback)
-    elseif (loginMain.dataSourceType == "gitlab") then
-        GitlabService:getContentWithRaw(foldername, path, callback)
     end
 end
