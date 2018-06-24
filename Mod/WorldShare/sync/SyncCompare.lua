@@ -54,21 +54,27 @@ function SyncCompare:syncCompare()
                 elseif (result == TRYAGAIN) then
                     Utils.SetTimeOut(SyncCompare.syncCompare, 1000)
                 end
+
+                LoginMain.closeMessageInfo()
             else
                 if (result == JUSTLOCAL) then
                     SyncMain.syncToDataSource()
+                    LoginMain.closeMessageInfo()
                     return true
                 end
 
                 if (result == JUSTREMOTE) then
-                    SyncMain.syncToLocal()
+                    SyncMain:syncToLocal()
+                    LoginMain.closeMessageInfo()
                     return true
                 end
                 
-                SyncMain:StartSyncPage()
+                if (result == REMOTEBIGGER or result == LOCALBIGGER or result == EQUAL) then
+                    SyncMain:StartSyncPage()
+                    LoginMain.closeMessageInfo()
+                    return true
+                end
             end
-
-            LoginMain.closeMessageInfo()
         end
     )
 end
@@ -83,6 +89,14 @@ end
 
 function SyncCompare:compareRevision(callback)
     local IsEnterWorld = GlobalStore.get("IsEnterWorld")
+    local selectWorld = GlobalStore.get("selectWorld")
+
+    if(selectWorld.status == 2) then
+        if(type(callback) == 'function') then
+            callback(JUSTREMOTE)
+            return true
+        end
+    end
 
     if (LoginUserInfo.IsSignedIn()) then
         if (IsEnterWorld) then
@@ -105,8 +119,6 @@ function SyncCompare:compareRevision(callback)
                 self:comparePrepare()
             end
         else
-            local selectWorld = GlobalStore.get("selectWorld")
-
             if (selectWorld.is_zip) then
                 _guihelper.MessageBox(L "不能同步ZIP文件")
                 return
@@ -126,7 +138,6 @@ end
 function SyncCompare:compare(callback)
     local IsEnterWorld = GlobalStore.get("IsEnterWorld")
     local foldername = GlobalStore.get("foldername")
-    foldername.base32 = GitEncoding.base32(foldername.utf8)
 
     local worldDir = GlobalStore.get("worldDir")
     local remoteWorldsList = GlobalStore.get("remoteWorldsList")
@@ -144,15 +155,16 @@ function SyncCompare:compare(callback)
         end
     end
 
-    if (hasRevision and currentRevision ~= 0 and currentRevision ~= 1) then
+    if (hasRevision) then
         local function handleRevision(data, err)
             if (err == 0 or err == 502) then
                 _guihelper.MessageBox(L "网络错误")
                 return false
             end
 
-            currentRevision = tonumber(currentRevision) or 0
-            remoteRevision = tonumber(data)
+            currentRevision = tonumber(currentRevision)
+            currentRevision = (currentRevision == 0 or currentRevision == 1) and 0 or currentRevision
+            remoteRevision = tonumber(data) or 0
 
             GlobalStore.set("currentRevision", currentRevision)
             GlobalStore.set("remoteRevision", remoteRevision)
@@ -161,10 +173,6 @@ function SyncCompare:compare(callback)
 
             if (remoteRevision == 0) then
                 result = JUSTLOCAL
-            end
-
-            if (currentRevision == 0) then
-                result = JUSTREMOTE
             end
 
             if (currentRevision < remoteRevision) then
@@ -219,7 +227,7 @@ function SyncCompare:compare(callback)
 
         GitService:new():getWorldRevision(foldername, handleRevision)
     else
-        if (not IsEnterWorld) then
+        if (IsEnterWorld) then
             CommandManager:RunCommand("/save")
 
             SyncCompare:SetFinish(true)
@@ -230,7 +238,12 @@ function SyncCompare:compare(callback)
         else
             _guihelper.MessageBox(L "本地世界沒有版本信息")
             SyncCompare:SetFinish(true)
-            return
+            
+            if (type(callback) == "function") then
+                callback()
+            end
+
+            return false
         end
     end
 end

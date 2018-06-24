@@ -41,32 +41,31 @@ function SyncToLocal:init(callback)
         return false
     end
 
-    if (selectWorld.status == 2) then
-        -- down zip
-        self:DownloadZIP(callback)
-        return false
+    local function handleProjectId(projectId)
+        if (not projectId) then
+            _guihelper.MessageBox(L "数据源异常")
+            SyncGUI.closeWindow()
+            return false
+        end
+
+        self.projectId = projectId
+        selectWorld.projectId = projectId
+        GlobalStore.set("selectWorld", selectWorld)
+
+        if (selectWorld.status == 2) then
+            -- down zip
+            self:DownloadZIP()
+            return false
+        end
+
+        -- 加载进度UI界面
+        self.syncGUI = SyncGUI:new()
+        self:SetFinish(false)
+
+        self:syncToLocal()
     end
 
-    -- 加载进度UI界面
-    self.syncGUI = SyncGUI:new()
-    self:SetFinish(false)
-
-    GitService:new():getProjectIdByName(
-        self.foldername.base32,
-        function(projectId)
-            if (not projectId) then
-                _guihelper.MessageBox(L "数据源异常")
-                SyncGUI.closeWindow()
-                return false
-            end
-
-            self.projectId = projectId
-            selectWorld.projectId = projectId
-            GlobalStore.set("selectWorld", selectWorld)
-
-            self:syncToLocal()
-        end
-    )
+    GitService:new():getProjectIdByName(self.foldername.base32, handleProjectId)
 end
 
 function SyncToLocal:syncToLocal()
@@ -149,7 +148,7 @@ function SyncToLocal:HandleCompareList()
     if (self.compareListTotal < self.compareListIndex) then
         self:SetFinish(true)
         self:RefreshList()
-        
+
         self.compareListIndex = 1
         return false
     end
@@ -257,11 +256,7 @@ function SyncToLocal:updateOne(file, callback)
         end
     end
 
-    GitService:new():getContentWithRaw(
-        self.foldername.utf8,
-        currentRemoteItem.path,
-        handleUpdate
-    )
+    GitService:new():getContentWithRaw(self.foldername.utf8, currentRemoteItem.path, handleUpdate)
 end
 
 -- 删除文件
@@ -282,29 +277,43 @@ function SyncToLocal:deleteOne(file, callback)
 end
 
 function SyncToLocal:DownloadZIP()
-    ParaIO.CreateDirectory(self.worldDir.default)
-    -- SyncMain.commitId = SyncMain:getGitlabCommitId(SyncMain.foldername.utf8)
+    local commitId = GlobalStore.get("commitId")
 
-    SyncMain:syncToLocal(
-        function(success, params)
-            if (success) then
-                SyncMain.selectedWorldInfor.status = 3
-                SyncMain.selectedWorldInfor.server = "local"
-                SyncMain.selectedWorldInfor.is_zip = false
-                SyncMain.selectedWorldInfor.icon = "Texture/blocks/items/1013_Carrot.png"
-                SyncMain.selectedWorldInfor.revision = params.revison
-                SyncMain.selectedWorldInfor.filesTotals = params.filesTotals
-                SyncMain.selectedWorldInfor.text = SyncMain.foldername.utf8
-                SyncMain.selectedWorldInfor.world_mode = "edit"
-                SyncMain.selectedWorldInfor.gs_nid = ""
-                SyncMain.selectedWorldInfor.force_nid = 0
-                SyncMain.selectedWorldInfor.ws_id = ""
-                SyncMain.selectedWorldInfor.author = ""
-                SyncMain.selectedWorldInfor.remotefile =
-                    "local://" .. SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default
-
-                LoginMain.LoginPage:Refresh()
-            end
+    local function handleDownloadZIP(commitId)
+        if (not commitId) then
+            return false
         end
-    )
+
+        ParaIO.CreateDirectory(self.worldDir.default)
+
+        self.localFiles = LocalService:new():LoadFiles(self.worldDir.default)
+
+        if (#self.localFiles ~= 0) then
+            _guihelper.MessageBox(L "本地数据错误")
+            return false
+        end
+
+        GitService:new():DownloadZIP(
+            self.foldername.base32,
+            commitId,
+            function(bSuccess, downloadPath)
+                LocalService:new():MoveZipToFolder(downloadPath)
+                self:RefreshList() 
+            end
+        )
+    end
+
+    if (not commitId) then
+        GitService:new():getCommits(
+            self.projectId,
+            self.foldername.base32,
+            function(data, err)
+                if (data and data[1] and data[1]["id"]) then
+                    handleDownloadZIP(data[1]["id"])
+                end
+            end
+        )
+    else
+        handleDownloadZIP(commitId)
+    end
 end

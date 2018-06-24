@@ -22,6 +22,7 @@ local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader")
 
 local GitlabService = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.GitlabService"))
 
@@ -58,37 +59,6 @@ function GitlabService:checkSpecialCharacter(filename)
 
     return false
 end
-
--- function GitlabService:checkProjectId(projectId, foldername, callback)
---     if (not projectId) then
---         projectId = GitlabService.projectId
---     end
-
---     if (not projectId) then
---         if (foldername) then
---             GitlabService:getProjectIdByName(
---                 foldername,
---                 function(projectId)
---                     if (projectId) then
---                         GitlabService.projectId = projectId
-
---                         if (type(callback) == "function") then
---                             callback(projectId)
---                         end
---                     else
---                         _guihelper.MessageBox(L "获取projectId失败")
---                     end
---                 end
---             )
---         else
---             _guihelper.MessageBox(L "获取projectId失败")
---         end
---     else
---         if (type(callback) == "function") then
---             callback(projectId)
---         end
---     end
--- end
 
 function GitlabService:apiGet(url, callback)
     if (not url or not self.apiBaseUrl) then
@@ -479,8 +449,8 @@ function GitlabService:getContent(projectId, path, callback)
 
     self:apiGet(
         url,
-        function(data)
-            if(err == 200 and data) then
+        function(data, err)
+            if (err == 200 and data) then
                 if (type(callback) == "function") then
                     callback(Encoding.unbase64(data.content), data.size, err)
                 end
@@ -515,6 +485,36 @@ function GitlabService:getContentWithRaw(foldername, path, callback)
                 callback(data, #data, err)
             end
         end
+    )
+end
+
+function GitlabService:DownloadZIP(foldername, commitId, callback)
+    if (not foldername or not commitId) then
+        return false
+    end
+
+    local url =
+        format(
+        "%s/%s/%s/repository/archive.zip?ref=%s",
+        self.dataSourceInfo.rawBaseUrl,
+        self.dataSourceInfo.dataSourceUsername,
+        foldername,
+        commitId and commitId or "master"
+    )
+
+    LOG.std("GitlabService", "debug", "DZIP", "url: %s", url)
+
+    FileDownloader:new():Init(
+        nil,
+        url,
+        "temp/archive.zip",
+        function(bSuccess, downloadPath)           
+            if (type(callback) == "function") then
+                callback(bSuccess, downloadPath)
+            end
+        end,
+        "access plus 5 mins",
+        true
     )
 end
 
@@ -623,21 +623,5 @@ function GitlabService:getCommitIdByFoldername(foldername)
         if (value.worldsName == foldername) then
             return value.commitId
         end
-    end
-end
-
-function GitlabService:setProjectId(foldername, remoteWorldsList)
-    local remoteWorldsList = GlobalStore.get("remoteWorldsList") or {}
-
-    if (self.dataSourceType == "gitlab") then
-        for key, value in ipairs(remoteWorldsList) do
-            if (value.worldsName == foldername) then
-                GitlabService.projectId = value.gitlabProjectId
-
-                return
-            end
-        end
-
-        GitlabService.projectId = nil
     end
 end

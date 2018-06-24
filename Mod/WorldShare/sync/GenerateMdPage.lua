@@ -66,7 +66,7 @@ function GenerateMdPage:genIndexMD(callback)
         dataSourceInfo.keepWorkDataSourceId,
         nil,
         path,
-        function(data, err)
+        function(data, size, err)
             if (err == 200) then
                 update()
             else
@@ -131,7 +131,7 @@ function GenerateMdPage:genWorldMD(worldInfo, callback)
         dataSourceInfo.keepWorkDataSourceId,
         nil,
         worldFilePath,
-        function(data, err)
+        function(data, size, err)
             if (err == 200) then
                 update()
             else

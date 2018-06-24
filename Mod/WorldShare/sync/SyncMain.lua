@@ -119,8 +119,8 @@ function SyncMain:syncToLocal()
     SyncToLocal:init()
 end
 
-function SyncMain:syncToDataSource(callback)
-    SyncToDataSource:init(callback)
+function SyncMain:syncToDataSource()
+    SyncToDataSource:init()
 end
 
 function SyncMain.GetCurrentRevision()

@@ -18,6 +18,7 @@ NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 NPL.load("(gl)Mod/WorldShare/login/DeleteWorld.lua")
+NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
@@ -33,6 +34,7 @@ local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkServi
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
+local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
@@ -203,8 +205,6 @@ function LoginWorldList.changeRevision(callback)
                 local zipFoldername = {}
                 zipFoldername.default = zipWorldDir.default:match("([^/\\]+)/[^/]*$")
                 zipFoldername.utf8 = Encoding.Utf8ToDefault(zipFoldername.default)
-
-                --LOG.std(nil,"debug","zipWorldDir.default",zipWorldDir.default);
 
                 value.revision = LocalService:GetZipRevision(zipWorldDir.default)
                 value.size = LocalService:GetZipWorldSize(zipWorldDir.default)
@@ -423,14 +423,13 @@ function LoginWorldList.updateWorldInfo(worldIndex, callback)
     end
 
     local selectWorld = localWorlds[worldIndex]
-
-    GlobalStore.set("selectWorldIndex", worldIndex)
     GlobalStore.set("selectWorld", selectWorld)
 
     local foldername = {}
 
     foldername.utf8 = selectWorld.foldername
     foldername.default = Encoding.Utf8ToDefault(foldername.utf8)
+    foldername.base32 = GitEncoding.base32(foldername.utf8)
 
     local worldDir = {}
 

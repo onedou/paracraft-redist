@@ -165,95 +165,63 @@ function LocalService:isZip(path)
     end
 end
 
-function LocalService:downloadZip(_foldername, _commitId, _callback)
-    local foldername = GitEncoding.base32(SyncMain.foldername.utf8)
-    local url =
-        format(
-        "%s/%s/%s/repository/archive.zip?ref=%s",
-        loginMain.rawBaseUrl,
-        loginMain.dataSourceUsername,
-        foldername,
-        SyncMain.commitId
-    )
-    LOG.std("LocalService", "debug", "DZIPRAW", "raw url: %s", url)
+function LocalService:MoveZipToFolder(path)
+    if (not ParaAsset.OpenArchive(path, true)) then
+        return false
+    end
 
-    FileDownloader:new():Init(
-        nil,
-        url,
-        "temp/archive.zip",
-        function(bSuccess, downloadPath)
-            if (bSuccess) then
-                local remoteRevison
+    local foldername = GlobalStore.get("foldername")
 
-                if (ParaAsset.OpenArchive(downloadPath, true)) then
-                    local zipParentDir = downloadPath:gsub("[^/\\]+$", "")
+    local parentDir = path:gsub("[^/\\]+$", "")
 
-                    --LOG.std(nil,"debug","zipParentDir",zipParentDir);
+    local filesOut = {}
+    commonlib.Files.Find(filesOut, "", 0, 10000, ":.", path) -- ":.", any regular expression after : is supported. `.` match to all strings.
 
-                    local filesOut = {}
-                    commonlib.Files.Find(filesOut, "", 0, 10000, ":.", downloadPath) -- ":.", any regular expression after : is supported. `.` match to all strings.
+    local bashPath = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+    local folderCreate = ""
+    local rootFolder = filesOut[1] and filesOut[1].filename
 
-                    --LOG.std(nil,"debug","filesOut", filesOut);
+    for _, item in ipairs(filesOut) do
+        if (item.filesize > 0) then
+            local file = ParaIO.open(format("%s%s", parentDir, item.filename), "r")
 
-                    local bashPath = SyncMain.GetWorldFolderFullPath() .. "/" .. SyncMain.foldername.default .. "/"
-                    local folderCreate = ""
-                    local rootFolder = filesOut[1] and filesOut[1].filename
+            if (file:IsValid()) then
+                local binData = file:GetText(0, -1)
+                local pathArray = {}
+                local path = commonlib.copy(item.filename)
 
-                    --LOG.std(nil,"debug","rootFolder",rootFolder);
+                path = path:sub(#rootFolder, #path)
 
-                    for _, item in ipairs(filesOut) do
-                        if (item.filesize > 0) then
-                            local file = ParaIO.open(zipParentDir .. item.filename, "r")
-                            if (file:IsValid()) then
-                                local binData = file:GetText(0, -1)
-                                local pathArray = {}
-                                local path = commonlib.copy(item.filename)
-
-                                path = path:sub(#rootFolder, #path)
-
-                                --LOG.std(nil,"debug","path",path);
-
-                                if (path == "/revision.xml") then
-                                    remoteRevison = binData
-                                end
-
-                                for segmentation in string.gmatch(path, "[^/]+") do
-                                    if (segmentation ~= rootFolder) then
-                                        pathArray[#pathArray + 1] = segmentation
-                                    end
-                                end
-
-                                folderCreate = commonlib.copy(bashPath)
-
-                                for i = 1, #pathArray - 1, 1 do
-                                    folderCreate = folderCreate .. pathArray[i] .. "/"
-                                    ParaIO.CreateDirectory(folderCreate)
-                                    --LOG.std(nil,"debug","folderCreate",folderCreate);
-                                end
-
-                                local writeFile = ParaIO.open(bashPath .. path, "w")
-
-                                writeFile:write(binData, #binData)
-                                writeFile:close()
-
-                                file:close()
-                            end
-                        else
-                            -- this is a folder
-                        end
-                    end
-
-                    ParaAsset.CloseArchive(downloadPath)
+                if (path == "/revision.xml") then
+                    GlobalStore.set('remoteRevision', binData)
                 end
 
-                _callback(true, remoteRevison)
-            else
-                _callback(false, nil)
+                for segmentation in string.gmatch(path, "[^/]+") do
+                    if (segmentation ~= rootFolder) then
+                        pathArray[#pathArray + 1] = segmentation
+                    end
+                end
+
+                folderCreate = commonlib.copy(bashPath)
+
+                for i = 1, #pathArray - 1, 1 do
+                    folderCreate = folderCreate .. pathArray[i] .. "/"
+                    ParaIO.CreateDirectory(folderCreate)
+                end
+
+                local writeFile = ParaIO.open(format("%s%s", bashPath, path), "w")
+
+                writeFile:write(binData, #binData)
+                writeFile:close()
+
+                file:close()
             end
-        end,
-        "access plus 5 mins",
-        true
-    )
+        else
+            -- this is a folder
+        end
+    end
+
+    ParaAsset.CloseArchive(path)
 end
 
 function LocalService:FileDownloader(_foldername, _path, _callback)
