@@ -35,6 +35,7 @@ function SyncToLocal:init(callback)
     self.worldDir = GlobalStore.get("worldDir")
     self.foldername = GlobalStore.get("foldername")
     local selectWorld = GlobalStore.get("selectWorld")
+    local commitId = GlobalStore.get("commitId")
 
     if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
         _guihelper.MessageBox(L "下载失败，原因：下载目录为空")
@@ -52,8 +53,10 @@ function SyncToLocal:init(callback)
         selectWorld.projectId = projectId
         GlobalStore.set("selectWorld", selectWorld)
 
-        if (selectWorld.status == 2) then
+        echo(commitId, true)
+        if (commitId or selectWorld.status == 2) then
             -- down zip
+            echo(333333)
             self:DownloadZIP()
             return false
         end
@@ -216,8 +219,9 @@ function SyncToLocal:downloadOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
     GitService:new():getContentWithRaw(
-        self.foldername.utf8,
+        self.foldername.base32,
         currentRemoteItem.path,
+        nil,
         function(content, size)
             self.syncGUI:updateDataBar(
                 self.compareListIndex,
@@ -261,7 +265,7 @@ function SyncToLocal:updateOne(file, callback)
         end
     end
 
-    GitService:new():getContentWithRaw(self.foldername.utf8, currentRemoteItem.path, handleUpdate)
+    GitService:new():getContentWithRaw(self.foldername.base32, currentRemoteItem.path, nil, handleUpdate)
 end
 
 -- 删除文件
@@ -303,7 +307,8 @@ function SyncToLocal:DownloadZIP()
             commitId,
             function(bSuccess, downloadPath)
                 LocalService:new():MoveZipToFolder(downloadPath)
-                self:RefreshList() 
+                self:RefreshList()
+                GlobalStore.remove("commitId")
             end
         )
     end
@@ -312,6 +317,7 @@ function SyncToLocal:DownloadZIP()
         GitService:new():getCommits(
             self.projectId,
             self.foldername.base32,
+            false,
             function(data, err)
                 if (data and data[1] and data[1]["id"]) then
                     handleDownloadZIP(data[1]["id"])
@@ -319,6 +325,7 @@ function SyncToLocal:DownloadZIP()
             end
         )
     else
+
         handleDownloadZIP(commitId)
     end
 end

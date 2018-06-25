@@ -6,7 +6,7 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua");
-local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain");
+local SyncMain  = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
@@ -221,7 +221,7 @@ function SyncMain:RefreshKeepworkList(callback)
         function(pProjectId)
             projectId = pProjectId
 
-            GitService:new():getCommits(projectId, foldername.base32, handleKeepworkList)
+            GitService:new():getCommits(projectId, foldername.base32, false, handleKeepworkList)
         end
     )
 end

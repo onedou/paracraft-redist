@@ -374,9 +374,36 @@ function GitlabService:create(foldername, callback)
 end
 
 -- commit
-function GitlabService:getCommits(projectId, callback)
-    local url = format("projects/%s/repository/commits", projectId)
-    self:apiGet(url, callback)
+local per_page = 100
+local page = 1
+local commits = commonlib.vector:new()
+function GitlabService:getCommits(projectId, IsGetAll, callback)
+    echo(projectId)
+    local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectId, per_page, page)
+
+    self:apiGet(
+        url,
+        function(data, err)
+            if (#data == 0) then
+                if (type(callback) == "function") then
+                    local results = commonlib.copy(commits)
+                    callback(results)
+                end
+
+                page = 1
+                commits:clear()
+
+                return false
+            end
+
+            commits:AddAll(data)
+
+            if (page == 1 or IsGetAll) then
+                page = page + 1
+                self:getCommits(projectId, IsGetAll, callback)
+            end
+        end
+    )
 end
 
 -- 写文件
@@ -464,12 +491,15 @@ function GitlabService:getContent(projectId, path, callback)
 end
 
 -- 获取文件
-function GitlabService:getContentWithRaw(foldername, path, callback)
-    local foldername = GitEncoding.base32(foldername)
+function GitlabService:getContentWithRaw(foldername, path, commitId, callback)
     local dataSourceInfo = GlobalStore.get("dataSourceInfo")
 
+    if(not commitId) then
+        commitId = "master"
+    end
+
     local url =
-        format("%s/%s/%s/raw/master/%s", dataSourceInfo.rawBaseUrl, dataSourceInfo.dataSourceUsername, foldername, path)
+        format("%s/%s/%s/raw/%s/%s", dataSourceInfo.rawBaseUrl, dataSourceInfo.dataSourceUsername, foldername, commitId, path)
 
     HttpRequest:GetUrl(
         {
@@ -508,7 +538,7 @@ function GitlabService:DownloadZIP(foldername, commitId, callback)
         nil,
         url,
         "temp/archive.zip",
-        function(bSuccess, downloadPath)           
+        function(bSuccess, downloadPath)
             if (type(callback) == "function") then
                 callback(bSuccess, downloadPath)
             end

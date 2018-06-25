@@ -19,6 +19,7 @@ NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 NPL.load("(gl)Mod/WorldShare/login/DeleteWorld.lua")
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+NPL.load("(gl)Mod/WorldShare/login/VersionChange.lua")
 
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
@@ -35,6 +36,7 @@ local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
 local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
+local VersionChange = commonlib.gettable("Mod.WorldShare.login.VersionChange")
 
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
@@ -216,7 +218,14 @@ function LoginWorldList.changeRevision(callback)
 end
 
 function LoginWorldList.selectVersion()
-    _guihelper.MessageBox("Hello World!!!")
+    local selectWorld = GlobalStore.get('selectWorld')
+
+    if(selectWorld.status == 1) then
+        _guihelper.MessageBox(L "此世界仅在本地，无法切换版本")
+        return false
+    end
+
+    VersionChange:init()
 end
 
 --[[
@@ -553,7 +562,7 @@ function LoginWorldList:sensitiveCheck(callback)
     if (new_world_name) then
         HttpRequest:GetUrl(
             {
-                url = LoginMain.site .. "/api/wiki/models/sensitive_words/query",
+                url = format("%s/api/wiki/models/sensitive_words/query", LoginMain.site),
                 form = {
                     query = {
                         name = new_world_name
