@@ -178,6 +178,7 @@ function LocalService:MoveZipToFolder(path)
     commonlib.Files.Find(filesOut, "", 0, 10000, ":.", path) -- ":.", any regular expression after : is supported. `.` match to all strings.
 
     local bashPath = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+
     local folderCreate = ""
     local rootFolder = filesOut[1] and filesOut[1].filename
 

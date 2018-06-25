@@ -378,29 +378,34 @@ local per_page = 100
 local page = 1
 local commits = commonlib.vector:new()
 function GitlabService:getCommits(projectId, IsGetAll, callback)
-    echo(projectId)
     local url = format("projects/%s/repository/commits?per_page=%s&page=%s", projectId, per_page, page)
 
     self:apiGet(
         url,
         function(data, err)
-            if (#data == 0) then
-                if (type(callback) == "function") then
-                    local results = commonlib.copy(commits)
-                    callback(results)
+            if (IsGetAll) then
+                if (#data == 0) then
+                    if (type(callback) == "function") then
+                        local results = commonlib.copy(commits)
+                        callback(results, err)
+                    end
+    
+                    page = 1
+                    commits:clear()
+    
+                    return false
                 end
-
-                page = 1
-                commits:clear()
+    
+                commits:AddAll(data)
+    
+                page = page + 1
+                self:getCommits(projectId, IsGetAll, callback)
 
                 return false
             end
 
-            commits:AddAll(data)
-
-            if (page == 1 or IsGetAll) then
-                page = page + 1
-                self:getCommits(projectId, IsGetAll, callback)
+            if (type(callback) == "function") then
+                callback(data, err)
             end
         end
     )

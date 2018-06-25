@@ -127,13 +127,16 @@ function VersionChange:GetAllRevision()
 end
 
 function VersionChange:SelectVersion(index)
+    local selectWorld = GlobalStore.get("selectWorld")
+    local targetDir = selectWorld.remotefile:gsub("^local://", "")
+    
     GlobalStore.set("commitId", self.allRevision[index]["commitId"])
+
     self:ClosePage()
-    DeleteWorld.DeleteLocal(
-        function()
-            SyncMain:syncToLocal()
-        end
-    )
+    echo(targetDir, true)
+    commonlib.Files.DeleteFolder(targetDir)
+
+    SyncMain:syncToLocal()
 end
 
 -- function VersionChange:FilterSameVersion(callback)

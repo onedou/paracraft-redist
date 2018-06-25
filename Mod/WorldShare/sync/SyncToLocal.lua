@@ -53,10 +53,8 @@ function SyncToLocal:init(callback)
         selectWorld.projectId = projectId
         GlobalStore.set("selectWorld", selectWorld)
 
-        echo(commitId, true)
         if (commitId or selectWorld.status == 2) then
             -- down zip
-            echo(333333)
             self:DownloadZIP()
             return false
         end
@@ -306,6 +304,7 @@ function SyncToLocal:DownloadZIP()
             self.foldername.base32,
             commitId,
             function(bSuccess, downloadPath)
+                echo(downloadPath)
                 LocalService:new():MoveZipToFolder(downloadPath)
                 self:RefreshList()
                 GlobalStore.remove("commitId")
@@ -325,7 +324,6 @@ function SyncToLocal:DownloadZIP()
             end
         )
     else
-
         handleDownloadZIP(commitId)
     end
 end
