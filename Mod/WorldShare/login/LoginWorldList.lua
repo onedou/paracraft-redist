@@ -38,8 +38,6 @@ local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
 
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
 
-LoginWorldList.localWorlds = {}
-
 function LoginWorldList.CreateNewWorld()
     LoginMain.LoginPage:CloseWindow()
     CreateNewWorld.ShowPage()
@@ -47,7 +45,8 @@ end
 
 function LoginWorldList.GetCurWorldInfo(info_type, world_index)
     local index = tonumber(world_index)
-    local selected_world = InternetLoadWorld.cur_ds[world_index]
+    local compareWorldList = GlobalStore.get("compareWorldList")
+    local selected_world = compareWorldList[world_index]
 
     if (selected_world) then
         if (info_type == "mode") then
@@ -64,58 +63,34 @@ function LoginWorldList.GetCurWorldInfo(info_type, world_index)
     end
 end
 
-function LoginWorldList.UpdateLocalWorlds()
-    localWorlds = GlobalStore.get("localWorlds")
+function LoginWorldList.UpdateWorldList()
+    local compareWorldList = GlobalStore.get("compareWorldList") or {}
+
+    LoginWorldList.GetInternetWorldList(
+        function(InternetWorldList)
+            for CKey, CItem in ipairs(compareWorldList) do
+                for IKey, IItem in ipairs(InternetWorldList) do
+                    if (IItem.foldername == CItem.foldername) then
+                        for key, value in pairs(IItem) do
+                            if(key ~= "revision") then
+                                CItem[key] = value
+                            end
+                        end
+                    end
+                end
+            end
+
+            InternetLoadWorld.cur_ds = compareWorldList
+        end
+    )
 
     if (LoginMain.LoginPage) then
-        LoginMain.LoginPage:GetNode("gw_world_ds"):SetAttribute("DataSource", localWorlds)
+        LoginMain.LoginPage:GetNode("gw_world_ds"):SetAttribute("DataSource", compareWorldList)
         LoginWorldList.OnSwitchWorld(1)
     end
 end
 
-function LoginWorldList.RefreshCurrentServerList(callback)
-    LoginMain.setPageRefreshing(true)
-
-    if (not LoginUserInfo.IsSignedIn()) then
-        LoginWorldList.getLocalWorldList(
-            function()
-                LoginWorldList.changeRevision(
-                    function()
-                        LoginWorldList.UpdateLocalWorlds()
-                        LoginMain.setPageRefreshing(false)
-
-                        if (type(callback) == "function") then
-                            callback()
-                        end
-                    end
-                )
-            end
-        )
-    end
-
-    if (LoginUserInfo.IsSignedIn()) then
-        LoginWorldList.getLocalWorldList(
-            function()
-                LoginWorldList.changeRevision(
-                    function()
-                        LoginWorldList.syncWorldsList(
-                            function()
-                                LoginWorldList.UpdateLocalWorlds()
-                                LoginMain.setPageRefreshing(false)
-
-                                if (type(callback) == "function") then
-                                    callback()
-                                end
-                            end
-                        )
-                    end
-                )
-            end
-        )
-    end
-end
-
-function LoginWorldList.getLocalWorldList(callback)
+function LoginWorldList.GetInternetWorldList(callback)
     local ServerPage = InternetLoadWorld.GetCurrentServerPage()
 
     RemoteServerList:new():Init(
@@ -139,63 +114,104 @@ function LoginWorldList.getLocalWorldList(callback)
             ServerPage.ds = serverlist.worlds or {}
             InternetLoadWorld.OnChangeServerPage()
 
-            GlobalStore.set("localWorlds", ServerPage.ds)
-
             if (callback) then
-                callback()
+                callback(ServerPage.ds)
             end
         end
     )
 end
 
+function LoginWorldList.RefreshCurrentServerList(callback)
+    LoginMain.setPageRefreshing(true)
+
+    if (not LoginUserInfo.IsSignedIn()) then
+        LoginWorldList.getLocalWorldList(
+            function()
+                LoginWorldList.changeRevision(
+                    function()
+                        LoginWorldList.UpdateWorldList()
+                        LoginMain.setPageRefreshing(false)
+
+                        if (type(callback) == "function") then
+                            callback()
+                        end
+                    end
+                )
+            end
+        )
+    end
+
+    if (LoginUserInfo.IsSignedIn()) then
+        LoginWorldList.getLocalWorldList(
+            function()
+                LoginWorldList.changeRevision(
+                    function()
+                        LoginWorldList.syncWorldsList(
+                            function()
+                                LoginWorldList.UpdateWorldList()
+                                LoginMain.setPageRefreshing(false)
+
+                                if (type(callback) == "function") then
+                                    callback()
+                                end
+                            end
+                        )
+                    end
+                )
+            end
+        )
+    end
+end
+
+function LoginWorldList.getLocalWorldList(callback)
+    local localWorldList = LocalLoadWorld.BuildLocalWorldList(true)
+
+    GlobalStore.set("localWorlds", localWorldList)
+
+    if (callback) then
+        callback()
+    end
+end
+
 function LoginWorldList.changeRevision(callback)
     local localWorlds = GlobalStore.get("localWorlds")
 
-    if (localWorlds) then
-        for key, value in ipairs(localWorlds) do
-            if (not value.is_zip) then
-                value.modifyTime = value.revision
+    for key, value in ipairs(localWorlds) do
+        if (not value.is_zip) then
+            local foldername = {}
+            foldername.utf8 = value.foldername
+            foldername.default = Encoding.Utf8ToDefault(value.foldername)
 
-                local foldername = {}
-                foldername.utf8 = value.foldername
-                foldername.default = Encoding.Utf8ToDefault(value.foldername)
+            local WorldRevisionCheckOut =
+                WorldRevision:new():init(SyncMain.GetWorldFolderFullPath() .. "/" .. foldername.default .. "/")
+            value.revision = WorldRevisionCheckOut:GetDiskRevision()
 
-                local WorldRevisionCheckOut =
-                    WorldRevision:new():init(SyncMain.GetWorldFolderFullPath() .. "/" .. foldername.default .. "/")
-                value.revision = WorldRevisionCheckOut:GetDiskRevision()
+            local tag = LocalService:GetTag(foldername.default)
 
-                local tag = LocalService:GetTag(foldername.default)
-
-                if (tag.size) then
-                    value.size = tag.size
-                else
-                    value.size = 0
-                end
+            if (tag.size) then
+                value.size = tag.size
             else
-                value.modifyTime = value.revision
-
-                local zipWorldDir = {}
-                zipWorldDir.default = value.remotefile:gsub("local://", "")
-                zipWorldDir.utf8 = Encoding.Utf8ToDefault(zipWorldDir.default)
-
-                local zipFoldername = {}
-                zipFoldername.default = zipWorldDir.default:match("([^/\\]+)/[^/]*$")
-                zipFoldername.utf8 = Encoding.Utf8ToDefault(zipFoldername.default)
-
-                value.revision = LocalService:GetZipRevision(zipWorldDir.default)
-                value.size = LocalService:GetZipWorldSize(zipWorldDir.default)
+                value.size = 0
             end
+        else
+            local zipWorldDir = {}
+            zipWorldDir.default = value.remotefile:gsub("local://", "")
+            zipWorldDir.utf8 = Encoding.Utf8ToDefault(zipWorldDir.default)
+
+            local zipFoldername = {}
+            zipFoldername.default = zipWorldDir.default:match("([^/\\]+)/[^/]*$")
+            zipFoldername.utf8 = Encoding.Utf8ToDefault(zipFoldername.default)
+
+            value.revision = LocalService:GetZipRevision(zipWorldDir.default)
+            value.size = LocalService:GetZipWorldSize(zipWorldDir.default)
         end
+    end
 
-        LoginMain.refreshPage()
+    GlobalStore.set("compareWorldList", localWorlds)
+    LoginMain.refreshPage()
 
-        if (callback) then
-            callback()
-        end
-
-        return
-    else
-        LoginWorldList.changeRevision()
+    if (callback) then
+        callback()
     end
 end
 
@@ -214,75 +230,87 @@ status代码含义:
 function LoginWorldList.syncWorldsList(callback)
     local function handleWorldList(response, err)
         local localWorlds = GlobalStore.get("localWorlds") or {}
+
         local remoteWorldsList = response.data
+        local compareWorldList = commonlib.vector:new()
 
         -- 处理本地网络同时存在 本地不存在 网络存在 的世界
         if (type(remoteWorldsList) ~= "table") then
             _guihelper.MessageBox(L "获取服务器世界列表错误")
-            return
+            return false
         end
 
-        for keyDistance, valueDistance in ipairs(remoteWorldsList) do
+        for DKey, DItem in ipairs(remoteWorldsList) do
             local isExist = false
+            local worldpath = ""
+            local status
 
-            for keyLocal, valueLocal in ipairs(localWorlds) do
-                if (valueDistance["worldsName"] == valueLocal["foldername"]) then
-                    if (localWorlds[keyLocal].server) then
-                        if (tonumber(valueLocal["revision"]) == tonumber(valueDistance["revision"])) then
-                            localWorlds[keyLocal].status = 3 --本地网络一致
-                        elseif (tonumber(valueLocal["revision"]) > tonumber(valueDistance["revision"])) then
-                            localWorlds[keyLocal].status = 4 --网络更新
-                        elseif (tonumber(valueLocal["revision"]) < tonumber(valueDistance["revision"])) then
-                            localWorlds[keyLocal].status = 5 --本地更新
-                        end
+            for LKey, LItem in ipairs(localWorlds) do
+                if (DItem["worldsName"] == LItem["foldername"]) then
+                    if (tonumber(LItem["revision"]) == tonumber(DItem["revision"])) then
+                        status = 3 --本地网络一致
+                    elseif (tonumber(LItem["revision"]) > tonumber(DItem["revision"])) then
+                        status = 4 --网络更新
+                    elseif (tonumber(LItem["revision"]) < tonumber(DItem["revision"])) then
+                        status = 5 --本地更新
                     end
 
-                    --localWorlds[kl].revision = vd["revision"];
                     isExist = true
+                    worldpath = LItem["worldpath"]
                     break
                 end
             end
 
             if (not isExist) then
-                localWorlds[#localWorlds + 1] = {
-                    text = valueDistance["worldsName"],
-                    foldername = valueDistance["worldsName"],
-                    revision = valueDistance["revision"],
-                    size = valueDistance["filesTotals"],
-                    modifyTime = valueDistance["modDate"],
-                    status = 2 --仅网络
-                }
+                status = 2
             end
+
+            local currentWorld = {
+                text = DItem["worldsName"],
+                foldername = DItem["worldsName"],
+                revision = DItem["revision"],
+                size = DItem["filesTotals"],
+                modifyTime = DItem["modDate"],
+                worldpath = worldpath,
+                status = status --仅网络
+            }
+
+            compareWorldList:push_back(currentWorld)
         end
 
         -- 处理 本地存在 网络不存在 的世界
-        for keyLocal, valueLocal in ipairs(localWorlds) do
+        for LKey, LItem in ipairs(localWorlds) do
             local isExist = false
 
-            for keyDistance, valueDistance in ipairs(remoteWorldsList) do
-                if (valueLocal["foldername"] == valueDistance["worldsName"]) then
+            for DKey, DItem in ipairs(remoteWorldsList) do
+                if (LItem["foldername"] == DItem["worldsName"]) then
                     isExist = true
                     break
                 end
             end
 
             if (not isExist) then
-                localWorlds[keyLocal].status = 1 --仅本地
+                currentWorld = LItem
+                currentWorld.modifyTime = currentWorld.writedate
+                currentWorld.text = currentWorld.foldername
+                currentWorld.status = 1 --仅本地
+                compareWorldList:push_back(currentWorld)
             end
         end
 
-        if (localWorlds) then
+        -- 排序
+        if (#compareWorldList > 0) then
             local tmp = 0
 
-            for i = 1, #localWorlds - 1 do
-                for j = 1, #localWorlds - i do
+            for i = 1, #compareWorldList - 1 do
+                for j = 1, #compareWorldList - i do
                     if
-                        LoginWorldList:formatDate(localWorlds[j].modifyTime) <
-                            LoginWorldList:formatDate(localWorlds[j + 1].modifyTime)
+                        LoginWorldList:formatDate(compareWorldList[j].modifyTime) <
+                            LoginWorldList:formatDate(compareWorldList[j + 1].modifyTime)
                      then
-                        tmp = localWorlds[j]
-                        localWorlds[j] = localWorlds[j + 1]
-                        localWorlds[j + 1] = tmp
+                        tmp = compareWorldList[j]
+                        compareWorldList[j] = compareWorldList[j + 1]
+                        compareWorldList[j + 1] = tmp
                     end
                 end
             end
@@ -290,6 +318,7 @@ function LoginWorldList.syncWorldsList(callback)
 
         GlobalStore.set("localWorlds", localWorlds)
         GlobalStore.set("remoteWorldsList", remoteWorldsList)
+        GlobalStore.set("compareWorldList", compareWorldList)
 
         LoginMain.refreshPage()
 
@@ -378,15 +407,25 @@ function LoginWorldList.GetWorldType()
 end
 
 function LoginWorldList.OnSwitchWorld(index)
+    index = index and index or Eval("index")
     InternetLoadWorld.OnSwitchWorld(index)
     LoginWorldList.updateWorldInfo(index, LoginMain.refreshPage)
 end
 
-function LoginWorldList.updateWorldInfo(worldIndex, callback)
-    local currentWorld = LocalLoadWorld.BuildLocalWorldList(true)[worldIndex] --origin list
-    local localWorlds = GlobalStore.get("localWorlds")
+function LoginWorldList.GetSelectWorldIndex()
+    return GlobalStore.get("worldIndex")
+end
 
-    if (type(currentWorld) == "table") then
+function LoginWorldList.updateWorldInfo(worldIndex, callback)
+    local compareWorldList = GlobalStore.get("compareWorldList")
+
+    if (not compareWorldList) then
+        return false
+    end
+
+    local currentWorld = compareWorldList[worldIndex]
+
+    if (currentWorld and currentWorld.status ~= 2) then
         local filesize = LocalService:GetWorldSize(currentWorld.worldpath)
         local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(currentWorld.foldername))
 
@@ -395,11 +434,12 @@ function LoginWorldList.updateWorldInfo(worldIndex, callback)
 
         GlobalStore.set("worldTag", worldTag)
 
-        localWorlds[worldIndex].size = filesize
+        compareWorldList[worldIndex].size = filesize
     end
 
-    local selectWorld = localWorlds[worldIndex]
+    local selectWorld = compareWorldList[worldIndex]
     GlobalStore.set("selectWorld", selectWorld)
+    GlobalStore.set("worldIndex", worldIndex)
 
     local foldername = {}
 
@@ -418,6 +458,8 @@ function LoginWorldList.updateWorldInfo(worldIndex, callback)
     if (type(callback) == "function") then
         callback()
     end
+
+    LoginMain.refreshPage()
 end
 
 function LoginWorldList.GetDesForWorld()
@@ -427,6 +469,9 @@ end
 
 function LoginWorldList.enterWorld()
     local selectWorld = GlobalStore.get("selectWorld")
+    local compareWorldList = GlobalStore.get("compareWorldList")
+
+    GlobalStore.set("enterWorld", selectWorld)
 
     if (not LoginUserInfo.IsSignedIn()) then
         InternetLoadWorld.EnterWorld()
@@ -434,10 +479,7 @@ function LoginWorldList.enterWorld()
     end
 
     if (selectWorld.status == 2) then
-        GlobalStore.set(
-            "willEnterWorld",
-            InternetLoadWorld.EnterWorld
-        )
+        GlobalStore.set("willEnterWorld", InternetLoadWorld.EnterWorld)
 
         SyncCompare:syncCompare()
     else

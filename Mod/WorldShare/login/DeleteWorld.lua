@@ -16,6 +16,7 @@ NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
+NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
 
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local LoginWorldList = commonlib.gettable("Mod.WorldShare.login.LoginWorldList")
@@ -24,6 +25,7 @@ local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkServi
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local GitEncoding = commonlib.gettable("Mod.WorldShare.helper.GitEncoding")
+local WorldCommon    = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
 
@@ -47,14 +49,14 @@ function DeleteWorld.GetSelectWorld()
     return GlobalStore.get("selectWorld")
 end
 
-function DeleteWorld.DeleteWorld(index)
-    local index = tonumber(index)
+function DeleteWorld.DeleteWorld()
+    local IsEnterWorld = GlobalStore.get("IsEnterWorld")
+    
+    if (IsEnterWorld) then
+        local selectWorld = GlobalStore.get("selectWorld")
+        local enterWorld = GlobalStore.get("enterWorld")
 
-    local selectWorld = GlobalStore.get("selectWorld")
-    local worldTag = GlobalStore.get("worldTag")
-
-    if (worldTag) then
-        if (worldTag.name == selectWorld.foldername) then
+        if(enterWorld.foldername == selectWorld.foldername) then
             _guihelper.MessageBox(L "不能刪除正在编辑的世界")
             return
         end

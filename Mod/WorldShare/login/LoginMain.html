@@ -11,7 +11,7 @@
                 LoginMain.setLoginPage()
 
                 function beSelected()
-                    return Eval("index") == InternetLoadWorld.selected_world_index;
+                    return Eval("index") == LoginWorldList.GetSelectWorldIndex()
                 end
 
                 function getWorldStatus(index)
@@ -376,7 +376,7 @@
                                         </pe:if>
                                         <div class="share_world_name">
                                             <%= Eval("text") %>
-                                                <%= if_else( Eval("is_zip") == true, L".zip", "")%>
+                                            <%= if_else( Eval("is_zip") == true, L".zip", "")%>
                                         </div>
                                     </div>
                                     <div name="worldinfo">
