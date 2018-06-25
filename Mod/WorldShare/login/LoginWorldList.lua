@@ -452,20 +452,23 @@ end
 function LoginWorldList.enterWorld()
     local selectWorld = GlobalStore.get("selectWorld")
 
-    if(not LoginUserInfo.IsSignedIn()) then
+    if (not LoginUserInfo.IsSignedIn()) then
         InternetLoadWorld.EnterWorld()
         return
     end
 
     if (selectWorld.status == 2) then
-        SyncToLocal.DownloadZIP(
-            function()
-                InternetLoadWorld.EnterWorld()
-            end
+        GlobalStore.set(
+            "willEnterWorld",
+            InternetLoadWorld.EnterWorld
         )
+
+        SyncCompare:syncCompare()
     else
         InternetLoadWorld.EnterWorld()
     end
+
+    LoginMain.ClosePage()
 end
 
 function LoginWorldList.sharePersonPage()

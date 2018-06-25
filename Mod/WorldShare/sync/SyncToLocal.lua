@@ -132,14 +132,18 @@ function SyncToLocal:GetCompareList()
 end
 
 function SyncToLocal:RefreshList()
-    SyncMain:RefreshKeepworkList(
+    LoginWorldList.RefreshCurrentServerList(
         function()
-            LoginWorldList.RefreshCurrentServerList(
-                function()
-                    SyncGUI:SetFinish(true)
-                    SyncGUI:refresh()
-                end
-            )
+            local willEnterWorld = GlobalStore.get('willEnterWorld')
+
+            if(type(willEnterWorld) == 'function') then
+                willEnterWorld()
+
+                GlobalStore.remove('willEnterWorld')
+            end
+
+            SyncGUI:SetFinish(true)
+            SyncGUI:refresh()
         end
     )
 end

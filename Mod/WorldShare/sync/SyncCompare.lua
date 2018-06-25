@@ -112,16 +112,15 @@ function SyncCompare:compareRevision(callback)
             -- GlobalStore.set("tagInfo", WorldCommon.GetWorldInfo())
             -- GlobalStore.set("worldDir", worldDir)
             -- GlobalStore.set("foldername", foldername)
-
             if (LoginMain.LoginPage or LoginMain.ModalPage) then
-                LoginMain.RefreshCurrentServerList(self.comparePrepare)
+                LoginWorldList.RefreshCurrentServerList(self.comparePrepare)
             else
-                self:comparePrepare()
+                self:comparePrepare(callback)
             end
         else
             if (selectWorld.is_zip) then
                 _guihelper.MessageBox(L "不能同步ZIP文件")
-                return
+                return false
             end
 
             self:compare(callback)
@@ -248,26 +247,11 @@ function SyncCompare:compare(callback)
     end
 end
 
-function SyncCompare:comparePrepare()
-    local foldername = GlobalStore.get("foldername")
-
+function SyncCompare:comparePrepare(callback)
     if (GameLogic.IsReadOnly()) then
-        if (type(callback) == "function") then
-            callback("zip")
-        end
-
-        return
+        _guihelper.MessageBox(L "不能同步ZIP文件")
+        return false
     end
 
-    -- local dataSource = InternetLoadWorld.GetCurrentServerPage().ds
-
-    -- if (dataSource) then
-    --     for _, value in ipairs(dataSource) do
-    --         if (value.foldername == foldername.utf8) then
-    --             SyncMain.selectedWorldInfor = value
-    --         end
-    --     end
-    -- end
-
-    self:compare()
+    self:compare(callback)
 end

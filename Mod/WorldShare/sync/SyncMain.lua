@@ -37,6 +37,7 @@ local KeepworkService = commonlib.gettable("Mod.WorldShare.service.KeepworkServi
 local GenerateMdPage = commonlib.gettable("Mod.WorldShare.sync.GenerateMdPage")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
+local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 
@@ -73,8 +74,6 @@ function SyncMain.setBeyondPage()
 end
 
 function SyncMain.closeSyncPage()
-    SyncMain.isStart = false
-
     if (SyncMain.SyncPage) then
         SyncMain.SyncPage:CloseWindow()
     end

@@ -18,3 +18,7 @@ end
 function GlobalStore.get(key)
     return GlobalStore[key]
 end
+
+function GlobalStore.remove(key)
+    GlobalStore[key] = nil
+end
