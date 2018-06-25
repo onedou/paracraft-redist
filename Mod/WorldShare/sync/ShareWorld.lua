@@ -15,14 +15,20 @@ NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
 NPL.load("(gl)Mod/WorldShare/store/Global.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
+NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+NPL.load("(gl)Mod/WorldShare/sync/SyncCompare.lua")
 
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
-local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
+local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
+local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
+local SyncCompare = commonlib.gettable("Mod.WorldShare.sync.SyncCompare")
+local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 
 local ShareWorld = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.sync.ShareWorld"))
 
@@ -32,7 +38,7 @@ function ShareWorld:ctor()
 end
 
 function ShareWorld.ShowPage()
-    if (loginMain.isVerified ~= "noLogin" and not loginMain.isVerified) then
+    if (not LoginUserInfo.isVerified) then
         _guihelper.MessageBox(
             L "您需要到keepwork官网进行实名认证，认证成功后需重启paracraft即可正常操作，是否现在认证？",
             function(res)
@@ -46,49 +52,38 @@ function ShareWorld.ShowPage()
         return
     end
 
-    SyncMain.syncType = "share"
-
-    if (not loginMain.IsSignedIn()) then
-        loginMain.showLoginModalImp(
+    if (not LoginUserInfo.IsSignedIn()) then
+        LoginMain.showLoginModalImp(
             function()
                 ShareWorldPage.ShowPage()
             end
         )
-    else
-        loginMain.showMessageInfo(L "正在获取，请稍后...")
-        ShareWorld.shareCompare()
-    end
-end
 
-function ShareWorld.ShowPageImp()
-    System.App.Commands.Call(
-        "File.MCMLWindowFrame",
-        {
-            url = "Mod/WorldShare/sync/ShareWorld.html",
-            name = "SaveWorldPage.ShowSharePage",
-            isShowTitleBar = false,
-            DestroyOnClose = true,
-            style = CommonCtrl.WindowFrame.ContainerStyle,
-            allowDrag = true,
-            isTopLevel = true,
-            directPosition = true,
-            align = "_ct",
-            x = -640 / 2,
-            y = -415 / 2,
-            width = 640,
-            height = 415
-        }
+        return false
+    end
+
+    SyncCompare:compare(
+        function()
+            ShareWorld:init()
+        end
     )
 end
 
-function ShareWorld:init()
-    local filepath = SyncMain.worldDir.default .. "preview.jpg"
+function ShareWorld.ShowPageImp()
+    Utils:ShowWindow(640, 415, "Mod/WorldShare/sync/ShareWorld.html", "ShareWorld")
+end
 
-    if (ParaIO.DoesFileExist(filepath)) then
+function ShareWorld:init()
+    ShareWorld.ShowPageImp()
+
+    local worldDir = GlobalStore.get("worldDir")
+    local filepath = format("%spreview.jpg", worldDir.default)
+
+    if (ParaIO.DoesFileExist(filepath) and ShareWorld.SharePage) then
         ShareWorld.SharePage:SetNodeValue("ShareWorldImage", filepath)
     end
 
-    ShareWorld.SharePage:Refresh()
+    ShareWorld.RefreshPage()
 end
 
 function ShareWorld.setSharePage()
@@ -99,54 +94,53 @@ function ShareWorld.closeSharePage()
     ShareWorld.SharePage:CloseWindow()
 end
 
-function ShareWorld.getWorldSize()
-    local tagInfor = WorldCommon.GetWorldInfo()
-
-    return tagInfor.size
+function ShareWorld.RefreshPage(times)
+    if (ShareWorld.SharePage) then
+        ShareWorld.SharePage:Refresh(times or 0.01)
+    end
 end
 
-function ShareWorld.shareCompare()
-    -- SyncMain:compareRevision(
-    --     nil,
-    --     function(result)
-    --         if (result and result == "tryAgain") then
-    --             ShareWorld.shareCompare()
-    --         elseif (result == "zip") then
-    --             _guihelper.MessageBox(L "不能同步ZIP文件")
-    --             loginMain.closeMessageInfo()
-    --         elseif (result) then
-    --             ShareWorld.ShowPageImp()
-    --             ShareWorld.CompareResult = result
-    --             ShareWorld.SharePage:Refresh()
-    --             ShareWorld:init()
-    --             loginMain.closeMessageInfo()
-    --         else
-    --             if (ShareWorld.SharePage) then
-    --                 ShareWorld.SharePage:CloseWindow()
-    --             end
-    --         end
-    --     end
-    -- )
+function ShareWorld.GetFoldername()
+    local foldername = GlobalStore.get("foldername")
+
+    return foldername.utf8
+end
+
+function ShareWorld.GetWorldSize()
+    local tagInfor = WorldCommon.GetWorldInfo()
+
+    return Utils.formatFileSize(tagInfor.size)
+end
+
+function ShareWorld.GetRemoteRevision()
+    local remoteRevision = GlobalStore.get("remoteRevision")
+
+    return remoteRevision
+end
+
+function ShareWorld.GetCurrentRevision()
+    local currentRevision = GlobalStore.get("currentRevision")
+
+    return currentRevision
 end
 
 function ShareWorld.shareNow()
-    ShareWorld.SharePage:CloseWindow()
-
-    if (ShareWorld.CompareResult == "remoteBigger") then
+    if (ShareWorld.GetRemoteRevision() > ShareWorld.GetCurrentRevision()) then
         _guihelper.MessageBox(
             L "当前本地版本小于远程版本，是否继续上传？",
             function(res)
                 if (res and res == 6) then
                     SyncMain:syncToDataSource()
+                    ShareWorld.closeSharePage()
                 end
             end
         )
-    elseif
-        (ShareWorld.CompareResult == "localBigger" or ShareWorld.CompareResult == "justLocal" or
-            ShareWorld.CompareResult == "equal")
-     then
-        SyncMain:syncToDataSource()
+
+        return true
     end
+
+    SyncMain:syncToDataSource()
+    ShareWorld.closeSharePage()
 end
 
 function ShareWorld.snapshot()

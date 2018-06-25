@@ -143,6 +143,14 @@ function LoginMain.refreshPage(time)
     end
 end
 
+function LoginMain.IsShowPage()
+    if(LoginMain.LoginPage) then
+        return true
+    else
+        return false
+    end
+end
+
 function LoginMain.refreshModalPage(time)
     if (LoginMain.ModalPage) then
         LoginMain.ModalPage:Refresh(time or 0.01)

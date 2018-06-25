@@ -150,6 +150,7 @@ end
 
 function SyncToLocal:HandleCompareList()
     if (self.compareListTotal < self.compareListIndex) then
+
         self:SetFinish(true)
         self:RefreshList()
 

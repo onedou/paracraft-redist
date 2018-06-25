@@ -51,10 +51,10 @@ function DeleteWorld.DeleteWorld(index)
     local index = tonumber(index)
 
     local selectWorld = GlobalStore.get("selectWorld")
-    local tagInfo = GlobalStore.get("tagInfo")
+    local worldTag = GlobalStore.get("worldTag")
 
-    if (tagInfo) then
-        if (tagInfo.name == selectWorld.foldername) then
+    if (worldTag) then
+        if (worldTag.name == selectWorld.foldername) then
             _guihelper.MessageBox(L "不能刪除正在编辑的世界")
             return
         end

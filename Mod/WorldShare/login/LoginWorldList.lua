@@ -46,8 +46,6 @@ function LoginWorldList.CreateNewWorld()
 end
 
 function LoginWorldList.GetCurWorldInfo(info_type, world_index)
-    --local cur_world = InternetLoadWorld:GetCurrentWorld();
-
     local index = tonumber(world_index)
     local selected_world = InternetLoadWorld.cur_ds[world_index]
 
@@ -76,55 +74,33 @@ function LoginWorldList.UpdateLocalWorlds()
 end
 
 function LoginWorldList.RefreshCurrentServerList(callback)
-    if (LoginMain.LoginPage) then
-        LoginMain.setPageRefreshing(true)
+    LoginMain.setPageRefreshing(true)
 
-        if (not LoginUserInfo.IsSignedIn()) then
-            LoginWorldList.getLocalWorldList(
-                function()
-                    LoginWorldList.changeRevision(
-                        function()
-                            LoginWorldList.UpdateLocalWorlds()
-                            LoginMain.setPageRefreshing(false)
+    if (not LoginUserInfo.IsSignedIn()) then
+        LoginWorldList.getLocalWorldList(
+            function()
+                LoginWorldList.changeRevision(
+                    function()
+                        LoginWorldList.UpdateLocalWorlds()
+                        LoginMain.setPageRefreshing(false)
 
-                            if (type(callback) == "function") then
-                                callback()
-                            end
+                        if (type(callback) == "function") then
+                            callback()
                         end
-                    )
-                end
-            )
-        end
-
-        if (LoginUserInfo.IsSignedIn()) then
-            LoginWorldList.getLocalWorldList(
-                function()
-                    LoginWorldList.changeRevision(
-                        function()
-                            LoginWorldList.syncWorldsList(
-                                function()
-                                    LoginWorldList.UpdateLocalWorlds()
-                                    LoginMain.setPageRefreshing(false)
-
-                                    if (type(callback) == "function") then
-                                        callback()
-                                    end
-                                end
-                            )
-                        end
-                    )
-                end
-            )
-        end
+                    end
+                )
+            end
+        )
     end
 
-    if (LoginMain.ModalPage) then
+    if (LoginUserInfo.IsSignedIn()) then
         LoginWorldList.getLocalWorldList(
             function()
                 LoginWorldList.changeRevision(
                     function()
                         LoginWorldList.syncWorldsList(
                             function()
+                                LoginWorldList.UpdateLocalWorlds()
                                 LoginMain.setPageRefreshing(false)
 
                                 if (type(callback) == "function") then

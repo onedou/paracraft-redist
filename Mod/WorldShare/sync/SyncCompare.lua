@@ -42,13 +42,14 @@ local EQUAL = "EQUAL"
 
 function SyncCompare:syncCompare()
     local IsEnterWorld = GlobalStore.get("IsEnterWorld")
+    local IsShowLoginPage = LoginMain.IsShowPage()
 
     SyncCompare:SetFinish(false)
     LoginMain.showMessageInfo(L "请稍后...")
 
     self:compareRevision(
         function(result)
-            if (IsEnterWorld) then
+            if (IsEnterWorld and not IsShowLoginPage) then
                 if (result == REMOTEBIGGER) then
                     SyncMain:StartSyncPage()
                 elseif (result == TRYAGAIN) then
@@ -68,7 +69,7 @@ function SyncCompare:syncCompare()
                     LoginMain.closeMessageInfo()
                     return true
                 end
-                
+
                 if (result == REMOTEBIGGER or result == LOCALBIGGER or result == EQUAL) then
                     SyncMain:StartSyncPage()
                     LoginMain.closeMessageInfo()
@@ -91,40 +92,20 @@ function SyncCompare:compareRevision(callback)
     local IsEnterWorld = GlobalStore.get("IsEnterWorld")
     local selectWorld = GlobalStore.get("selectWorld")
 
-    if(selectWorld.status == 2) then
-        if(type(callback) == 'function') then
+    if (selectWorld.status == 2) then
+        if (type(callback) == "function") then
             callback(JUSTREMOTE)
             return true
         end
     end
 
     if (LoginUserInfo.IsSignedIn()) then
-        if (IsEnterWorld) then
-            -- local worldDir = {}
-
-            -- worldDir.default = GameLogic.GetWorldDirectory():gsub("\\", "/")
-            -- worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
-
-            -- local foldername = {}
-            -- foldername.default = SyncMain.worldDir.default:match("([^/]*)/$")
-            -- foldername.utf8 = SyncMain.worldDir.utf8:match("([^/]*)/$")
-
-            -- GlobalStore.set("tagInfo", WorldCommon.GetWorldInfo())
-            -- GlobalStore.set("worldDir", worldDir)
-            -- GlobalStore.set("foldername", foldername)
-            if (LoginMain.LoginPage or LoginMain.ModalPage) then
-                LoginWorldList.RefreshCurrentServerList(self.comparePrepare)
-            else
-                self:comparePrepare(callback)
-            end
-        else
-            if (selectWorld.is_zip) then
-                _guihelper.MessageBox(L "不能同步ZIP文件")
-                return false
-            end
-
-            self:compare(callback)
+        if (selectWorld.is_zip) then
+            _guihelper.MessageBox(L "不能同步ZIP文件")
+            return false
         end
+
+        self:compare(callback)
     else
         LoginUserInfo.LoginWithTokenApi(
             function()
@@ -237,7 +218,7 @@ function SyncCompare:compare(callback)
         else
             _guihelper.MessageBox(L "本地世界沒有版本信息")
             SyncCompare:SetFinish(true)
-            
+
             if (type(callback) == "function") then
                 callback()
             end
@@ -245,13 +226,4 @@ function SyncCompare:compare(callback)
             return false
         end
     end
-end
-
-function SyncCompare:comparePrepare(callback)
-    if (GameLogic.IsReadOnly()) then
-        _guihelper.MessageBox(L "不能同步ZIP文件")
-        return false
-    end
-
-    self:compare(callback)
 end
