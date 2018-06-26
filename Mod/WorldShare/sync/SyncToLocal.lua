@@ -60,7 +60,9 @@ function SyncToLocal:init(callback)
         end
 
         -- 加载进度UI界面
-        self.syncGUI = SyncGUI:new()
+        SyncGUI.init()
+        SyncGUI.SetSync(self)
+
         self:SetFinish(false)
 
         self:syncToLocal()
@@ -73,7 +75,7 @@ function SyncToLocal:syncToLocal()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    self.syncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
+    SyncGUI:updateDataBar(0, 0, L "正在对比文件列表...")
 
     local function handleSyncToLocal(data, err)
         self.localFiles = LocalService:new():LoadFiles(self.worldDir.default)
@@ -143,7 +145,7 @@ function SyncToLocal:RefreshList()
                 GlobalStore.remove('willEnterWorld')
             end
 
-            SyncGUI:SetFinish(true)
+            SyncGUI.SetFinish(true)
             SyncGUI:refresh()
         end
     )
@@ -168,7 +170,7 @@ function SyncToLocal:HandleCompareList()
     local currentItem = self.compareList[self.compareListIndex]
 
     local function retry()
-        self.syncGUI:updateDataBar(
+        SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
             format(L "%s 处理完成", currentItem.file),
@@ -196,6 +198,10 @@ function SyncToLocal:SetFinish(value)
     self.finish = value
 end
 
+function SyncToLocal:SetBorke(value)
+    self.broke = value
+end
+
 function SyncToLocal:GetLocalFileByFilename(filename)
     for key, item in ipairs(self.localFiles) do
         if (item.filename == filename) then
@@ -221,7 +227,7 @@ function SyncToLocal:downloadOne(file, callback)
         currentRemoteItem.path,
         nil,
         function(content, size)
-            self.syncGUI:updateDataBar(
+            SyncGUI:updateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
                 format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
@@ -250,7 +256,7 @@ function SyncToLocal:updateOne(file, callback)
     end
 
     local function handleUpdate(content, size)
-        self.syncGUI:updateDataBar(
+        SyncGUI:updateDataBar(
             self.compareListIndex,
             self.compareListTotal,
             format(L "%s （%s） 更新中", currentRemoteItem.path, Utils.formatFileSize(size, "KB"))
@@ -270,7 +276,7 @@ end
 function SyncToLocal:deleteOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
 
-    self.syncGUI:updateDataBar(
+    SyncGUI:updateDataBar(
         self.compareListIndex,
         self.compareListTotal,
         format(L "%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.size, "KB"))

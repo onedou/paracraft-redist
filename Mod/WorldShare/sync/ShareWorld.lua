@@ -65,11 +65,8 @@ function ShareWorld.ShowPage()
         return false
     end
 
-    SyncCompare:compare(
-        function()
-            ShareWorld:init()
-        end
-    )
+    GlobalStore.set("ShareMode", true)
+    SyncCompare:syncCompare()
 end
 
 function ShareWorld.ShowPageImp()
@@ -81,7 +78,7 @@ function ShareWorld:init()
 
     local worldDir = self:GetWorldDir()
     local filepath = format("%spreview.jpg", worldDir.default)
-    echo(filepath, true)
+
     if (ParaIO.DoesFileExist(filepath) and ShareWorld.SharePage) then
         ShareWorld.SharePage:SetNodeValue("ShareWorldImage", filepath)
     end

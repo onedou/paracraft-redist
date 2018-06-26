@@ -207,6 +207,8 @@ function LoginWorldList.changeRevision(callback)
             value.revision = LocalService:GetZipRevision(zipWorldDir.default)
             value.size = LocalService:GetZipWorldSize(zipWorldDir.default)
         end
+
+        value.modifyTime = value.writedate
     end
 
     GlobalStore.set("localWorlds", localWorlds)
@@ -483,8 +485,6 @@ function LoginWorldList.enterWorld()
     GlobalStore.set("enterWorld", enterWorld)
     GlobalStore.set("enterWorldDir", enterWorldDir)
     GlobalStore.set("enterFoldername", enterFoldername)
-
-    echo(GlobalStore.get("enterFoldername"))
 
     if (not LoginUserInfo.IsSignedIn()) then
         InternetLoadWorld.EnterWorld()
