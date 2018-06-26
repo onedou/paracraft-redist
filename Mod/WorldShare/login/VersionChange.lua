@@ -32,7 +32,6 @@ function VersionChange:init()
     LoginMain.showMessageInfo(L "请稍后...")
     self:GetVersionSource(
         function()
-            echo(self.allRevision, true)
             LoginMain.closeMessageInfo()
             self:ShowPage()
         end
@@ -128,13 +127,15 @@ end
 
 function VersionChange:SelectVersion(index)
     local selectWorld = GlobalStore.get("selectWorld")
-    local targetDir = selectWorld.remotefile:gsub("^local://", "")
-    
+    local foldername = GlobalStore.get("foldername")
+
     GlobalStore.set("commitId", self.allRevision[index]["commitId"])
 
-    self:ClosePage()
-    echo(targetDir, true)
+    local targetDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
+
     commonlib.Files.DeleteFolder(targetDir)
+    
+    self:ClosePage()
 
     SyncMain:syncToLocal()
 end

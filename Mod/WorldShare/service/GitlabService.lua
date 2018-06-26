@@ -14,6 +14,7 @@ NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)Mod/WorldShare/main.lua")
 NPL.load("(gl)script/ide/Encoding.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
+NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 
 local HttpRequest = commonlib.gettable("Mod.WorldShare.service.HttpRequest")
 local loginMain = commonlib.gettable("Mod.WorldShare.login.loginMain")
@@ -22,7 +23,7 @@ local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
-local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader")
+local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 
 local GitlabService = commonlib.inherit(nil, commonlib.gettable("Mod.WorldShare.service.GitlabService"))
 
@@ -389,15 +390,15 @@ function GitlabService:getCommits(projectId, IsGetAll, callback)
                         local results = commonlib.copy(commits)
                         callback(results, err)
                     end
-    
+
                     page = 1
                     commits:clear()
-    
+
                     return false
                 end
-    
+
                 commits:AddAll(data)
-    
+
                 page = page + 1
                 self:getCommits(projectId, IsGetAll, callback)
 
@@ -499,12 +500,19 @@ end
 function GitlabService:getContentWithRaw(foldername, path, commitId, callback)
     local dataSourceInfo = GlobalStore.get("dataSourceInfo")
 
-    if(not commitId) then
+    if (not commitId) then
         commitId = "master"
     end
 
     local url =
-        format("%s/%s/%s/raw/%s/%s", dataSourceInfo.rawBaseUrl, dataSourceInfo.dataSourceUsername, foldername, commitId, path)
+        format(
+        "%s/%s/%s/raw/%s/%s",
+        dataSourceInfo.rawBaseUrl,
+        dataSourceInfo.dataSourceUsername,
+        foldername,
+        commitId,
+        path
+    )
 
     HttpRequest:GetUrl(
         {
@@ -528,8 +536,7 @@ function GitlabService:DownloadZIP(foldername, commitId, callback)
         return false
     end
 
-    local url =
-        format(
+    local url = format(
         "%s/%s/%s/repository/archive.zip?ref=%s",
         self.dataSourceInfo.rawBaseUrl,
         self.dataSourceInfo.dataSourceUsername,
@@ -549,7 +556,7 @@ function GitlabService:DownloadZIP(foldername, commitId, callback)
             end
         end,
         "access plus 5 mins",
-        true
+        false
     )
 end
 

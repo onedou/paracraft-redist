@@ -18,9 +18,8 @@
                 return format("%s%s", "版本：", tostring(Eval("revision")))
             end
 
-            function select_version()
-                local index = Eval("index")
-                echo(index, true)
+            function select_version(index)
+                VersionChange:SelectVersion(index)
             end
         </script>
         <aries:window
@@ -32,7 +31,12 @@
             onclose="VersionChange.ClosePage">
             <pe:gridview DataSource="<%=get_source()%>">
                 <Columns style="color:#FFFFF;textcolor:#FFFFF;">
-                    <input type="button" onclick="select_version" class="mc_light_grey_button_with_fillet" value='<%=get_value()%>' style='<%=version_button()%>' />
+                    <input type="button"
+                           onclick="select_version"
+                           class="mc_light_grey_button_with_fillet"
+                           value='<%=get_value()%>'
+                           name='<%=Eval("index")%>'
+                           style='<%=version_button()%>' />
                 </Columns>
             </pe:repeat>
         </aries:window>

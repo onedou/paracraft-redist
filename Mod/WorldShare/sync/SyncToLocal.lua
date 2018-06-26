@@ -304,7 +304,6 @@ function SyncToLocal:DownloadZIP()
             self.foldername.base32,
             commitId,
             function(bSuccess, downloadPath)
-                echo(downloadPath)
                 LocalService:new():MoveZipToFolder(downloadPath)
                 self:RefreshList()
                 GlobalStore.remove("commitId")
