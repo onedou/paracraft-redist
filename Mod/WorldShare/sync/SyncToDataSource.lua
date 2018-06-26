@@ -305,7 +305,7 @@ function SyncToDataSource:updateOne(file, callback)
         format(L "%s （%s） 更新中", currentLocalItem.filename, Utils.formatFileSize(currentLocalItem.filesize, "KB"))
     )
 
-    if (currentLocalItem.sha1 == currentRemoteItem.sha) then
+    if (currentLocalItem.sha1 == currentRemoteItem.sha and currentLocalItem.filename ~= "revision.xml") then
         if (type(callback) == "function") then
             Utils.SetTimeOut(callback)
         end

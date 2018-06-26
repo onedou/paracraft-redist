@@ -115,7 +115,7 @@ function LoginMain.showLoginModalImp(callback)
     local params = Utils:ShowWindow(320, 350, "Mod/WorldShare/login/LoginModal.html", "LoginModal")
 
     params._page.OnClose = function()
-        LoginMain.modalCall = nil
+        -- LoginMain.modalCall = nil
     end
 
     if (type(callback) == "function") then

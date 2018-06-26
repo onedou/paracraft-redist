@@ -64,10 +64,16 @@ function VersionChange:GetVersionSource(callback)
                 for key, item in ipairs(data) do
                     local path = item.title:gsub("keepwork commit: ", "")
 
+                    local date = {}
+                    for v in string.gmatch(item.created_at, "[^T]+") do
+                        date[#date + 1] = v
+                    end
+
                     if (path == "revision.xml") then
                         local currentRevision = {
                             path = path,
-                            commitId = item.id
+                            commitId = item.id,
+                            date = date[1]
                         }
 
                         self.allRevision:push_back(currentRevision)
