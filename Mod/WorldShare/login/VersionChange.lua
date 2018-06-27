@@ -16,6 +16,7 @@ NPL.load("(gl)Mod/WorldShare/store/Global.lua")
 NPL.load("(gl)Mod/WorldShare/login/LoginMain.lua")
 NPL.load("(gl)Mod/WorldShare/sync/SyncMain.lua")
 NPL.load("(gl)Mod/WorldShare/login/DeleteWorld.lua")
+NPL.load("(gl)Mod/WorldShare/login/LoginUserInfo.lua")
 
 local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
 local SyncMain = commonlib.gettable("Mod.WorldShare.sync.SyncMain")
@@ -23,10 +24,16 @@ local GitService = commonlib.gettable("Mod.WorldShare.service.GitService")
 local Utils = commonlib.gettable("Mod.WorldShare.helper.Utils")
 local GlobalStore = commonlib.gettable("Mod.WorldShare.store.Global")
 local LoginMain = commonlib.gettable("Mod.WorldShare.login.LoginMain")
+local LoginUserInfo = commonlib.gettable("Mod.WorldShare.login.LoginUserInfo")
 
 local VersionChange = commonlib.gettable("Mod.WorldShare.login.VersionChange")
 
 function VersionChange:init()
+    if(not LoginUserInfo.IsSignedIn()) then
+        _guihelper.MessageBox(L "登录后才能继续")
+        return false
+    end
+
     self.foldername = GlobalStore.get("foldername")
 
     LoginMain.showMessageInfo(L "请稍后...")
@@ -110,6 +117,9 @@ function VersionChange:GetRevisionContent(callback)
     end
 
     local currentItem = self.allRevision[index]
+    local selectWorld = GlobalStore.get('selectWorld')
+    local commitId = SyncMain:GetCurrentRevisionInfo()
+    commitId = commitId['id']
 
     GitService:new():getContentWithRaw(
         self.foldername.base32,
@@ -121,6 +131,20 @@ function VersionChange:GetRevisionContent(callback)
             end
 
             currentItem.revision = content
+            currentItem.shortId = string.sub(currentItem.commitId, 1, 5)
+
+            if(tonumber(selectWorld.revision) == tonumber(currentItem.revision)) then
+                currentItem.isActive = true
+            else
+                currentItem.isActive = false
+            end
+
+            if(currentItem.commitId == commitId) then
+                currentItem.isActiveFull = true
+            else
+                currentItem.isActiveFull = false
+            end
+
             index = index + 1
             self:GetRevisionContent(callback)
         end
@@ -134,8 +158,10 @@ end
 function VersionChange:SelectVersion(index)
     local selectWorld = GlobalStore.get("selectWorld")
     local foldername = GlobalStore.get("foldername")
-
-    GlobalStore.set("commitId", self.allRevision[index]["commitId"])
+    local commitId = self.allRevision[index]["commitId"]
+    
+    GlobalStore.set("commitId", commitId)
+    SyncMain:SetCurrentCommidId(commitId)
 
     local targetDir = format("%s/%s/", SyncMain.GetWorldFolderFullPath(), foldername.default)
 
