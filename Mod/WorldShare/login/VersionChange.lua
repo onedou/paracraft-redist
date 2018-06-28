@@ -36,6 +36,18 @@ function VersionChange:init()
 
     self.foldername = GlobalStore.get("foldername")
 
+    local IsEnterWorld = GlobalStore.get("IsEnterWorld")
+
+    if (IsEnterWorld) then
+        local selectWorld = GlobalStore.get("selectWorld")
+        local enterWorld = GlobalStore.get("enterWorld")
+
+        if(enterWorld.foldername == selectWorld.foldername) then
+            _guihelper.MessageBox(L "不能切换当前编辑的世界")
+            return
+        end
+    end
+
     LoginMain.showMessageInfo(L "请稍后...")
     self:GetVersionSource(
         function()

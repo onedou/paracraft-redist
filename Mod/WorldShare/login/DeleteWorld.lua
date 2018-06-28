@@ -76,36 +76,32 @@ function DeleteWorld.DeleteLocal()
     local foldername = selectWorld.foldername
 
     local function delete()
-        if (selectWorld.RemoveLocalFile and selectWorld:RemoveLocalFile()) then
-            InternetLoadWorld.RefreshAll()
-        elseif (selectWorld.remotefile) then
-            local targetDir = selectWorld.remotefile:gsub("^local://", "") -- local world, delete all files in folder and the folder itself.
+        local worldDir = selectWorld.worldpath
 
-            if (selectWorld.is_zip) then
-                if (ParaIO.DeleteFile(targetDir)) then
-                    if (type(callback) == "function") then
-                        callback()
-                    end
-                else
-                    _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+        if (selectWorld.is_zip) then
+            if (ParaIO.DeleteFile(worldDir)) then
+                if (type(callback) == "function") then
+                    callback()
                 end
             else
-                if (GameLogic.RemoveWorldFileWatcher) then
-                    GameLogic.RemoveWorldFileWatcher() -- file watcher may make folder deletion of current world directory not working.
-                end
-
-                if (commonlib.Files.DeleteFolder(targetDir)) then
-                    if (type(callback) == "function") then
-                        callback(foldername)
-                    end
-                else
-                    _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
-                end
+                _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+            end
+        else
+            if (GameLogic.RemoveWorldFileWatcher) then
+                GameLogic.RemoveWorldFileWatcher() -- file watcher may make folder deletion of current world directory not working.
             end
 
-            DeleteWorld.closeDeletePage()
-            LoginWorldList.RefreshCurrentServerList()
+            if (commonlib.Files.DeleteFolder(worldDir)) then
+                if (type(callback) == "function") then
+                    callback(foldername)
+                end
+            else
+                _guihelper.MessageBox(L "无法删除可能您没有足够的权限")
+            end
         end
+
+        DeleteWorld.closeDeletePage()
+        LoginWorldList.RefreshCurrentServerList()
     end
 
     if (selectWorld.status ~= 2) then

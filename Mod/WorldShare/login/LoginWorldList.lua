@@ -179,13 +179,12 @@ function LoginWorldList.changeRevision(callback)
     local localWorlds = GlobalStore.get("localWorlds")
 
     for key, value in ipairs(localWorlds) do
-        if (not value.is_zip) then
+        if (value.IsFolder) then
             local foldername = {}
             foldername.utf8 = value.foldername
             foldername.default = Encoding.Utf8ToDefault(value.foldername)
 
-            local WorldRevisionCheckOut =
-                WorldRevision:new():init(SyncMain.GetWorldFolderFullPath() .. "/" .. foldername.default .. "/")
+            local WorldRevisionCheckOut = WorldRevision:new():init(SyncMain.GetWorldFolderFullPath() .. "/" .. foldername.default .. "/")
             value.revision = WorldRevisionCheckOut:GetDiskRevision()
 
             local tag = LocalService:GetTag(foldername.default)
@@ -196,16 +195,11 @@ function LoginWorldList.changeRevision(callback)
                 value.size = 0
             end
         else
-            local zipWorldDir = {}
-            zipWorldDir.default = value.remotefile:gsub("local://", "")
-            zipWorldDir.utf8 = Encoding.Utf8ToDefault(zipWorldDir.default)
-
-            local zipFoldername = {}
-            zipFoldername.default = zipWorldDir.default:match("([^/\\]+)/[^/]*$")
-            zipFoldername.utf8 = Encoding.Utf8ToDefault(zipFoldername.default)
-
-            value.revision = LocalService:GetZipRevision(zipWorldDir.default)
-            value.size = LocalService:GetZipWorldSize(zipWorldDir.default)
+            value.revision = LocalService:GetZipRevision(value.worldpath)
+            value.size = LocalService:GetZipWorldSize(value.worldpath)
+            value.foldername = value.Title
+            value.is_zip = true
+            value.remotefile = format("local://%s", value.worldpath)
         end
 
         value.modifyTime = value.writedate
