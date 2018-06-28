@@ -214,7 +214,7 @@ function SyncMain:RefreshKeepworkList(callback)
         local dataSourceInfo = GlobalStore.get("dataSourceInfo")
         local localFiles = LocalService:new():LoadFiles(worldDir.default)
 
-        self:SetCommidId(lastCommitSha)
+        self:SetCurrentCommidId(lastCommitSha)
 
         GlobalStore.set("localFiles", localFiles)
 

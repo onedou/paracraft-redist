@@ -483,7 +483,9 @@ function LoginWorldList.GetDesForWorld()
     return str
 end
 
-function LoginWorldList.enterWorld()
+function LoginWorldList.enterWorld(index)
+    LoginWorldList.OnSwitchWorld(index)
+
     local enterWorld = GlobalStore.get("selectWorld")
     local enterWorldDir = GlobalStore.get("worldDir")
     local enterFoldername = GlobalStore.get("foldername")
@@ -498,7 +500,7 @@ function LoginWorldList.enterWorld()
         return
     end
 
-    if (LoginWorldList.status == 2) then
+    if (enterWorld.status == 2) then
         GlobalStore.set("willEnterWorld", InternetLoadWorld.EnterWorld)
 
         SyncCompare:syncCompare()
@@ -510,21 +512,20 @@ function LoginWorldList.enterWorld()
 end
 
 function LoginWorldList.sharePersonPage()
-    local url = LoginMain.personPageUrl --LoginMain.site .. "/wiki/mod/worldshare/share/#?type=person&userid=" .. login.userid;
+    local url = LoginMain.personPageUrl
     ParaGlobal.ShellExecute("open", url, "", "", 1)
 end
 
-function LoginWorldList.formatStatus(_status)
-    --LOG.std(nil, "debug", "_status", _status);
-    if (_status == 1) then
+function LoginWorldList.formatStatus(status)
+    if (status == 1) then
         return L "仅本地"
-    elseif (_status == 2) then
+    elseif (status == 2) then
         return L "仅网络"
-    elseif (_status == 3) then
+    elseif (status == 3) then
         return L "本地版本与远程数据源一致"
-    elseif (_status == 4) then
+    elseif (status == 4) then
         return L "本地版本更加新"
-    elseif (_status == 5) then
+    elseif (status == 5) then
         return L "远程版本更加新"
     else
         return L "获取状态中"
