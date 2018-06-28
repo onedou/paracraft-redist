@@ -158,12 +158,8 @@ function SyncMain:showBeyondVolume()
     SyncMain:ShowDialog("Mod/WorldShare/sync/BeyondVolume.html", "BeyondVolume")
 end
 
-function SyncMain.deleteWorldGithubLogin()
-    SyncMain:ShowDialog("Mod/WorldShare/sync/DeleteWorldGithub.html", DeleteWorldGithub)
-end
-
 function SyncMain:ShowDialog(url, name)
-    Utils:ShowWindow(500, 270, url, name)
+    Utils:ShowWindow(0, 0, url, name, 0, 0, "_fi", false)
 end
 
 function SyncMain:backupWorld()

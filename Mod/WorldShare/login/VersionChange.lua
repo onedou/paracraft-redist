@@ -56,7 +56,7 @@ function VersionChange:ClosePage()
 end
 
 function VersionChange:ShowPage()
-    Utils:ShowWindow(300, 400, "Mod/WorldShare/login/VersionChange.html", "VersionChange")
+    Utils:ShowWindow(0, 0, "Mod/WorldShare/login/VersionChange.html", "VersionChange", 0, 0, "_fi", false)
 end
 
 function VersionChange:GetVersionSource(callback)
@@ -168,9 +168,9 @@ function VersionChange:SelectVersion(index)
 
     commonlib.Files.DeleteFolder(targetDir)
 
-    self:ClosePage()
-
     SyncMain:syncToLocal()
+    
+    GlobalStore.set('willEnterWorld', self.ClosePage)
 end
 
 -- function VersionChange:FilterSameVersion(callback)

@@ -32,7 +32,7 @@ local DeleteWorld = commonlib.gettable("Mod.WorldShare.login.DeleteWorld")
 DeleteWorld.DeletePage = nil
 
 function DeleteWorld.ShowDeleteWorldPage()
-    Utils:ShowWindow(500, 270, "Mod/WorldShare/login/DeleteWorld.html", "DeleteWorld")
+    Utils:ShowWindow(0, 0, "Mod/WorldShare/login/DeleteWorld.html", "DeleteWorld", 0, 0, "_fi", false)
 end
 
 function DeleteWorld.setDeletePage()
