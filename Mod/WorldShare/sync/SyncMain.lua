@@ -55,6 +55,7 @@ function SyncMain:init()
 end
 
 function SyncMain:SyncWillEnterWorld()
+    echo(1111, true)
     -- 没有登陆则直接使用离线模式
     local enterWorld = GlobalStore.get("enterWorld")
 
@@ -105,7 +106,8 @@ function SyncMain:CommandEnter()
 
             GlobalStore.set("worldTag", worldTag)
         end
-
+        echo(currentWorld, true)
+        echo(11111, true)
         GlobalStore.set("enterWorld", currentWorld)
     end
 

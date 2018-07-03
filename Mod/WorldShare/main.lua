@@ -79,6 +79,7 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
+    echo(111222333, true)
     GlobalStore.set('IsEnterWorld', true)
     SyncMain:SyncWillEnterWorld()
 end

@@ -290,6 +290,24 @@ function loginResponse(page, response, err, callback)
     end
 end
 
+function LoginUserInfo.PWDValidation()
+    local info = LoginUserInfo.LoadSigninInfo()
+    local isDataCorrect = false
+
+    --check site data
+    if (info and info.loginServer) then
+        for key, item in ipairs(LoginUserInfo.serverLists) do
+            if (item.value == info.loginServer) then
+                isDataCorrect = true
+            end
+        end
+    end
+
+    if (not isDataCorrect) then
+        ParaIO.DeleteFile(LoginUserInfo.GetPasswordFile())
+    end
+end
+
 function LoginUserInfo.IsSignedIn()
     return LoginUserInfo.token ~= nil
 end
