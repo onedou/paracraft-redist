@@ -105,6 +105,8 @@ function SyncMain:CommandEnter()
 
             GlobalStore.set("worldTag", worldTag)
         end
+
+        GlobalStore.set("enterWorld", currentWorld)
     end
 
     LoginWorldList.RefreshCurrentServerList(handleSelectWorld)
