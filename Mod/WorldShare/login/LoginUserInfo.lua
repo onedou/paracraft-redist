@@ -240,7 +240,7 @@ function loginResponse(page, response, err, callback)
                                         categoryId = 1,
                                         categoryName = "作品网站",
                                         desc = "paracraft作品集",
-                                        displayName = LoginUserInfo.username,
+                                        displayName = "paracraft",--LoginUserInfo.username,
                                         domain = "paracraft",
                                         logoUrl = "/wiki/assets/imgs/paracraft.png",
                                         name = "paracraft",
