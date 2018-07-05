@@ -59,7 +59,7 @@ function ShareWorld.ShowPage()
     end
 
     local enterWorld = GlobalStore.get("enterWorld")
-    echo(enterWorld, true)
+
     if(not enterWorld) then
         _guihelper.MessageBox(L "此世界不支持分享")
         return false

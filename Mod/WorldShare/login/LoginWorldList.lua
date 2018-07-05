@@ -125,7 +125,7 @@ end
 
 function LoginWorldList.RefreshCurrentServerList(callback)
     LoginMain.setPageRefreshing(true)
-    echo(2222, true)
+
     if (not LoginUserInfo.IsSignedIn()) then
         LoginWorldList.getLocalWorldList(
             function()
