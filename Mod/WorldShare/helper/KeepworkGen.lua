@@ -109,31 +109,80 @@ function KeepworkGen:getCommand(command, content)
 end
 
 KeepworkGen.readmeDefault = [[
-### 作品介绍
+```@Paracraft
+styleID: 3
 
-本3D世界由[Paracraft](http://www.paracraft.cn/?lang=zh)创建。
-[Paracraft](http://www.paracraft.cn/?lang=zh)创意空间是一款免费的3D创作软件。
-适合全年龄层的用户使用。
-[Paracraft](http://www.paracraft.cn/?lang=zh)创意空间可以创建3D场景和人物，制作动画和电影，并支持使用NPL语言对世界内容进行代码控制。
-在软件中，还可欣赏不断更新的优秀电影作品，并创造属于您的个人作品。
+```
+```@BigFile
+styleID: 0
+bigFile:
+    src: >-
+    https://api.keepwork.com/storage/v0/siteFiles/205/raw
+    ext: mp4
+    filename: 小动画片头.mp4
+    size: 2264142
+```
+```@Text
+styleID: 1
+title:
+    name: Introduction of works
+    link: ''
+    target: _self
+paragraph:
+    data: >-
+    Designers of any classification need to have a certain fine arts foundation,
+    and even have certain hand drawing ability. When we use the computer to
+    design graphics, we are also imperceptibly using the art knowledge and
+    aesthetics that we store in the brain. Even the advanced artificial
+    intelligence can not replace the designer's aesthetic and art knowledge. In
+    the end, software is only a tool. If you want to improve your graphic sense
+    of aesthetics and design, you need to fill in the basic courses of art. In
+    the Internet visual design, the proportion of hand drawn in Internet design
+    is also increasing. 
 
-<br/>
+```
+```@Text
+styleID: 1
+title:
+    name: major function
+    link: ''
+    target: _self
+paragraph:
+    data: >-
+    - learn the basic principles of film and animation.
 
-### 主要功能
-– 学习电影与动画制作的基本原理。
-– 支持3D建模，骨骼绑定。
-– 支持镜头剪辑，并完成一部3D虚拟现实个人作品。
-– 支持建立个人作品wiki网站（可访问[Keepwork.com](http://keepwork.com)）
-– 支持发布作品到主流视频网站。
-– 支持NPL语言，可以用编程的方式制作交互式3D场景。
+    - support 3D modeling, bone binding.
 
-<br/>
+    - Supporting camera editing and completing a 3D virtual reality personal
+    work.
 
-**官网地址：**[www.paracraft.cn](http://www.paracraft.cn/?lang=zh)
-**软件下载：**[>点我查看<](http://www.paracraft.cn/download?lang=zh)
-**视频教程：**[>点我查看<](https://github.com/LiXizhi/HourOfCode/wiki)
+    - Support the establishment of Wiki website for personal works (accessible
+    to Keepwork.com)
 
-<br/>
+    - support the release of the work to the mainstream video site.
+
+```
+```@Text
+styleID: 1
+title:
+    name: Related help
+    link: ''
+    target: _self
+paragraph:
+    data: |-
+    Official website address:    www.paracraft.cn
+    Software download:   > point I look at <
+    Video tutorial:  > point I see <
+
+```
+```@Comment
+styleID: 0
+comment:
+    switch:
+    desc: card.switchComment
+    value: true
+
+```
 ]];
 
 KeepworkGen.readmeEnglish = [[
