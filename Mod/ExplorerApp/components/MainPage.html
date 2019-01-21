@@ -6,10 +6,69 @@
             MainPage = NPL.load("./MainPage.lua")
 
             MainPage.SetPage()
+
+            function select_category()
+                _guihelper.MessageBox('Show select category!!!!')
+            end
         ]]>
     </script>
-    <div style="width:200px;height:64px;color:#33ff33;background-color:#ff6a00" >
-        Hello World!!!!
+    <style type="text/mcss">
+        {
+            area = {
+                ["background-color"] = "#000000",
+                color = 'white'
+            },
+            strip = {
+                height = 45,
+                width = 960,
+            },
+            area_content = {
+                width = 960,
+                ['background-color'] = '#222222'
+            },
+            sidebar = {
+                float = 'left',
+                width = 120,
+                ['background-color'] = '#888888'
+            },
+            list = {
+                float = 'left',
+                width = 840,
+                ['background-color'] = '#777777'
+            }
+        }
+    </style>
+    <div class="area" name="area">
+        <div class="strip" name="strip">
+            <div class="strip_icon_1"></div>
+            <div class="strip_coions">0</div>
+            <div class="strip_icon_2"></div>
+        </div>
+        <div class="area_content" name="area_content">
+            <div class="sidebar">
+                <pe:gridview name="categoryTree" DataSource="<%={{a=1},{a=2}}%>" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
+                    <Columns>
+                        <div style="width:120px;height: 50px;color:#ffffff">
+                            <input type="button" value='11111' onclick="select_category" />
+                        </div>
+                    </Columns>
+                    <PagerSettings Position="Bottom" height="1" />
+                    <PagerTemplate AutoHidePager="true">
+                        <form>
+                            <label name="page" style="height:18px;margin-left:59px;margin-top:-95px;color:#ffffff;" />
+                            <input type="button" name="pre"  invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"上一页"%>' style="margin-left:35px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;224 167 13 15" />
+                            <input type="button" name="next" invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"下一页"%>' style="margin-left:40px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#249 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 167 13 15" />
+                        </form>
+                    </PagerTemplate>
+                </pe:gridview>
+            </div>
+            <div class="list">
+                <div>search!!!!!</div>
+                <div>
+                    project list!!!!!
+                </div>
+            </div>
+        </div>
     </div>
 </pe:mcml>
 </body>

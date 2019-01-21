@@ -26,6 +26,48 @@ function MainPage:SetPage()
 	Store:Set("page/MainPage", document:GetPageCtrl())
 end
 
+function MainPage:Refresh(times)
+    local MainPagePage = Store:Get('page/MainPage')
+
+    if MainPagePage then
+        MainPagePage:Refresh(times or 0.01)
+    end
+end
+
 function MainPage.OnScreenSizeChange()
-	echo('Hello World!!!!', true)
+	local MainPage = Store:Get('page/MainPage')
+
+    if (not MainPage) then
+        return false
+    end
+
+    local height = math.floor(Screen:GetHeight())
+    local width = math.floor(Screen:GetWidth())
+
+    local areaNode = MainPage:GetNode("area")
+    areaNode:SetCssStyle('height', height)
+    areaNode:SetCssStyle('width', width)
+    
+    local stripNode = MainPage:GetNode("strip")
+    -- stripNode:SetCssStyle('width', width)
+    
+    local areaContentNode = MainPage:GetNode("area_content")
+    areaContentNode:SetCssStyle('height', (height - 45))
+    -- areaContentNode:SetCssStyle('width', width)
+
+    -- local marginLeft = math.floor(Screen:GetWidth())
+
+    -- areaNode:SetCssStyle('margin-left', marginLeft)
+
+    -- local areaContentNode = HistoryManagerPage:GetNode("area_content")
+
+
+    -- areaContentNode:SetCssStyle('height', height - 47)
+    -- areaContentNode:SetCssStyle('margin-left', marginLeft)
+
+    -- local splitNode = HistoryManagerPage:GetNode("area_split")
+
+    -- splitNode:SetCssStyle("height", height - 47)
+
+    MainPage:Refresh(0)
 end
