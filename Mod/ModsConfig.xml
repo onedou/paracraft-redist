@@ -1,0 +1,9 @@
+
+<mods>
+	<mod name="ExplorerApp">
+		<world checked="true" name="global"/>
+	</mod>
+	<mod name="WorldShare">
+		<world checked="true" name="global"/>
+	</mod>
+</mods>

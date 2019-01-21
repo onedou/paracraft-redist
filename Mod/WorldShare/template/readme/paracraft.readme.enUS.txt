@@ -1,0 +1,51 @@
+```@BigFile
+bigFile:
+  src: >-
+    https://api.keepwork.com/storage/v0/siteFiles/626/raw#小动画片头.mp4
+  ext: mp4
+  filename: 小动画片头.mp4
+  size: 2264142
+```
+```@Text
+styleID: 0
+title:
+  name: Introduction of works
+  link: ''
+  target: _self
+paragraph:
+  data: |-
+        Designers of any classification need to have a certain fine arts foundation,and even have certain hand drawing ability. When we use the computer todesign graphics, we are also imperceptibly using the art knowledge andaesthetics that we store in the brain. Even the advanced artificialintelligence can not replace the designer's aesthetic andart knowledge. In the end, software is only a tool. If you want to improve your graphic sense of aesthetics and design, you need to fill in the basic courses of art. In the Internet visual design, the proportion of hand drawn in Internet design is also increasing. 
+```
+```@Text
+styleID: 1
+title:
+    name: Major function
+    link: ''
+    target: _self
+paragraph:
+    data: |-
+        - learn the basic principles of film and animation.
+        
+        - support 3D modeling, bone binding.
+        
+        - Supporting camera editing and completing a 3D virtual reality personal work.
+        
+        - Support the establishment of Wiki website for personal works (accessible to Keepwork.com)
+        
+        - support the release of the work to the mainstream video site.
+```
+```@Text
+styleID: 1
+title:
+        name: Related help
+        link: ''
+        target: _self
+paragraph:
+    data: |-
+        Official website address: www.paracraft.cn
+        Software download: > [point I look at](http://www.paracraft.cn) <
+        Video tutorial: > [point I see](http://www.paracraft.cn) <
+```
+```@Comment
+styleID: 1
+```
