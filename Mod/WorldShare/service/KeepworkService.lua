@@ -295,6 +295,34 @@ function KeepworkService:GetProject(pid, callback)
     )
 end
 
+function KeepworkService:GetProjects(filter, callback)
+    local headers = self:GetHeaders()
+    local filterUrl = ''
+
+    if type(filter) == 'string' then
+        filterUrl = format("classifyTags-like=%%|%s|%%", filter or '')
+    end
+
+    self:Request(
+        format("/projects?%s", filterUrl),
+        "GET",
+        nil,
+        headers,
+        function(data, err)
+            if type(callback) ~= 'function' then
+                return false
+            end
+
+            if err ~= 200 or not data or not data.world then
+                callback()
+                return false
+            end
+
+            callback(data)
+        end
+    )
+end
+
 -- @param usertoken: keepwork user token
 function KeepworkService:Profile(callback, token)
     local headers = self:GetHeaders()
@@ -491,8 +519,8 @@ function KeepworkService:SetRatedProject(kpProjectId, rate, callback)
                 self:Request("/projectRates", "POST", params, headers, callback)
             end
 
-            if err == 200 and type(data) == 'table' and #data == 1 and type(data[1].id) == 'number' then
-                self:Request(format("/projectRates/%d", data[1].id), "PUT", params, headers, callback)
+            if err == 200 and type(data) == 'table' and #data == 1 and type(data[1].projectId) == 'number' then
+                self:Request(format("/projectRates/%d", data[1].projectId), "PUT", params, headers, callback)
             end
         end
     )

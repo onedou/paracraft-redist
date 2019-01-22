@@ -147,11 +147,14 @@ function WorldShare:OnWorldLoad()
     local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 end
 
-function WorldShare:OnLeaveWorld()
+function WorldShare:OnLeaveWorld(params)
     Store:Remove("world/selectWorld")
     Store:Remove("world/worldIndex")
     Store:Remove("world/shareMode")
     Store:Remove("world/worldDir")
     Store:Remove("world/foldername")
-    Store:Remove('world/openKpProjectId')
+
+    if (Store:Get("world/isEnterWorld")) then
+        Store:Remove("world/openKpProjectId")
+    end
 end

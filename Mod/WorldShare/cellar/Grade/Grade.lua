@@ -57,12 +57,12 @@ function Grade:GetProjectId()
         return tagInfo.kpProjectId
     end
 
-    if openKpProjectId then
-        return openKpProjectId
-    end
-
     if urlKpProjectId then
         return urlKpProjectId
+    end
+
+    if openKpProjectId then
+        return openKpProjectId
     end
 end
 
@@ -143,7 +143,7 @@ function Grade:Confirm(score)
         rate,
         function(data, err)
             if err == 200 then
-                GradeLocalData:RecordProjectId(tagInfo.kpProjectId)
+                GradeLocalData:RecordProjectId(self:GetProjectId())
                 _guihelper.MessageBox(L"感谢您为该作品打分！")
             end
         end

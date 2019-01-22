@@ -12,11 +12,32 @@ local Screen = commonlib.gettable("System.Windows.Screen")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
 local MainPage = NPL.export()
 
+MainPage.categoryTree = {
+    {key = 0, value = L'精选'},
+    {key = 1, value = L'单人'},
+    {key = 2, value = L'双人'},
+    {key = 3, value = L'对战'},
+    {key = 4, value = L'动画'},
+    {key = 5, value = L'收藏'}
+}
+
 function MainPage:ShowPage()
 	local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/MainPage.html", "Mod.ExplorerApp.MainPage", 0, 0, "_fi", false)
+
+    local MainPagePage = Store:Get('page/MainPage')
+
+    if MainPagePage then
+        MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', self.categoryTree)
+        MainPagePage:GetNode('worksTree'):SetAttribute('DateSource', {
+            {
+                projectId = 656
+            }
+        })
+    end
 
 	Screen:Connect("sizeChanged", MainPage, MainPage.OnScreenSizeChange, "UniqueConnection")
     MainPage.OnScreenSizeChange()

@@ -23,7 +23,7 @@
     <style type="text/mcss">
         {
             close = {
-                ['margin-top'] = -10,
+                ['margin-top'] = 10,
                 ['margin-right'] = 10,
                 float = 'left',
                 background = 'Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7',
@@ -38,6 +38,23 @@
                 height = 45,
                 width = 960,
                 ['background-color'] = '#232223'
+            },
+            balance = {
+                width = 300,
+                height = 30,
+                ['background-color'] = '#555555',
+                position = 'relative',
+                align = 'center',
+                ['margin-top'] = 7.5
+            },
+            strip_icon_1 = {
+                float = 'left'
+            },
+            strip_coins = {
+                float = 'left'
+            },
+            strip_icon_2 = {
+                float = 'left'
             },
             area_content = {
                 width = 960,
@@ -101,31 +118,31 @@
             },
             list_content = {
                 padding = 10
-                width = 600
             },
             work_item = {
-                float = 'left',
-                height = 60,
-                width = 125,
-                ['background-color'] = '#ffffff'
+                height = 120,
+                width = 250,
+                ['background-color'] = '#ffffff',
+                ['margin-right'] = 10,
+                ['margin-bottom'] = 10
             }
         }
     </style>
     <div class="area" name="area">
         <div class="strip" name="strip">
-            <div>
-                <div class="strip_icon_1"></div>
-                <div class="strip_coions">0</div>
-                <div class="strip_icon_2"></div>
+            <div class="balance">
+                <div class="strip_icon_1">star</div>
+                <div class="strip_coins">1</div>
+                <div class="strip_icon_2">setting</div>
             </div>
             <input onclick="close()" class="close" type="button" align="right" />
         </div>
         <div class="area_content" name="area_content">
             <div class="sidebar">
-                <pe:gridview name="categoryTree" DataSource="<%={{a=1},{a=2}}%>" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
+                <pe:gridview name="categoryTree" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
                     <Columns>
                         <div>
-                            <input type="button" value='11111' onclick="select_category" class="category_button"/>
+                            <input type="button" value='<%=Eval("value")%>' onclick="select_category" class="category_button"/>
                         </div>
                     </Columns>
                     <PagerSettings Position="Bottom" height="1" />
@@ -149,10 +166,14 @@
                     </div>
                 </div>
                 <div class="list_content">
-                    <pe:gridview name="worksTree" style="position:relative;text-align:left" DataSource="<%={{a=1},{a=2}}%>" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
+                    <pe:gridview name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="3" AllowPaging="false">
                         <Columns>
                             <div class="work_item">
-                                Item11111
+                                <div><%=format('%s%d', L'项目ID:', Eval('projectId'))%></div>
+                                <div>
+                                    <div>DOWNLOAD</div>
+                                    <div>FAVORITE</div>
+                                </div>
                             </div>
                         </Columns>
                         <PagerSettings Position="Bottom" height="1" />
