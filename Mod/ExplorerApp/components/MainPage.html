@@ -22,6 +22,14 @@
             function select_project()
                 _guihelper.MessageBox(1111111)
             end
+
+            function download()
+                _guihelper.MessageBox('d')
+            end
+
+            function favorite()
+            _guihelper.MessageBox('f')
+            end
         ]]>
     </script>
     <style type="text/mcss">
@@ -129,6 +137,72 @@
                 ['background-color'] = '#ffffff',
                 ['margin-right'] = 10,
                 ['margin-bottom'] = 10
+            },
+            radius = {
+                position = 'relative',
+                height = 120,
+                width = 250,
+                background = "textures/explorer_32bits.png;37 28 16 15:4 4 4 4",
+            },
+            project_id = {
+                ['margin-left'] = 10,
+                ['margin-top'] = 10,
+                color = '#ffffff',
+                ['font-size'] = 12,
+                ['base-font-size'] = 12,
+                background = "textures/explorer_32bits.png;3 3 30 20:8 8 8 8",
+                height = 20,
+                width = 80,
+                ['text-align'] = 'center'
+            },
+            item_button = {
+                ['margin-top'] = 65,
+                ['margin-left'] = 175,
+            },
+            download = {
+                float = 'left'
+                width = 30,
+                height = 18,
+                background = "textures/explorer_32bits.png;3 3 30 20:8 8 8 8",
+            },
+            download_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 9,
+                ['margin-top'] = 4,
+                background = "textures/explorer_32bits.png;37 3 12 12",
+            },
+            download_icon_click = {
+                position = 'relative',
+                width = 30,
+                height = 18,
+                background = ''
+            },
+            favorite = {
+                float = 'left',
+                background = "textures/explorer_32bits.png;3 3 30 20:8 8 8 8",
+                width = 30,
+                height = 18,
+                ['margin-left'] = 4
+            },
+            favorite_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 9,
+                ['margin-top'] = 3,
+                background = 'textures/explorer_32bits.png;53 3 12 12',
+            },
+            favorite_icon_click = {
+                position = 'relative',
+                width = 30,
+                height = 18,
+                background = ''
+            },
+            click = {
+                position = 'relative',
+                width = 250,
+                height = 120,
+                background = ''
             }
         }
     </style>
@@ -173,11 +247,18 @@
                     <pe:gridview name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="3" AllowPaging="false">
                         <Columns>
                             <div class="work_item">
-                                
-                                <div><%= format('%s%d', L'项目ID:', Eval('projectId'))%></div>
-                                <div>
-                                    <div>DOWNLOAD</div>
-                                    <div>FAVORITE</div>
+                                <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
+                                <div class="radius"></div>
+                                <div class="project_id"><%= format('%s%d', L'项目ID:', Eval('projectId'))%></div>
+                                <div class="item_button">
+                                    <div class="download">
+                                        <input type="button" class="download_icon_click" name='<%=Eval("index")%>' onclick="download" />
+                                        <div class="download_icon"></div>
+                                    </div>
+                                    <div class="favorite">
+                                        <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="favorite" />
+                                        <div class="favorite_icon"></div>
+                                    </div>
                                 </div>
                             </div>
                         </Columns>
