@@ -153,4 +153,5 @@ function WorldShare:OnLeaveWorld()
     Store:Remove("world/shareMode")
     Store:Remove("world/worldDir")
     Store:Remove("world/foldername")
+    Store:Remove('world/openKpProjectId')
 end

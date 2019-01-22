@@ -612,6 +612,18 @@ function KeepworkService:SaveSigninInfo(info)
     end
 end
 
+function KeepworkService:GetProjectFromUrlProtocol()
+    local cmdline = ParaEngine.GetAppCommandLine()
+    local urlProtocol = string.match(cmdline or "", "paracraft://(.*)$")
+    urlProtocol = Encoding.url_decode(urlProtocol or "")
+
+    local kpProjectId = urlProtocol:match('kpProjectId="([%S]+)"')
+
+    if kpProjectId then
+        return kpProjectId
+    end
+end
+
 -- return nil or user token in url protocol
 function KeepworkService:GetUserTokenFromUrlProtocol()
     local cmdline = ParaEngine.GetAppCommandLine()

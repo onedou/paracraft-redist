@@ -243,6 +243,7 @@ function UserConsole:HandleWorldId(pid)
         tonumber(pid),
         function(worldInfo)
             if worldInfo and worldInfo.archiveUrl then
+                Store:Set('world/openKpProjectId', pid)
                 HandleLoadWorld(worldInfo.archiveUrl)
             else
                 _guihelper.MessageBox(L"世界不存在")

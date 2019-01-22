@@ -34,6 +34,14 @@ function MainPage:Refresh(times)
     end
 end
 
+function MainPage:Close()
+    local MainPagePage = Store:Get('page/MainPage')
+
+    if MainPagePage then
+        MainPagePage:CloseWindow()
+    end
+end
+
 function MainPage.OnScreenSizeChange()
 	local MainPage = Store:Get('page/MainPage')
 
@@ -49,11 +57,11 @@ function MainPage.OnScreenSizeChange()
     areaNode:SetCssStyle('width', width)
     
     local stripNode = MainPage:GetNode("strip")
-    -- stripNode:SetCssStyle('width', width)
-    
+    stripNode:SetCssStyle('margin-left', (width - 960) / 2)
+
     local areaContentNode = MainPage:GetNode("area_content")
     areaContentNode:SetCssStyle('height', (height - 45))
-    -- areaContentNode:SetCssStyle('width', width)
+    areaContentNode:SetCssStyle('margin-left', (width - 960) / 2)
 
     -- local marginLeft = math.floor(Screen:GetWidth())
 

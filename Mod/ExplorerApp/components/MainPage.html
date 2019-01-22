@@ -10,10 +10,26 @@
             function select_category()
                 _guihelper.MessageBox('Show select category!!!!')
             end
+
+            function search()
+                _guihelper.MessageBox('Search!!!!!')
+            end
+
+            function close()
+                MainPage:Close()
+            end
         ]]>
     </script>
     <style type="text/mcss">
         {
+            close = {
+                ['margin-top'] = -10,
+                ['margin-right'] = 10,
+                float = 'left',
+                background = 'Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7',
+                width = 26,
+                height = 26
+            },
             area = {
                 ["background-color"] = "#000000",
                 color = 'white'
@@ -21,35 +37,95 @@
             strip = {
                 height = 45,
                 width = 960,
+                ['background-color'] = '#232223'
             },
             area_content = {
                 width = 960,
                 ['background-color'] = '#222222'
             },
+            category_button = {
+                ['margin-top'] = 5,
+                width = 100,
+                height = 28,
+                ['font-size'] = 12,
+                margin = 0,
+                padding = 0,
+                ['margin-left'] = 10
+                color = '#ffffff',
+                background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#179 89 21 21:4 4 4 4"
+            },
             sidebar = {
                 float = 'left',
                 width = 120,
-                ['background-color'] = '#888888'
+                ['background-color'] = '#4d4d4d'
             },
             list = {
                 float = 'left',
                 width = 840,
-                ['background-color'] = '#777777'
+                ['background-color'] = '#393939'
+            },
+            list_search_tool = {
+
+            },
+            list_search_bar = {
+                float = 'left',
+                ['margin-left'] = 450,
+                ['margin-top'] = 22,
+                textcolor = "#ffffff",
+                height = 30,
+                background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
+            },
+            list_search_textfield = {
+                width = 266,
+                height = 30,
+                background = '',
+                textcolor = '#ffffff'
+            },
+            list_search_button = {
+                color = "#cccccc",
+                background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                height = 26,
+                margin = 2,
+                ['min-width'] = 32
+            },
+            list_filter = {
+                float = 'left',
+                ['margin-top'] = 22,
+            },
+            list_filter_button = {
+                color = "#cccccc",
+                ['margin-left'] = 20,
+                background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                height = 30,
+                ['min-width'] = 32
+            },
+            list_content = {
+                padding = 10
+                width = 600
+            },
+            work_item = {
+                float = 'left',
+                height = 60,
+                width = 125,
+                ['background-color'] = '#ffffff'
             }
         }
     </style>
     <div class="area" name="area">
         <div class="strip" name="strip">
-            <div class="strip_icon_1"></div>
-            <div class="strip_coions">0</div>
-            <div class="strip_icon_2"></div>
+            <div>
+                <div class="strip_icon_1"></div>
+                <div class="strip_coions">0</div>
+                <div class="strip_icon_2"></div>
+            </div>
+            <input onclick="close()" class="close" type="button" align="right" />
         </div>
         <div class="area_content" name="area_content">
             <div class="sidebar">
                 <pe:gridview name="categoryTree" DataSource="<%={{a=1},{a=2}}%>" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
                     <Columns>
-                        <div style="width:120px;height: 50px;color:#ffffff">
-                            <input type="button" value='11111' onclick="select_category" />
+                        <div>
+                            <input type="button" value='11111' onclick="select_category" class="category_button"/>
                         </div>
                     </Columns>
                     <PagerSettings Position="Bottom" height="1" />
@@ -63,9 +139,31 @@
                 </pe:gridview>
             </div>
             <div class="list">
-                <div>search!!!!!</div>
-                <div>
-                    project list!!!!!
+                <div class=list_search_tool>
+                    <div class="list_search_bar">
+                        <input type="text" name="content" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入项目ID"%>' rows="1" CaretColor="#FFFFFFFF" />
+                        <input onclick="search()" class="list_search_button" type="button" value='<%=L"搜索"%>' />
+                    </div>
+                    <div class="list_filter">
+                        <input class="list_filter_button" type="button" value='<%=L"综合"%>' />
+                    </div>
+                </div>
+                <div class="list_content">
+                    <pe:gridview name="worksTree" style="position:relative;text-align:left" DataSource="<%={{a=1},{a=2}}%>" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
+                        <Columns>
+                            <div class="work_item">
+                                Item11111
+                            </div>
+                        </Columns>
+                        <PagerSettings Position="Bottom" height="1" />
+                        <PagerTemplate AutoHidePager="true">
+                            <form>
+                                <label name="page" style="height:18px;margin-left:59px;margin-top:-95px;color:#ffffff;" />
+                                <input type="button" name="pre"  invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"上一页"%>' style="margin-left:35px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;224 167 13 15" />
+                                <input type="button" name="next" invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"下一页"%>' style="margin-left:40px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#249 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 167 13 15" />
+                            </form>
+                        </PagerTemplate>
+                    </pe:gridview>
                 </div>
             </div>
         </div>
