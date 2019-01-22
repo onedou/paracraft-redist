@@ -32,7 +32,7 @@ function MainPage:ShowPage()
 
     if MainPagePage then
         MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', self.categoryTree)
-        MainPagePage:GetNode('worksTree'):SetAttribute('DateSource', {
+        MainPagePage:GetNode('worksTree'):SetAttribute('DataSource', {
             {
                 projectId = 656
             }

@@ -18,6 +18,10 @@
             function close()
                 MainPage:Close()
             end
+
+            function select_project()
+                _guihelper.MessageBox(1111111)
+            end
         ]]>
     </script>
     <style type="text/mcss">
@@ -169,7 +173,8 @@
                     <pe:gridview name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="3" AllowPaging="false">
                         <Columns>
                             <div class="work_item">
-                                <div><%=format('%s%d', L'项目ID:', Eval('projectId'))%></div>
+                                
+                                <div><%= format('%s%d', L'项目ID:', Eval('projectId'))%></div>
                                 <div>
                                     <div>DOWNLOAD</div>
                                     <div>FAVORITE</div>
