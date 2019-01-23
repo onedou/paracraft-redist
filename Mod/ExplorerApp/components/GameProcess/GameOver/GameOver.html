@@ -1,0 +1,32 @@
+<html>
+<body>
+<pe:mcml>
+    <script refresh="false" type="text/npl" src="SetCoins.lua">
+        UpdatePassword = NPL.load('./UpdatePassword.lua')
+        Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+
+        UpdatePassword:SetPage()
+
+        function get_window_style()
+            return Utils.FixCenter(360, 232)
+        end
+
+        function close()
+            UpdatePassword:ClosePage()
+        end
+    </script>
+    <div width="100%" height="100%">
+            <aries:window
+            class="default"
+            mode="thin"
+            width="360"
+            height="232"
+            style="<%=get_window_style()%>"
+            title='<%=L"修改密码" %>'
+            onclose="close()">
+            修改密码
+            </aries:window>
+    </div>
+</pe:mcml>
+</body>
+</html>

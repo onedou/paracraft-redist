@@ -11,6 +11,7 @@ local PurchasingCode = NPL.load("(gl)Mod/ExplorerApp/components/PurchasingCode/P
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Notice = NPL.load("./Notice/Notice.lua")
+local Result = NPL.load("./Result/Result.lua")
 
 local PurchasingCode = NPL.export()
 
@@ -33,4 +34,9 @@ end
 function PurchasingCode:GetNotice()
     self:ClosePage()
     Notice:ShowPage()
+end
+
+function PurchasingCode:Confirm()
+    self:ClosePage()
+    Result:ShowPage()
 end

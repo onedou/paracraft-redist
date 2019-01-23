@@ -27,7 +27,7 @@
                 _guihelper.MessageBox('d')
             end
 
-            function favorite()
+            function myfavorite()
                 _guihelper.MessageBox('f')
             end
 
@@ -38,7 +38,7 @@
             function get_image(extra)
                 echo(extra.imageUrl, true)
 
-                return "position:relative;top:-100px;left:0;width: 100px;height: 100px;background:url('" .. extra.imageUrl .. "');"
+                return "position:relative;top:-113px;left:0;width:250px;height:120px;background:url(http://c.hiphotos.baidu.com/image/pic/item/f703738da9773912311dc99af5198618367ae216.jpg?e=4694582148&token=LYZsjH0681n9sWZqCM4E2KmU6DsJOE7CAM4O3eJq:EmJc-bbnC9TCRaA8hBDy3HjksBY=)"
             end
         ]]>
     </script>
@@ -85,7 +85,7 @@
                 width = 220,
                 height = 25,
                 ['text-align'] = 'center',
-                ['background-color'] = '#737373',
+                background = 'textures/explorer_32bits.png#31 131 24 24:4 4 4 4',
                 ['margin-top'] = 3,
                 ['margin-left'] = 10
             },
@@ -308,11 +308,11 @@
                                         <div class="download_icon"></div>
                                     </div>
                                     <div class="favorite">
-                                        <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="favorite" />
+                                        <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="myfavorite" />
                                         <div class="favorite_icon"></div>
                                     </div>
                                 </div>
-                                <div style="<%=get_image(Eval('extra'))%>">123123</div>
+                                <div style="<%=get_image(Eval('extra'))%>"></div>
                             </div>
                         </Columns>
                         <PagerSettings Position="Bottom" height="1" />

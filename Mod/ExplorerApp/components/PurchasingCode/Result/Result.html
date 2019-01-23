@@ -1,31 +1,86 @@
 <html>
 <body>
 <pe:mcml>
-    <script refresh="false" type="text/npl" src="SetCoins.lua">
-        SetCoins = NPL.load('./SetCoins.lua')
-        Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+    <script refresh="false" type="text/npl" src="Result.lua">
+        <![CDATA[
+            Result = NPL.load('./Result.lua')
+            Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
-        SetCoins:SetPage()
+            Result:SetPage()
 
-        function get_window_style()
-            return Utils.FixCenter(360, 232)
-        end
+            function get_window_style()
+                return Utils.FixCenter(360, 232)
+            end
 
-        function close()
+            function close()
+                Result:ClosePage()
+            end
 
-        end
+            function container()
+                local style = Utils.FixCenter(380, 248)
+                return style .. ';background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8)';
+            end
+        ]]>
     </script>
+    <style type="text/scss">
+        {
+            strip = {
+                height = 40,
+                padding = 10
+            },
+            strip_title = {
+                float = 'left'
+            },
+            balance = {
+                float = 'left',
+                ['margin-left'] = 10
+            },
+            close = {
+                float = 'left',
+                ['margin-left'] = 10
+            },
+            close_button = {
+                background = 'Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7',
+                width = 26,
+                height = 26
+            },
+            area = {
+                ['padding-top'] = 16,
+                ['padding-left'] = 13,
+                ['padding-right'] = 13,
+            },
+            confirm = {
+                position = 'relative',
+                align = 'center',
+                color = '#ffffff',
+                width = 87,
+                height = 32,
+                background = 'textures/explorer_32bits.png#60 131 17 16:3 3 3 3',
+                ['margin-top'] = 25
+            }
+        }
+    </style>
     <div width="100%" height="100%">
-            <aries:window
-            class="default"
-            mode="thin"
-            width="360"
-            height="232"
-            style="<%=get_window_style()%>"
-            title='<%=L"金币设置" %>'
-            onclose="close()">
-            Set Coins
-            </aries:window>
+        <div class="default" width="382" height="248" style="<%= container() %>">
+            <div class="strip">
+                <div class="strip_title">激活码充值</div>
+                <div class="balance">
+                    余额: 32 <div style="float:left" onclick="purchasing_code">充值</div>
+                </div>
+                <div class="close">
+                    <input onclick="close()" class="close_button" type="button"/>
+                </div>
+            </div>
+            <div style="height:1px;" width="100%" class="mc_line"></div>
+            <div class="area">
+                <div>SUCCESS ICON</div>
+                <div>充值成功</div>
+                <div>获得10000金币</div>
+                <div>
+                    <input type="button" enable_ime="false" class="confirm" value="确定" onclick="close()" />
+                </div>
+            </div>
+        </div>
     </div>
 </pe:mcml>
 </body>

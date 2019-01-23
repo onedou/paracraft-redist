@@ -10,6 +10,7 @@ local Notice = NPL.load("(gl)Mod/ExplorerApp/components/Notice/Notice.lua")
 ]]
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+
 local Notice = NPL.export()
 
 function Notice:ShowPage()
