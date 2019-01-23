@@ -91,18 +91,16 @@ function MainPage:SetWorkdsTree()
         return false
     end
 
-    -- Projects:GetProjects(nil, function(data, err)
-    --     echo(data, true)
-    --     echo(err, true)
-    -- end)
+    Projects:GetProjects("paracraft专属", function(data, err)
+        if not data or not data.rows then
+            return false
+        end
 
-    MainPage:GetNode('worksTree'):SetAttribute('DataSource', {
-        {
-            projectId = 656
-        }
-    })
+        MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
+        self:Refresh()
+    end)
 end
 
 function MainPage:SetCoins()
-    SystemPassword:ShowPage()
+    Password:ShowPage()
 end

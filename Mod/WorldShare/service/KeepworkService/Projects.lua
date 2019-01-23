@@ -14,16 +14,16 @@ local Projects = NPL.export()
 
 function Projects:GetProjects(filter, callback)
     local headers = KeepworkService:GetHeaders()
-    local filterUrl = ''
+    local params = {}
 
     if type(filter) == 'string' then
-        filterUrl = format("classifyTags-like=%%|%s|%%", filter or '')
+        params["classifyTags-like"] = format("%%%s%%", filter)
     end
 
     KeepworkService:Request(
         format("/projects/search", filterUrl),
         "POST",
-        nil,
+        params,
         headers,
         function(data, err)
             if type(callback) ~= 'function' then

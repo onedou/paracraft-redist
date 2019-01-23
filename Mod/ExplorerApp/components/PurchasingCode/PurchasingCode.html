@@ -1,31 +1,40 @@
 <html>
 <body>
 <pe:mcml>
-    <script refresh="false" type="text/npl" src="SetCoins.lua">
-        SetCoins = NPL.load('./SetCoins.lua')
+    <script refresh="false" type="text/npl" src="PurchasingCode.lua">
+        PurchasingCode = NPL.load('./PurchasingCode.lua')
         Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
-        SetCoins:SetPage()
+        PurchasingCode:SetPage()
 
         function get_window_style()
             return Utils.FixCenter(360, 232)
         end
 
         function close()
+            PurchasingCode:ClosePage()
+        end
 
+        function get_notice()
+            PurchasingCode:GetNotice()
         end
     </script>
     <div width="100%" height="100%">
-            <aries:window
-            class="default"
-            mode="thin"
-            width="360"
-            height="232"
-            style="<%=get_window_style()%>"
-            title='<%=L"金币设置" %>'
-            onclose="close()">
-            Set Coins
-            </aries:window>
+        <aries:window
+        class="default"
+        mode="thin"
+        width="360"
+        height="232"
+        style="<%=get_window_style()%>"
+        title='<%=L"激活码充值" %>'
+        onclose="close()">
+        <div>
+            <input type="text" />
+        </div>
+        <div onclick="get_notice">
+            （如何获得激活码？）
+        </div>
+        </aries:window>
     </div>
 </pe:mcml>
 </body>

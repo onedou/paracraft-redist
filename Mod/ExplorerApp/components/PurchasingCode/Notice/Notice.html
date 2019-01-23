@@ -1,31 +1,50 @@
 <html>
 <body>
 <pe:mcml>
-    <script refresh="false" type="text/npl" src="SetCoins.lua">
-        SetCoins = NPL.load('./SetCoins.lua')
+    <script refresh="false" type="text/npl" src="Notice.lua">
+        Notice = NPL.load('./Notice.lua')
         Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
-        SetCoins:SetPage()
+        Notice:SetPage()
 
         function get_window_style()
             return Utils.FixCenter(360, 232)
         end
 
         function close()
-
+            Notice:ClosePage()
         end
     </script>
     <div width="100%" height="100%">
-            <aries:window
-            class="default"
-            mode="thin"
-            width="360"
-            height="232"
-            style="<%=get_window_style()%>"
-            title='<%=L"金币设置" %>'
-            onclose="close()">
-            Set Coins
-            </aries:window>
+        <aries:window
+        class="default"
+        mode="thin"
+        width="360"
+        height="232"
+        style="<%=get_window_style()%>"
+        title='<%=L"激活码说明" %>'
+        onclose="close()">
+            <div>
+                一、怎么获得激活码？
+            </div>
+            <div>
+                方法一：向代理商购买本公司统一发售的充值卡，充值卡上有唯一的激活码。
+
+                方法二：联系KeepWork客服获取。
+                
+                KeepWork客服QQ：2953765808
+            </div>
+            <div>
+                二、余额怎么充值？
+            </div>
+            <div>
+                输入激活码成功后，即可完成金币的充值。
+            </div>
+            <div>
+                注：激活码仅用于paracraft充值服务，每个激活码只能充值一次。
+                不能兑换现金，不能进行转账交易，没有逾期限制。
+            </div>
+        </aries:window>
     </div>
 </pe:mcml>
 </body>

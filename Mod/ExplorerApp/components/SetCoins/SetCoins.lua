@@ -8,6 +8,10 @@ use the lib:
 local SetCoins = NPL.load("(gl)Mod/ExplorerApp/components/SetCoins/SetCoins.lua")
 ------------------------------------------------------------
 ]]
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local UpdatePassword = NPL.load("../Password/UpdatePassword/UpdatePassword.lua")
+local PurchasingCode = NPL.load("../PurchasingCode/PurchasingCode.lua")
 
 local SetCoins = NPL.export()
 
@@ -25,4 +29,14 @@ function SetCoins:ClosePage()
     if (SetCoinsPage) then
         SetCoinsPage:CloseWindow()
     end
+end
+
+function SetCoins:UpdatePassword()
+    self:ClosePage()
+    UpdatePassword:ShowPage()
+end
+
+function SetCoins:PurchasingCode()
+    self:ClosePage()
+    PurchasingCode:ShowPage()
 end

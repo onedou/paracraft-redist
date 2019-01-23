@@ -34,6 +34,12 @@
             function set_coins()
                 MainPage:SetCoins()
             end
+
+            function get_image(extra)
+                echo(extra.imageUrl, true)
+
+                return "position:relative;top:-100px;left:0;width: 100px;height: 100px;background:url('" .. extra.imageUrl .. "');"
+            end
         ]]>
     </script>
     <style type="text/mcss">
@@ -89,7 +95,7 @@
                 height = 24,
                 ['text-align'] = 'center',
                 color = '#333333',
-                background = 'textures/explorer_32bits.png#3 131 58 24:5 5 5 5',
+                background = 'textures/explorer_32bits.png#3 131 25 24:5 5 5 5',
                 ['margin-left'] = 4,
                 ['margin-top'] = 3
             },
@@ -295,7 +301,7 @@
                             <div class="work_item">
                                 <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
                                 <div class="radius"></div>
-                                <div class="project_id"><%= format('%s%d', L'项目ID:', Eval('projectId'))%></div>
+                                <div class="project_id"><%= format('%s%d', L'项目ID:', Eval('id'))%></div>
                                 <div class="item_button">
                                     <div class="download">
                                         <input type="button" class="download_icon_click" name='<%=Eval("index")%>' onclick="download" />
@@ -306,6 +312,7 @@
                                         <div class="favorite_icon"></div>
                                     </div>
                                 </div>
+                                <div style="<%=get_image(Eval('extra'))%>">123123</div>
                             </div>
                         </Columns>
                         <PagerSettings Position="Bottom" height="1" />
