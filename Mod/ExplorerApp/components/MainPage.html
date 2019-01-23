@@ -1,7 +1,7 @@
 ﻿<html>
 <body>
 <pe:mcml>
-    <script refresh="false" type="text/npl" src="DemoGUI.lua">
+    <script refresh="false" type="text/npl" src="MainPage.lua">
         <![CDATA[
             MainPage = NPL.load("./MainPage.lua")
 
@@ -28,7 +28,11 @@
             end
 
             function favorite()
-            _guihelper.MessageBox('f')
+                _guihelper.MessageBox('f')
+            end
+
+            function set_coins()
+                MainPage:SetCoins()
             end
         ]]>
     </script>
@@ -51,37 +55,72 @@
                 width = 960,
                 ['background-color'] = '#232223'
             },
+            title = {
+                position = 'relative',
+                ['margin-left'] = 12,
+                ['margin-top'] = 12
+            },
             balance = {
                 width = 300,
                 height = 30,
-                ['background-color'] = '#555555',
                 position = 'relative',
                 align = 'center',
                 ['margin-top'] = 7.5
             },
             strip_icon_1 = {
-                float = 'left'
+                position = 'relative',
+                float = 'left',
+                width = 28,
+                height = 28,
+                background = 'textures/explorer_32bits.png#3 27 30 30:8 8 8 8'
             },
             strip_coins = {
-                float = 'left'
+                float = 'left',
+                width = 220,
+                height = 25,
+                ['text-align'] = 'center',
+                ['background-color'] = '#737373',
+                ['margin-top'] = 3,
+                ['margin-left'] = 10
             },
             strip_icon_2 = {
-                float = 'left'
+                float = 'left',
+                width = 56,
+                height = 24,
+                ['text-align'] = 'center',
+                color = '#333333',
+                background = 'textures/explorer_32bits.png#3 131 58 24:5 5 5 5',
+                ['margin-left'] = 4,
+                ['margin-top'] = 3
             },
             area_content = {
                 width = 960,
                 ['background-color'] = '#222222'
             },
             category_button = {
-                ['margin-top'] = 5,
                 width = 100,
                 height = 28,
-                ['font-size'] = 12,
+                ['font-size'] = 13,
+                ['base-font-size'] = 13,
                 margin = 0,
                 padding = 0,
-                ['margin-left'] = 10
+                ['margin-top'] = 14,
+                ['margin-left'] = 10,
+                color = '#909399',
+                background = "textures/explorer_32bits.png#3 95 106 32:8 8 8 8",
+            },
+            category_button_selected = {
+                width = 100,
+                height = 28,
+                ['font-size'] = 13,
+                ['base-font-size'] = 13,
+                margin = 0,
+                padding = 0,
+                ['margin-top'] = 14,
+                ['margin-left'] = 10,
                 color = '#ffffff',
-                background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#179 89 21 21:4 4 4 4"
+                background = "textures/explorer_32bits.png#2 60 107 32:8 8 8 8",
+                ['font-weight'] = 'bold'
             },
             sidebar = {
                 float = 'left',
@@ -102,7 +141,8 @@
                 ['margin-top'] = 22,
                 textcolor = "#ffffff",
                 height = 30,
-                background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;263 346 36 36:15 15 15 15",
+                padding = 0,
+                background = "textures/explorer_32bits.png#57 27 65 28:3 3 3 3",
             },
             list_search_textfield = {
                 width = 266,
@@ -113,9 +153,9 @@
             list_search_button = {
                 color = "#cccccc",
                 background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
-                height = 26,
-                margin = 2,
-                ['min-width'] = 32
+                height = 30,
+                margin = 0
+                ['min-width'] = 57
             },
             list_filter = {
                 float = 'left',
@@ -124,7 +164,7 @@
             list_filter_button = {
                 color = "#cccccc",
                 ['margin-left'] = 20,
-                background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
+                background = "",
                 height = 30,
                 ['min-width'] = 32
             },
@@ -208,10 +248,11 @@
     </style>
     <div class="area" name="area">
         <div class="strip" name="strip">
+            <div class="title">探索</div>
             <div class="balance">
-                <div class="strip_icon_1">star</div>
-                <div class="strip_coins">1</div>
-                <div class="strip_icon_2">setting</div>
+                <div class="strip_icon_1"></div>
+                <div class="strip_coins">0</div>
+                <input type="button" value='<%=L"投币"%>' class="strip_icon_2" onclick="set_coins"/>
             </div>
             <input onclick="close()" class="close" type="button" align="right" />
         </div>
@@ -220,7 +261,12 @@
                 <pe:gridview name="categoryTree" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
                     <Columns>
                         <div>
-                            <input type="button" value='<%=Eval("value")%>' onclick="select_category" class="category_button"/>
+                            <pe:if condition='<%= Eval("selected")%>'>
+                                <input type="button" value='<%=Eval("value")%>' onclick="select_category" class="category_button_selected"/>
+                            </pe:if>
+                            <pe:if condition='<%= not Eval("selected")%>'>
+                                <input type="button" value='<%=Eval("value")%>' onclick="select_category" class="category_button"/>
+                            </pe:if>
                         </div>
                     </Columns>
                     <PagerSettings Position="Bottom" height="1" />

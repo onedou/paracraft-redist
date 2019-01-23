@@ -28,7 +28,7 @@ function KeepworkService:GetEnv()
 	local env = Store:Get("user/env")
 
 	if not env then
-		env = Config.env.ONLINE
+		env = Config.defaultEnv
 	end
 
 	return env
@@ -277,34 +277,6 @@ function KeepworkService:GetProject(pid, callback)
 
     self:Request(
         format("/projects/%d/detail", pid),
-        "GET",
-        nil,
-        headers,
-        function(data, err)
-            if type(callback) ~= 'function' then
-                return false
-            end
-
-            if err ~= 200 or not data or not data.world then
-                callback()
-                return false
-            end
-
-            callback(data)
-        end
-    )
-end
-
-function KeepworkService:GetProjects(filter, callback)
-    local headers = self:GetHeaders()
-    local filterUrl = ''
-
-    if type(filter) == 'string' then
-        filterUrl = format("classifyTags-like=%%|%s|%%", filter or '')
-    end
-
-    self:Request(
-        format("/projects?%s", filterUrl),
         "GET",
         nil,
         headers,

@@ -12,12 +12,13 @@ local Screen = commonlib.gettable("System.Windows.Screen")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local Projects = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Projects.lua")
+local Password = NPL.load("./Password/Password.lua")
 
 local MainPage = NPL.export()
 
 MainPage.categoryTree = {
-    {key = 0, value = L'精选'},
+    {key = 0, value = L'精选', selected=true},
     {key = 1, value = L'单人'},
     {key = 2, value = L'双人'},
     {key = 3, value = L'对战'},
@@ -32,11 +33,7 @@ function MainPage:ShowPage()
 
     if MainPagePage then
         MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', self.categoryTree)
-        MainPagePage:GetNode('worksTree'):SetAttribute('DataSource', {
-            {
-                projectId = 656
-            }
-        })
+        MainPage:SetWorkdsTree()
     end
 
 	Screen:Connect("sizeChanged", MainPage, MainPage.OnScreenSizeChange, "UniqueConnection")
@@ -84,19 +81,28 @@ function MainPage.OnScreenSizeChange()
     areaContentNode:SetCssStyle('height', (height - 45))
     areaContentNode:SetCssStyle('margin-left', (width - 960) / 2)
 
-    -- local marginLeft = math.floor(Screen:GetWidth())
-
-    -- areaNode:SetCssStyle('margin-left', marginLeft)
-
-    -- local areaContentNode = HistoryManagerPage:GetNode("area_content")
-
-
-    -- areaContentNode:SetCssStyle('height', height - 47)
-    -- areaContentNode:SetCssStyle('margin-left', marginLeft)
-
-    -- local splitNode = HistoryManagerPage:GetNode("area_split")
-
-    -- splitNode:SetCssStyle("height", height - 47)
-
     MainPage:Refresh(0)
+end
+
+function MainPage:SetWorkdsTree()
+    local MainPage = Store:Get('page/MainPage')
+
+    if (not MainPage) then
+        return false
+    end
+
+    -- Projects:GetProjects(nil, function(data, err)
+    --     echo(data, true)
+    --     echo(err, true)
+    -- end)
+
+    MainPage:GetNode('worksTree'):SetAttribute('DataSource', {
+        {
+            projectId = 656
+        }
+    })
+end
+
+function MainPage:SetCoins()
+    SystemPassword:ShowPage()
 end
