@@ -1,3 +1,4 @@
+/caches
 /npl_packages/
 /temp/
 /worlds/
@@ -10,4 +11,6 @@
 /version.txt
 /readme.txt
 /temp.bat
+/temp.bat.txt
 /tempAdmin.bat
+/copyright.txt
