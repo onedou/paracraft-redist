@@ -20,7 +20,7 @@
             end
 
             function select_project()
-                _guihelper.MessageBox(1111111)
+                MainPage:SelectProject()
             end
 
             function download()
@@ -36,21 +36,42 @@
             end
 
             function get_image(extra)
-                echo(extra.imageUrl, true)
-
-                return "position:relative;top:-113px;left:0;width:250px;height:120px;background:url(http://c.hiphotos.baidu.com/image/pic/item/f703738da9773912311dc99af5198618367ae216.jpg?e=4694582148&token=LYZsjH0681n9sWZqCM4E2KmU6DsJOE7CAM4O3eJq:EmJc-bbnC9TCRaA8hBDy3HjksBY=)"
+                if not extra or not extra.imageUrl then
+                    return "position:relative;top:-113px;left:0;width:250px;height:120px;background:url();"
+                else
+                    return "position:relative;top:-113px;left:0;width:250px;height:120px;background:url(" .. extra.imageUrl .. ");"
+                end
             end
         ]]>
     </script>
     <style type="text/mcss">
         {
             close = {
-                ['margin-top'] = 10,
+                ['margin-top'] = 8,
                 ['margin-right'] = 10,
                 float = 'left',
-                background = 'Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7',
-                width = 26,
-                height = 26
+                width = 65,
+                height = 28,
+                background = 'textures/explorer_32bits.png#61 131 16 16:3 3 3 3',
+                color = '#ffffff'
+            },
+            close_click = {
+                width = 65,
+                height = 28,
+                position = 'relative'
+            },
+            close_icon = {
+                float = 'left',
+                background = 'textures/explorer_32bits.png#105 3 15 16',
+                width = 15,
+                height = 16,
+                ['margin-top'] = 6,
+                ['margin-left'] = 10,
+            },
+            close_word = {
+                float = 'left',
+                ['margin-top'] = 3,
+                ['margin-left'] = 3
             },
             area = {
                 ["background-color"] = "#000000",
@@ -146,9 +167,16 @@
                 ['margin-left'] = 450,
                 ['margin-top'] = 22,
                 textcolor = "#ffffff",
+                width = 316,
                 height = 30,
                 padding = 0,
                 background = "textures/explorer_32bits.png#57 27 65 28:3 3 3 3",
+            },
+            list_search_bar_radius = {
+                position = 'relative',
+                height = 30,
+                width = 316,
+                background = "textures/explorer_32bits.png#126 29 16 12:3 3 3 3",
             },
             list_search_textfield = {
                 width = 266,
@@ -157,11 +185,21 @@
                 textcolor = '#ffffff'
             },
             list_search_button = {
+                position = 'relative',
+                align = 'right',
                 color = "#cccccc",
                 background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;179 89 21 21:8 8 8 8",
                 height = 30,
-                margin = 0
-                ['min-width'] = 57
+                width = 57,
+                ['text-align'] = 'center',
+                ['padding-top'] = 3,
+                ['margin-top'] = -32
+            },
+            list_search_button_click = {
+                postion = 'relative',
+                height = 30,
+                width = 57,
+                ['margin-top'] = -30
             },
             list_filter = {
                 float = 'left',
@@ -260,7 +298,11 @@
                 <div class="strip_coins">0</div>
                 <input type="button" value='<%=L"投币"%>' class="strip_icon_2" onclick="set_coins"/>
             </div>
-            <input onclick="close()" class="close" type="button" align="right" />
+            <div class="close" align="right">
+                <div onclick="close()" class="close_click"></div>
+                <div class="close_icon"></div>
+                <div class="close_word">返回</div>
+            </div>
         </div>
         <div class="area_content" name="area_content">
             <div class="sidebar">
@@ -288,8 +330,12 @@
             <div class="list">
                 <div class=list_search_tool>
                     <div class="list_search_bar">
+                        <div class="list_search_bar_radius"></div>
                         <input type="text" name="content" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入项目ID"%>' rows="1" CaretColor="#FFFFFFFF" />
-                        <input onclick="search()" class="list_search_button" type="button" value='<%=L"搜索"%>' />
+                        <div class="list_search_button">
+                            <%=L"搜索"%>
+                            <div class="list_search_button_click" onclick="search()"></div>
+                        </div>
                     </div>
                     <div class="list_filter">
                         <input class="list_filter_button" type="button" value='<%=L"综合"%>' />

@@ -5,30 +5,30 @@ Date: 2019.01.23
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local Password = NPL.load("(gl)Mod/ExplorerApp/components/Password/UpdatePassword/UpdatePassword.lua")
+local Password = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/TimeUp/TimeUp.lua")
 ------------------------------------------------------------
 ]]
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
-local UpdatePassword = NPL.export()
+local TimeUp = NPL.export()
 
-function UpdatePassword:ShowPage()
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/UpdatePassword/UpdatePassword.html", "Mod.ExplorerApp.Password.UpdatePassword", 0, 0, "_fi", false)
+function TimeUp:ShowPage()
+    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/TimeUp/TimeUp.html", "Mod.ExplorerApp.GameProcess.UpdatePassword", 0, 0, "_fi", false)
 end
 
-function UpdatePassword:SetPage()
-    Store:Set("page/UpdatePassword", document:GetPageCtrl())
+function TimeUp:SetPage()
+    Store:Set("page/TimeUp", document:GetPageCtrl())
 end
 
-function UpdatePassword:ClosePage()
-    local UpdatePasswordPage = Store:Get('page/UpdatePassword')
+function TimeUp:ClosePage()
+    local TimeUpPage = Store:Get('page/TimeUp')
 
-    if (UpdatePasswordPage) then
-        UpdatePasswordPage:CloseWindow()
+    if (TimeUpPage) then
+        TimeUpPage:CloseWindow()
     end
 end
 
-function UpdatePassword:Confirm()
+function TimeUp:Confirm()
 
 end

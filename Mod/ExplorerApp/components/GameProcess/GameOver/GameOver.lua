@@ -11,24 +11,24 @@ local Password = NPL.load("(gl)Mod/ExplorerApp/components/Password/UpdatePasswor
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
-local UpdatePassword = NPL.export()
+local GameOver = NPL.export()
 
-function UpdatePassword:ShowPage()
+function GameOver:ShowPage()
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/UpdatePassword/UpdatePassword.html", "Mod.ExplorerApp.Password.UpdatePassword", 0, 0, "_fi", false)
 end
 
-function UpdatePassword:SetPage()
+function GameOver:SetPage()
     Store:Set("page/UpdatePassword", document:GetPageCtrl())
 end
 
-function UpdatePassword:ClosePage()
-    local UpdatePasswordPage = Store:Get('page/UpdatePassword')
+function GameOver:ClosePage()
+    local GameOverPage = Store:Get('page/GameOver')
 
-    if (UpdatePasswordPage) then
-        UpdatePasswordPage:CloseWindow()
+    if (GameOverPage) then
+        GameOverPage:CloseWindow()
     end
 end
 
-function UpdatePassword:Confirm()
+function GameOver:Confirm()
 
 end

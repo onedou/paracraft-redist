@@ -1,19 +1,19 @@
 <html>
 <body>
 <pe:mcml>
-    <script refresh="false" type="text/npl" src="GameOver.lua">
+    <script refresh="false" type="text/npl" src="ProactiveEnd.lua">
         <![CDATA[
-            GameOver = NPL.load('./GameOver.lua')
+            ProactiveEnd = NPL.load('./ProactiveEnd.lua')
             Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 
-            GameOver:SetPage()
+            ProactiveEnd:SetPage()
 
             function get_window_style()
                 return Utils.FixCenter(360, 232)
             end
 
             function close()
-                GameOver:ClosePage()
+                ProactiveEnd:ClosePage()
             end
         ]]>
     </script>

@@ -104,3 +104,7 @@ end
 function MainPage:SetCoins()
     Password:ShowPage()
 end
+
+function MainPage:SelectProject()
+    
+end
