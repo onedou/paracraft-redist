@@ -26,18 +26,39 @@
         {
             strip = {
                 height = 40,
-                padding = 10
+                ['padding-left'] = 10
+                ['padding-top'] = 9
             },
             strip_title = {
                 float = 'left'
             },
             balance = {
                 float = 'left',
-                ['margin-left'] = 10
+                ['margin-left'] = 15,
+                ['padding-left'] = 10,
+                width = 133,
+                height = 24,
+                background = "textures/explorer_32bits.png#78 195 134 24:8 8 8 8"
+            },
+            recharge = {
+                position = "relative",
+                align = "right",
+                height = 24,
+                width = 48,
+                color = "#000000",
+                ['text-align'] = 'center',
+                background = "textures/explorer_32bits.png#109 131 48 24:8 8 8 8",
+                ['margin-top'] = -21
+            },
+            recharge_click = {
+                position = "relative",
+                height = 24,
+                width = 48
             },
             close = {
                 float = 'left',
-                ['margin-left'] = 10
+                ['margin-top'] = -2
+                ['margin-left'] = 120
             },
             close_button = {
                 background = 'Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7',
@@ -49,6 +70,16 @@
                 ['padding-left'] = 13,
                 ['padding-right'] = 13,
             },
+            icon = {
+                position = 'relative',
+                align = 'center',
+                width = 70,
+                height = 70,
+                background = 'textures/explorer_32bits.png#3 159 71 70'
+            },
+            word = {
+                ['text-align'] = 'center'
+            },
             confirm = {
                 position = 'relative',
                 align = 'center',
@@ -56,16 +87,21 @@
                 width = 87,
                 height = 32,
                 background = 'textures/explorer_32bits.png#60 131 17 16:3 3 3 3',
-                ['margin-top'] = 25
+                ['margin-top'] = 15
             }
         }
     </style>
     <div width="100%" height="100%">
         <div class="default" width="382" height="248" style="<%= container() %>">
             <div class="strip">
-                <div class="strip_title">激活码充值</div>
+                <div class="strip_title"><%=L'激活码充值'%></div>
                 <div class="balance">
-                    余额: 32 <div style="float:left" onclick="purchasing_code">充值</div>
+                    <%=L'余额:'%>
+                    <div style="float:left;margin-left:5px;color:#f4bf34">32</div>
+                    <div class="recharge">
+                        <div class="recharge_click" onclick="purchasing_code"></div>
+                        <%=L'充值'%>
+                    </div>
                 </div>
                 <div class="close">
                     <input onclick="close()" class="close_button" type="button"/>
@@ -73,9 +109,9 @@
             </div>
             <div style="height:1px;" width="100%" class="mc_line"></div>
             <div class="area">
-                <div>SUCCESS ICON</div>
-                <div>充值成功</div>
-                <div>获得10000金币</div>
+                <div class="icon"></div>
+                <div style="margin-top: 80px;" class="word">充值成功</div>
+                <div class="word">获得10000金币</div>
                 <div>
                     <input type="button" enable_ime="false" class="confirm" value="确定" onclick="close()" />
                 </div>
