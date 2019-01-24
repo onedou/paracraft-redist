@@ -18,7 +18,7 @@ function ProactiveEnd:ShowPage()
 end
 
 function ProactiveEnd:SetPage()
-    Store:Set("page/UpdatePassword", document:GetPageCtrl())
+    Store:Set("page/ProactiveEnd", document:GetPageCtrl())
 end
 
 function ProactiveEnd:ClosePage()

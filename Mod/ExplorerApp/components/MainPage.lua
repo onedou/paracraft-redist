@@ -15,6 +15,8 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Projects = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Projects.lua")
 local Password = NPL.load("./Password/Password.lua")
 local GameOver = NPL.load("./GameProcess/GameOver/GameOver.lua")
+local TimeUp = NPL.load('./GameProcess/TimeUp/TimeUp.lua')
+local ProactiveEnd = NPL.load('./GameProcess/ProactiveEnd/ProactiveEnd.lua')
 
 local MainPage = NPL.export()
 
@@ -107,5 +109,5 @@ function MainPage:SetCoins()
 end
 
 function MainPage:SelectProject()
-    GameOver:ShowPage()
+    ProactiveEnd:ShowPage()
 end

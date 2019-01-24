@@ -14,7 +14,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local TimeUp = NPL.export()
 
 function TimeUp:ShowPage()
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/TimeUp/TimeUp.html", "Mod.ExplorerApp.GameProcess.UpdatePassword", 0, 0, "_fi", false)
+    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/TimeUp/TimeUp.html", "Mod.ExplorerApp.GameProcess.TimeUp", 0, 0, "_fi", false)
 end
 
 function TimeUp:SetPage()
