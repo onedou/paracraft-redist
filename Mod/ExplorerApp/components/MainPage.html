@@ -7,8 +7,8 @@
 
             MainPage.SetPage()
 
-            function select_category()
-                _guihelper.MessageBox('Show select category!!!!')
+            function select_category(index)
+                MainPage:SetWorkdsTree(index)
             end
 
             function search()
@@ -309,11 +309,11 @@
                 <pe:gridview name="categoryTree" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
                     <Columns>
                         <div>
-                            <pe:if condition='<%= Eval("selected")%>'>
-                                <input type="button" value='<%=Eval("value")%>' onclick="select_category" class="category_button_selected"/>
+                            <pe:if condition='<%= Eval("index") == MainPage.categorySelected %>'>
+                                <input type="button" value='<%=Eval("value")%>' class="category_button_selected"/>
                             </pe:if>
-                            <pe:if condition='<%= not Eval("selected")%>'>
-                                <input type="button" value='<%=Eval("value")%>' onclick="select_category" class="category_button"/>
+                            <pe:if condition='<%= Eval("index") ~= MainPage.categorySelected %>'>
+                                <input type="button" value='<%=Eval("value")%>' name="<%=Eval('index')%>" onclick="select_category" class="category_button"/>
                             </pe:if>
                         </div>
                     </Columns>

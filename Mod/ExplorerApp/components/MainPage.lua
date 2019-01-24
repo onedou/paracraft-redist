@@ -20,13 +20,14 @@ local ProactiveEnd = NPL.load('./GameProcess/ProactiveEnd/ProactiveEnd.lua')
 
 local MainPage = NPL.export()
 
+MainPage.categorySelected = 1
 MainPage.categoryTree = {
-    {key = 0, value = L'精选', selected=true},
-    {key = 1, value = L'单人'},
-    {key = 2, value = L'双人'},
-    {key = 3, value = L'对战'},
-    {key = 4, value = L'动画'},
-    {key = 5, value = L'收藏'}
+    {value = L'精选'},
+    {value = L'单人'},
+    {value = L'双人'},
+    {value = L'对战'},
+    {value = L'动画'},
+    {value = L'收藏'}
 }
 
 function MainPage:ShowPage()
@@ -87,18 +88,25 @@ function MainPage.OnScreenSizeChange()
     MainPage:Refresh(0)
 end
 
-function MainPage:SetWorkdsTree()
+function MainPage:SetWorkdsTree(index)
     local MainPage = Store:Get('page/MainPage')
 
     if (not MainPage) then
         return false
     end
 
-    Projects:GetProjects("paracraft专属", function(data, err)
+    if not index then
+        index = 1
+    end
+
+    local filter = {"paracraft专属", self.categoryTree[index].value}
+
+    Projects:GetProjects(filter, function(data, err)
         if not data or not data.rows then
             return false
         end
 
+        self.categorySelected = index
         MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
         self:Refresh()
     end)
