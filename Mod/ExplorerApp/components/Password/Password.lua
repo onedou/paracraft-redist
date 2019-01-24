@@ -77,7 +77,7 @@ function Password:UpdateViewPassword()
         return false
     end
 
-    if #password > 4 then
+    if #password > 4 or string.match(password, "[^%d]+") then
         PasswordPage:SetValue('password', Password.password)
         return false
     end

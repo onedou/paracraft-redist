@@ -34,18 +34,39 @@
         {
             strip = {
                 height = 40,
-                padding = 10
+                ['padding-left'] = 10
+                ['padding-top'] = 9
             },
             strip_title = {
                 float = 'left'
             },
             balance = {
                 float = 'left',
-                ['margin-left'] = 10
+                ['margin-left'] = 15,
+                ['padding-left'] = 10,
+                width = 133,
+                height = 24,
+                background = "textures/explorer_32bits.png#78 195 134 24:8 8 8 8"
+            },
+            recharge = {
+                position = "relative",
+                align = "right",
+                height = 24,
+                width = 48,
+                color = "#000000",
+                ['text-align'] = 'center',
+                background = "textures/explorer_32bits.png#109 131 48 24:8 8 8 8",
+                ['margin-top'] = -21
+            },
+            recharge_click = {
+                position = "relative",
+                height = 24,
+                width = 48
             },
             close = {
                 float = 'left',
-                ['margin-left'] = 10
+                ['margin-top'] = -2
+                ['margin-left'] = 120
             },
             close_button = {
                 background = 'Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7',
@@ -54,7 +75,9 @@
             },
             enter_purchasing_code = {
                 width = 353,
-                height = 30
+                height = 30,
+                background = "textures/explorer_32bits.png#113 95 32 32:3 3 3 3",
+                textcolor = '#ffffff'
             },
             area = {
                 ['padding-top'] = 23,
@@ -80,9 +103,14 @@
     <div width="100%" height="100%">
         <div class="default" width="380" height="248" style="<%= container() %>">
             <div class="strip">
-                <div class="strip_title">激活码充值</div>
+                <div class="strip_title"><%=L'激活码充值'%></div>
                 <div class="balance">
-                    余额: 32 <div style="float:left" onclick="purchasing_code">充值</div>
+                    <%=L'余额:'%>
+                    <div style="float:left;margin-left:5px;color:#f4bf34">32</div>
+                    <div class="recharge">
+                        <div class="recharge_click" onclick="purchasing_code"></div>
+                        <%=L'充值'%>
+                    </div>
                 </div>
                 <div class="close">
                     <input onclick="close()" class="close_button" type="button"/>
@@ -91,10 +119,10 @@
             <div style="height:1px;" width="100%" class="mc_line"></div>
             <div class="area">
                 <div>
-                    <input class="enter_purchasing_code" EmptyText='<%=L"请输入激活码"%>' type="text" />
+                    <input class="enter_purchasing_code" EmptyText='<%=L"请输入激活码"%>' spacing="4" CaretColor="#FFFFFFFF" type="text" />
                 </div>
                 <div class="notice" onclick="get_notice">
-                    （如何获得激活码？）
+                    <%=L'（如何获得激活码？）'%>
                 </div>
                 <div>
                     <input type="button" enable_ime="false" class="confirm" value="确定" onclick="confirm()" />
