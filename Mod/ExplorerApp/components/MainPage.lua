@@ -8,16 +8,22 @@ use the lib:
 local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 ------------------------------------------------------------
 ]]
+NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
+
+local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
+
 local Screen = commonlib.gettable("System.Windows.Screen")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Projects = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Projects.lua")
+local Projects = NPL.load("../service/KeepworkService/Projects.lua")
 local Password = NPL.load("./Password/Password.lua")
 local GameOver = NPL.load("./GameProcess/GameOver/GameOver.lua")
 local TimeUp = NPL.load('./GameProcess/TimeUp/TimeUp.lua')
 local ProactiveEnd = NPL.load('./GameProcess/ProactiveEnd/ProactiveEnd.lua')
-local Wallet = NPL.load('./database/Wallet.lua')
+local Wallet = NPL.load('../database/Wallet.lua')
+local ProjectsDatabase = NPL.load('../database/Projects.lua')
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 
 local MainPage = NPL.export()
 
@@ -30,6 +36,7 @@ MainPage.categoryTree = {
     {value = L'动画'},
     {value = L'收藏'}
 }
+MainPage.worksTree = {}
 
 function MainPage:ShowPage()
 	local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/MainPage.html", "Mod.ExplorerApp.MainPage", 0, 0, "_fi", false)
@@ -102,15 +109,118 @@ function MainPage:SetWorkdsTree(index)
 
     local filter = {"paracraft专属", self.categoryTree[index].value}
 
-    Projects:GetProjects(filter, function(data, err)
+    Projects:GetProjectsByFilter(filter, function(data, err)
+        -- echo(ParaEngine.GetAttributeObject():GetField("MaxMacAddress",""), true)
+
         if not data or not data.rows then
             return false
         end
 
         self.categorySelected = index
+        self.worksTree = self:HandleWorldsTree(data.rows)
         MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
         self:Refresh()
     end)
+end
+
+function MainPage:Search()
+    local MainPage = Store:Get('page/MainPage')
+
+    if (not MainPage) then
+        return false
+    end
+
+    local projectId = tonumber(MainPage:GetValue('project_id'))
+
+    if not projectId or projectId == 0 then
+        return false
+    end
+
+    Projects:GetProjectById(
+        projectId,
+        function(data, err)
+            if not data or not data.rows then
+                return false
+            end
+
+            self.categorySelected = 0
+            self.worksTree = self:HandleWorldsTree(data.rows)
+            MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
+            self:Refresh()
+        end
+    )
+end
+
+function MainPage:HandleWorldsTree(rows)
+    if not rows or type(rows) ~= 'table' then
+        return false
+    end
+
+    for key, item in ipairs(rows) do
+        if ProjectsDatabase:IsProjectDownloaded(item.id) then
+            item.downloaded = true
+        else
+            item.downloaded = false
+        end
+
+        if ProjectsDatabase:IsFavoriteProject(item.id) then
+            item.favorite = true
+        else
+            item.favorite = false
+        end
+    end
+
+    return rows
+end
+
+function MainPage:DownloadWorld(index)
+    local curItem = self.worksTree[index]
+
+    if not curItem or not curItem.id then
+        return false
+    end
+
+    if not ProjectsDatabase:IsProjectDownloaded(curItem.id) then
+        Projects:GetProjectDetailById(curItem.id, function(data, err)
+            if not data or not data.world or not data.world.archiveUrl or err ~= 200 then
+                return false
+            end
+
+            local archiveUrl = data.world.archiveUrl
+
+            FileDownloader:new():Init(
+                nil,
+                archiveUrl,
+                format("/worlds/DesignHouse/userworlds/%s.zip", archiveUrl:gsub("[%W%s]+", "_")),
+                function(bSuccess, downloadPath)
+                    if bSuccess then
+                        ProjectsDatabase:SetDownloadedProject(data)
+                        self:HandleWorldsTree(self.worksTree)
+                        self:Refresh()
+                    end
+                end,
+                "access plus 5 mins",
+                true
+            )
+        end)
+    end
+end
+
+function MainPage:SetFavorite(index)
+    local curItem = self.worksTree[index]
+
+    if not curItem or not curItem.id then
+        return false
+    end
+
+    if not ProjectsDatabase:IsFavoriteProject(curItem.id) then
+        ProjectsDatabase:SetFavoriteProject(curItem.id)
+    else
+        ProjectsDatabase:RemoveFavoriteProject(curItem.id)
+    end
+
+    self:HandleWorldsTree(self.worksTree)
+    self:Refresh()
 end
 
 function MainPage:SetCoins()

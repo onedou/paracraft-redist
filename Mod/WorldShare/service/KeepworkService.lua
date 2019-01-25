@@ -290,7 +290,7 @@ function KeepworkService:GetProject(pid, callback)
                 return false
             end
 
-            callback(data)
+            callback(data, err)
         end
     )
 end

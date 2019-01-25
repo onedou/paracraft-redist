@@ -5,14 +5,14 @@ Date:  2019.01.25
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local Projects = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Projects.lua")
+local Projects = NPL.load("(gl)Mod/ExplorerApp/service/KeepworkService/Projects.lua")
 ------------------------------------------------------------
 ]]
-local KeepworkService = NPL.load('../KeepworkService.lua')
+local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
 
 local Projects = NPL.export()
 
-function Projects:GetProjects(filter, callback)
+function Projects:GetProjectsByFilter(filter, callback)
     local headers = KeepworkService:GetHeaders()
     local params = {}
 
@@ -52,4 +52,37 @@ function Projects:GetProjects(filter, callback)
             callback(data, err)
         end
     )
+end
+
+function Projects:GetProjectById(projectId, callback)
+    local headers = KeepworkService:GetHeaders()
+    local params = {
+        ["$and"] = {
+            { classifyTags = { ["$like"] = '%paracraft专属%' } },
+            { id = { ["$eq"] = projectId } },
+        }
+    }
+
+    KeepworkService:Request(
+        format("/projects/search", filterUrl),
+        "POST",
+        params,
+        headers,
+        function(data, err)
+            if type(callback) ~= 'function' then
+                return false
+            end
+
+            if err ~= 200 or not data then
+                callback()
+                return false
+            end
+
+            callback(data, err)
+        end
+    )
+end
+
+function Projects:GetProjectDetailById(projectId, callback)
+    KeepworkService:GetProject(projectId, callback)
 end

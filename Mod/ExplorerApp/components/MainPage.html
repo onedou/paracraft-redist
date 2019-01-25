@@ -12,7 +12,7 @@
             end
 
             function search()
-                _guihelper.MessageBox('Search!!!!!')
+                MainPage:Search()
             end
 
             function close()
@@ -23,12 +23,12 @@
                 MainPage:SelectProject()
             end
 
-            function download()
-                _guihelper.MessageBox('d')
+            function download(index)
+                MainPage:DownloadWorld(index)
             end
 
-            function myfavorite()
-                _guihelper.MessageBox('f')
+            function myfavorite(index)
+                MainPage:SetFavorite(index)
             end
 
             function set_coins()
@@ -40,6 +40,12 @@
                     return "position:relative;top:-113px;left:0;width:250px;height:120px;background:url();"
                 else
                     return "position:relative;top:-113px;left:0;width:250px;height:120px;background:url(" .. extra.imageUrl .. ");"
+                end
+            end
+
+            function select_sort()
+                if not MainPage.sortUi then
+                    local x, y, width, height = _guihelper.GetLastUIObjectPos()
                 end
             end
         ]]>
@@ -199,7 +205,8 @@
                 postion = 'relative',
                 height = 30,
                 width = 57,
-                ['margin-top'] = -30
+                ['margin-top'] = -25,
+                background = ''
             },
             list_filter = {
                 float = 'left',
@@ -249,12 +256,19 @@
                 height = 18,
                 background = "textures/explorer_32bits.png;3 3 30 20:8 8 8 8",
             },
-            download_icon = {
+            not_download_icon = {
                 width = 11,
                 height = 11,
                 ['margin-left'] = 9,
-                ['margin-top'] = 4,
-                background = "textures/explorer_32bits.png;37 3 12 12",
+                ['margin-top'] = 3,
+                background = 'textures/explorer_32bits.png;53 3 12 12',
+            },
+            download_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 8,
+                ['margin-top'] = 3,
+                background = 'textures/explorer_32bits.png;83 3 15 12',
             },
             download_icon_click = {
                 position = 'relative',
@@ -272,9 +286,16 @@
             favorite_icon = {
                 width = 11,
                 height = 11,
-                ['margin-left'] = 9,
-                ['margin-top'] = 3,
-                background = 'textures/explorer_32bits.png;53 3 12 12',
+                ['margin-left'] = 9.5,
+                ['margin-top'] = 4,
+                background = "textures/explorer_32bits.png;69 3 12 12",
+            },
+            not_favorite_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 9.5,
+                ['margin-top'] = 4,
+                background = "textures/explorer_32bits.png;37 3 12 12",
             },
             favorite_icon_click = {
                 position = 'relative',
@@ -331,14 +352,14 @@
                 <div class=list_search_tool>
                     <div class="list_search_bar">
                         <div class="list_search_bar_radius"></div>
-                        <input type="text" name="content" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入项目ID"%>' rows="1" CaretColor="#FFFFFFFF" />
+                        <input type="text" name="project_id" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入项目ID"%>' rows="1" CaretColor="#FFFFFFFF" />
                         <div class="list_search_button">
                             <%=L"搜索"%>
-                            <div class="list_search_button_click" onclick="search()"></div>
+                            <input type="button" class="list_search_button_click" DefaultButton="true" onclick="search()" />
                         </div>
                     </div>
                     <div class="list_filter">
-                        <input class="list_filter_button" type="button" value='<%=L"综合"%>' />
+                        <input class="list_filter_button" onclick="select_sort()" type="button" value='<%=L"综合"%>' />
                     </div>
                 </div>
                 <div class="list_content">
@@ -349,14 +370,30 @@
                                 <div class="radius"></div>
                                 <div class="project_id"><%= format('%s%d', L'项目ID:', Eval('id'))%></div>
                                 <div class="item_button">
-                                    <div class="download">
-                                        <input type="button" class="download_icon_click" name='<%=Eval("index")%>' onclick="download" />
-                                        <div class="download_icon"></div>
-                                    </div>
-                                    <div class="favorite">
-                                        <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="myfavorite" />
-                                        <div class="favorite_icon"></div>
-                                    </div>
+                                    <pe:if condition="<%= Eval('downloaded') %>">
+                                        <div class="download">
+                                            <input type="button" class="download_icon_click" name='<%=Eval("index")%>' />
+                                            <div class="download_icon"></div>
+                                        </div>
+                                    </pe:if>
+                                    <pe:if condition="<%= not Eval('downloaded') %>">
+                                        <div class="download">
+                                            <input type="button" class="download_icon_click" name='<%=Eval("index")%>' onclick="download" />
+                                            <div class="not_download_icon"></div>
+                                        </div>
+                                    </pe:if>
+                                    <pe:if condition="<%= Eval('favorite') %>">
+                                        <div class="favorite">
+                                            <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="myfavorite" />
+                                            <div class="favorite_icon"></div>
+                                        </div>
+                                    </pe:if>
+                                    <pe:if condition="<%= not Eval('favorite') %>">
+                                        <div class="favorite">
+                                            <input type="button" class="favorite_icon_click" name='<%=Eval("index")%>' onclick="myfavorite" />
+                                            <div class="not_favorite_icon"></div>
+                                        </div>
+                                    </pe:if>
                                 </div>
                                 <div style="<%=get_image(Eval('extra'))%>"></div>
                             </div>
