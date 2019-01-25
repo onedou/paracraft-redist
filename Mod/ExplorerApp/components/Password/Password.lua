@@ -11,13 +11,19 @@ local Password = NPL.load("(gl)Mod/ExplorerApp/components/Password/Password.lua"
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local SetCoins = NPL.load("../SetCoins/SetCoins.lua")
+local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
 
 local Password = NPL.export()
 
 Password.password = ''
+Password.mode = 'enter'
 
 function Password:ShowPage()
     Password.password = ''
+
+    if not Wallet:GetUserPassword() then
+        Password.mode = 'set'
+    end
 
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/Password.html", "Mod.ExplorerApp.Password", 0, 0, "_fi", false)
 
@@ -59,9 +65,32 @@ function Password:FocusPassword()
 end
 
 function Password:Confirm()
-    self:ClosePage()
+    if not self.password then
+        return false
+    end
 
-    SetCoins:ShowPage()
+    if self.mode == 'enter' then
+        if string.reverse(self.password) == Wallet:GetUserPassword('password') then
+            self:ClosePage()
+            SetCoins:ShowPage()
+        else
+            _guihelper.MessageBox(L'密码错误')
+            self:FocusPassword()
+        end
+    end
+
+    if self.mode == 'set' then
+        if #self.password < 4 then
+            _guihelper.MessageBox(L'密码长度不对')
+            self:FocusPassword()
+            return false
+        end
+
+        Wallet:SetUserPassword(string.reverse(self.password))
+        self:ClosePage()
+        self.mode = 'enter'
+        SetCoins:ShowPage()
+    end
 end
 
 function Password:UpdateViewPassword()

@@ -12,10 +12,15 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Notice = NPL.load("./Notice/Notice.lua")
 local Result = NPL.load("./Result/Result.lua")
+local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
 
 local PurchasingCode = NPL.export()
 
+PurchasingCode.balance = 0
+
 function PurchasingCode:ShowPage()
+    self.balance = Wallet:GetUserBalance()
+
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/PurchasingCode.html", "Mod.ExplorerApp.PurchasingCode", 0, 0, "_fi", false)
 end
 

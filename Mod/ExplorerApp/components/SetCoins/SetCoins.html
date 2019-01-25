@@ -18,11 +18,11 @@
             end
 
             function confirm()
-
+                SetCoins:Confirm()
             end
 
             function add_coin(count)
-                echo(count, true)
+                SetCoins:AddPlayerCoins(count)
             end
 
             function update_password()
@@ -34,7 +34,7 @@
             end
 
             function clear_user_blance()
-                _guihelper.MessageBox("clear!!!")
+                SetCoins:ClearPlayerCoins()
             end
         ]]>
     </script>
@@ -157,7 +157,7 @@
                 color = '#ffffff',
                 width = 87,
                 height = 32,
-                background = 'textures/explorer_32bits.png#60 131 17 16:3 3 3 3'
+                background = 'textures/explorer_32bits.png#61 131 16 16:3 3 3 3'
             }
         }
     </style>
@@ -167,7 +167,7 @@
                 <div class="strip_title">金币设置</div>
                 <div class="balance">
                     余额: 
-                    <div style="float:left;margin-left:5px;color:#f4bf34">32</div>
+                    <div style="float:left;margin-left:5px;color:#f4bf34"><%=SetCoins.balance%></div>
                     <div class="recharge">
                         <div class="recharge_click" onclick="purchasing_code"></div>
                         充值
@@ -183,7 +183,7 @@
                     玩家可用
                     <div class="user_blance">
                         <div class="coin_icon"></div>
-                        <div class="user_blance_text">123</div>
+                        <div class="user_blance_text"><%= SetCoins.playerBalance %></div>
                     </div>
                     <div class="clear_user_blance">
                         <div class="clear_user_blance_click" onclick="clear_user_blance"></div>
@@ -198,11 +198,11 @@
                             1
                         </div>
                         <div style="padding-left:20px;" class="plus">
-                            <div class="plus_icon" name="2" onclick="add_coin"></div>
+                            <div class="plus_icon" name="5" onclick="add_coin"></div>
                             5
                         </div>
                         <div style="padding-left:15px;" class="plus">
-                            <div class="plus_icon" name="3" onclick="add_coin"></div>
+                            <div class="plus_icon" name="10" onclick="add_coin"></div>
                             10
                         </div>
                     </div>

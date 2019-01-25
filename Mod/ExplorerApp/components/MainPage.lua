@@ -17,6 +17,7 @@ local Password = NPL.load("./Password/Password.lua")
 local GameOver = NPL.load("./GameProcess/GameOver/GameOver.lua")
 local TimeUp = NPL.load('./GameProcess/TimeUp/TimeUp.lua')
 local ProactiveEnd = NPL.load('./GameProcess/ProactiveEnd/ProactiveEnd.lua')
+local Wallet = NPL.load('./database/Wallet.lua')
 
 local MainPage = NPL.export()
 
