@@ -119,8 +119,6 @@ function MainPage:SetWorkdsTree(index)
     local filter = {"paracraft专属", self.categoryTree[index].value}
 
     Projects:GetProjectsByFilter(filter, function(data, err)
-        -- echo(ParaEngine.GetAttributeObject():GetField("MaxMacAddress",""), true)
-
         if not data or not data.rows then
             return false
         end

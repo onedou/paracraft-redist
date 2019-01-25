@@ -12,10 +12,19 @@ local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua
 
 local ParacraftDevices = NPL.export()
 
-function ParacraftDevices:PwdVerfify()
+function ParacraftDevices:PwdVerfify(password, callback)
+    if not password then
+        return false
+    end
+
+    local params = {
+        deviceId = ParaEngine.GetAttributeObject():GetField("MaxMacAddress",""),
+        password = password
+    }
+
     KeepworkService:Request(
         "/paracraftDevices/pwdVerify",
-        "POST",
+        "GET",
         params,
         headers,
         function(data, err)
