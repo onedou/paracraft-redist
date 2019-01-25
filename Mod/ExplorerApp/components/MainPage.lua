@@ -44,6 +44,9 @@ MainPage.worksTree = {}
 function MainPage:ShowPage()
     self.playerBalance = Wallet:GetPlayerBalance()
 
+    Store:Set('explorer/selectSortIndex', 1)
+    Store:Set('explorer/sortList', { { value = L"综合" }, { value = L"最新" }, { value = L"热门" } })
+
 	local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/MainPage.html", "Mod.ExplorerApp.MainPage", 0, 0, "_fi", false)
 
     local MainPagePage = Store:Get('page/MainPage')
@@ -283,4 +286,12 @@ function MainPage:SelectProject(index)
 
     -- prevent recursive calls.
     mytimer:Change(1,nil);
+end
+
+function MainPage:GetSortIndex()
+    return Store:Get('explorer/selectSortIndex')
+end
+
+function MainPage:GetSortList()
+    return Store:Get('explorer/sortList')
 end

@@ -1,0 +1,65 @@
+<html>
+<body>
+<pe:mcml>
+    <script refresh="false" type="text/npl" src="Sort.lua">
+        Sort = NPL.load('./Sort.lua')
+        Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+
+        Sort:SetPage()
+
+        function container()
+            return format("margin-left:%s;margin-top: %s", Sort.position.x - 12, Sort.position.y + 25)
+        end
+
+        function close()
+            Sort:ClosePage()
+        end
+
+        function select_item(index)
+            Sort:SetSortIndex(index)
+        end
+
+        function get_sort_list()
+            return Sort:GetSortList()
+        end
+    </script>
+    <style type="text/mcss">
+        {
+            area = {
+                width = 62,
+                height = 102,
+                background = 'textures/explorer_32bits.png#244 4 63 102:0 0 4 4',
+                padding = 10,
+                ['text-align'] = 'center'
+            },
+            area_click = {
+                position = 'relative'
+            },
+            item = {
+                color = '#ffffff'
+                background = '',
+                ['margin-top'] = 3,
+                ['margin-left'] = -3
+            },
+            item_click = {
+                position = 'relative',
+                width = 40,
+                height = 20,
+                ['margin-top'] = 6,
+            }
+        }
+    </style>
+    <div width="100%" height="100%">
+        <div class="area_click" width="100%" height="100%" onclick="close()"></div>
+        <div class="area" width="62" height="102" style="<%= container() %>">
+            <pe:repeat DataSource="<%=get_sort_list()%>">
+                <pe:repeatitem>
+                    <div class="item_click" name="<%=Eval('index')%>" onclick="select_item"></div>
+                    <div class="item"><%=Eval('value')%></div>
+                </pe:repeatitem>
+            </pe:repeat>
+        </div>
+    </div>
+</pe:mcml>
+</body>
+</html>

@@ -10,9 +10,15 @@ NPL.load("(gl)Mod/ExplorerApp/main.lua")
 local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 ------------------------------------------------------------
 ]]
+NPL.load("(gl)Mod/ExplorerStore/store/ExplorerStore.lua")
+
+local ExplorerStore = commonlib.gettable('Mod.ExplorerApp.store.Explorer')
+
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
+
 local ExplorerApp = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.ExplorerApp"))
 
-local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 
 function ExplorerApp:GetName()
 	return "ExplorerApp"
@@ -23,6 +29,8 @@ function ExplorerApp:GetDesc()
 end
 
 function ExplorerApp:Init()
+	Store.storeList.explorer = ExplorerStore
+
 	MainPage:ShowPage()
 end
 

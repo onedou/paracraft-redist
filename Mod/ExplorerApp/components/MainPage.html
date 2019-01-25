@@ -4,6 +4,7 @@
     <script refresh="false" type="text/npl" src="MainPage.lua">
         <![CDATA[
             MainPage = NPL.load("./MainPage.lua")
+            Sort = NPL.load("./Sort/Sort.lua")
 
             MainPage.SetPage()
 
@@ -44,9 +45,13 @@
             end
 
             function select_sort()
-                if not MainPage.sortUi then
-                    local x, y, width, height = _guihelper.GetLastUIObjectPos()
-                end
+                local x, y, width, height = _guihelper.GetLastUIObjectPos()
+
+                Sort:ShowPage(x, y)
+            end
+
+            function get_cur_sort()
+                return MainPage:GetSortList()[MainPage:GetSortIndex()].value
             end
         ]]>
     </script>
@@ -359,7 +364,7 @@
                         </div>
                     </div>
                     <div class="list_filter">
-                        <input class="list_filter_button" onclick="select_sort()" type="button" value='<%=L"综合"%>' />
+                        <input class="list_filter_button" onclick="select_sort()" type="button" value='<%=get_cur_sort()%>' />
                     </div>
                 </div>
                 <div class="list_content">
