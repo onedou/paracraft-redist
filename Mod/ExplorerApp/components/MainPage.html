@@ -19,8 +19,8 @@
                 MainPage:Close()
             end
 
-            function select_project()
-                MainPage:SelectProject()
+            function select_project(index)
+                MainPage:SelectProject(index)
             end
 
             function download(index)
@@ -316,7 +316,7 @@
             <div class="title">探索</div>
             <div class="balance">
                 <div class="strip_icon_1"></div>
-                <div class="strip_coins">0</div>
+                <div class="strip_coins"><%=MainPage.playerBalance%></div>
                 <input type="button" value='<%=L"投币"%>' class="strip_icon_2" onclick="set_coins"/>
             </div>
             <div class="close" align="right">

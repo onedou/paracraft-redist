@@ -33,7 +33,15 @@ function ParacraftDevices:PwdVerfify()
     )
 end
 
-function ParacraftDevices:Recharge()
+function ParacraftDevices:Recharge(code, callback)
+    if not code then
+        return false
+    end
+
+    local params = {
+        key = code
+    }
+
     KeepworkService:Request(
         "/paracraftGameCoinKeys/active",
         "POST",

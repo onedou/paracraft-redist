@@ -13,6 +13,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Notice = NPL.load("./Notice/Notice.lua")
 local Result = NPL.load("./Result/Result.lua")
 local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
+local ParacraftDevices = NPL.load('(gl)Mod/ExplorerApp/service/KeepworkService/ParacraftDevices.lua')
 
 local PurchasingCode = NPL.export()
 
@@ -42,6 +43,23 @@ function PurchasingCode:GetNotice()
 end
 
 function PurchasingCode:Confirm()
-    self:ClosePage()
-    Result:ShowPage()
+    local PurchasingCodePage = Store:Get('page/PurchasingCode')
+
+    if not PurchasingCodePage then
+        return false
+    end
+
+    local code = PurchasingCodePage:GetValue('code')
+
+    if not code or #code == 0 then
+        return false
+    end
+
+    ParacraftDevices:Recharge(code, function(data, err)
+        self.balance = self.balance + tonumber(data)
+        Wallet:SetUserBalance(self.balance)
+        self:ClosePage()
+        Result:ShowPage(data)
+    end)
+
 end

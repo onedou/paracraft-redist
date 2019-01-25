@@ -84,7 +84,7 @@ function Projects:SetDownloadedProject(info)
 
     local data = {
         projectId = info.id,
-        world = info.word
+        world = info.world
     }
 
     local downloadedProjects = self:GetData("downloadedProjects") or {}

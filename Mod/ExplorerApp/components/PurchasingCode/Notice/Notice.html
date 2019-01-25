@@ -5,11 +5,13 @@
         <![CDATA[
             Notice = NPL.load('./Notice.lua')
             Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+            PurchasingCode = NPL.load("(gl)Mod/ExplorerApp/components/PurchasingCode/PurchasingCode.lua")
 
             Notice:SetPage()
 
             function close()
                 Notice:ClosePage()
+                PurchasingCode:ShowPage()
             end
 
             function container()

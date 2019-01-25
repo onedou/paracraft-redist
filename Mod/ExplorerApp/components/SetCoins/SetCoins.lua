@@ -13,6 +13,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local UpdatePassword = NPL.load("../Password/UpdatePassword/UpdatePassword.lua")
 local PurchasingCode = NPL.load("../PurchasingCode/PurchasingCode.lua")
 local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
+local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 
 local SetCoins = NPL.export()
 
@@ -81,4 +82,5 @@ function SetCoins:Confirm()
     Wallet:SetPlayerBalance(self.playerBalance)
 
     self:ClosePage()
+    MainPage:UpdateCoins()
 end

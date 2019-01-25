@@ -11,6 +11,8 @@ local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
+local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 
 local Screen = commonlib.gettable("System.Windows.Screen")
 
@@ -39,6 +41,8 @@ MainPage.categoryTree = {
 MainPage.worksTree = {}
 
 function MainPage:ShowPage()
+    self.playerBalance = Wallet:GetPlayerBalance()
+
 	local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/MainPage.html", "Mod.ExplorerApp.MainPage", 0, 0, "_fi", false)
 
     local MainPagePage = Store:Get('page/MainPage')
@@ -94,6 +98,11 @@ function MainPage.OnScreenSizeChange()
     areaContentNode:SetCssStyle('margin-left', (width - 960) / 2)
 
     MainPage:Refresh(0)
+end
+
+function MainPage:UpdateCoins()
+    self.playerBalance = Wallet:GetPlayerBalance()
+    self:Refresh()
 end
 
 function MainPage:SetWorkdsTree(index)
@@ -191,7 +200,7 @@ function MainPage:DownloadWorld(index)
             FileDownloader:new():Init(
                 nil,
                 archiveUrl,
-                format("/worlds/DesignHouse/userworlds/%s.zip", archiveUrl:gsub("[%W%s]+", "_")),
+                format("/worlds/DesignHouse/userworlds/%s_r.zip", string.match(archiveUrl, "(.+)%.zip%?ref.+$"):gsub("[%W%s]+", "_")),
                 function(bSuccess, downloadPath)
                     if bSuccess then
                         ProjectsDatabase:SetDownloadedProject(data)
@@ -227,6 +236,41 @@ function MainPage:SetCoins()
     Password:ShowPage()
 end
 
-function MainPage:SelectProject()
-    ProactiveEnd:ShowPage()
+function MainPage:SelectProject(index)
+    local curItem = self.worksTree[index]
+
+    if not curItem or not curItem.id then
+        return false
+    end
+
+    if not ProjectsDatabase:IsProjectDownloaded(curItem.id) then
+        return false
+    end
+
+    local projectInfo = ProjectsDatabase:GetDownloadedProject(curItem.id)
+
+    if not projectInfo or not projectInfo.world then
+        return false
+    end
+
+    world = RemoteWorld.LoadFromHref(projectInfo.world.archiveUrl, "self")
+    world:GetLocalFileName()
+
+    local mytimer = commonlib.Timer:new(
+        {
+            callbackFunc = function(timer)
+                InternetLoadWorld.LoadWorld(
+                    world,
+                    nil,
+                    "never",
+                    function(bSucceed, localWorldPath)
+                        MainPage:Close()
+                    end
+                );
+            end
+        }
+    );
+
+    -- prevent recursive calls.
+    mytimer:Change(1,nil);
 end

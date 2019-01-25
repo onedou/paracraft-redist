@@ -10,10 +10,17 @@ local Result = NPL.load("(gl)Mod/ExplorerApp/components/PurchasingCode/Result/Re
 ]]
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
+local PurchasingCode = NPL.load("(gl)Mod/ExplorerApp/components/PurchasingCode/PurchasingCode.lua")
 
 local Result = NPL.export()
 
-function Result:ShowPage()
+Result.getCoins = ''
+
+function Result:ShowPage(coins)
+    self.balance = Wallet:GetUserBalance()
+    self.getCoins = coins
+
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/Result/Result.html", "Mod.ExplorerApp.PurchasingCode.Result", 0, 0, "_fi", false)
 end
 
@@ -27,4 +34,9 @@ function Result:ClosePage()
     if (ResultPage) then
         ResultPage:CloseWindow()
     end
+end
+
+function Result:PurchasingCode()
+    self:ClosePage()
+    PurchasingCode:ShowPage()
 end
