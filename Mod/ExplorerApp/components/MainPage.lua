@@ -13,6 +13,7 @@ NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
+local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
 
 local Screen = commonlib.gettable("System.Windows.Screen")
 
@@ -262,7 +263,18 @@ function MainPage:SelectProject(index)
                     nil,
                     "never",
                     function(bSucceed, localWorldPath)
-                        MainPage:Close()
+                        if bSucceed then
+                            self.playerBalance = self.playerBalance - 1
+                            Wallet:SetPlayerBalance(self.playerBalance)
+                            MainPage:Close()
+
+                            Utils.SetTimeOut(
+                                function()
+                                    TimeUp:ShowPage()
+                                end,
+                                5000
+                            )
+                        end
                     end
                 );
             end
