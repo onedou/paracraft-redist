@@ -27,6 +27,7 @@ local ProactiveEnd = NPL.load('./GameProcess/ProactiveEnd/ProactiveEnd.lua')
 local Wallet = NPL.load('../database/Wallet.lua')
 local ProjectsDatabase = NPL.load('../database/Projects.lua')
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+local Toast = NPL.load("./Toast/Toast.lua")
 
 local MainPage = NPL.export()
 
@@ -42,6 +43,7 @@ MainPage.categoryTree = {
 MainPage.worksTree = {}
 
 function MainPage:ShowPage()
+    self.balance = Wallet:GetUserBalance()
     self.playerBalance = Wallet:GetPlayerBalance()
 
     Store:Set('explorer/selectSortIndex', 1)
@@ -138,6 +140,26 @@ function MainPage:SetWorkdsTree(index, sort)
         index = 1
     end
 
+    if index == 6 then
+        local allFavoriteProjects = ProjectsDatabase:GetAllFavoriteProjects()
+
+        Projects:GetProjectById(
+            allFavoriteProjects,
+            sort,
+            function(data, err)
+                if not data or not data.rows then
+                    return false
+                end
+
+                self.categorySelected = index
+                self.worksTree = self:HandleWorldsTree(data.rows)
+                MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
+                self:Refresh()
+            end
+        )
+        return true
+    end
+
     local filter = {"paracraft专属", self.categoryTree[index].value}
 
     Projects:GetProjectsByFilter(filter, sort, function(data, err)
@@ -166,7 +188,7 @@ function MainPage:Search(sort)
     end
 
     Projects:GetProjectById(
-        projectId,
+        { projectId },
         sort,
         function(data, err)
             if not data or not data.rows then
@@ -224,6 +246,7 @@ function MainPage:DownloadWorld(index)
                 format("/worlds/DesignHouse/userworlds/%s_r.zip", string.match(archiveUrl, "(.+)%.zip%?ref.+$"):gsub("[%W%s]+", "_")),
                 function(bSuccess, downloadPath)
                     if bSuccess then
+                        Toast:ShowPage(L"下载成功")
                         ProjectsDatabase:SetDownloadedProject(data)
                         self:HandleWorldsTree(self.worksTree)
                         self:Refresh()
@@ -244,8 +267,10 @@ function MainPage:SetFavorite(index)
     end
 
     if not ProjectsDatabase:IsFavoriteProject(curItem.id) then
+        Toast:ShowPage(L"收藏成功")
         ProjectsDatabase:SetFavoriteProject(curItem.id)
     else
+        Toast:ShowPage(L"取消收藏")
         ProjectsDatabase:RemoveFavoriteProject(curItem.id)
     end
 
@@ -282,6 +307,8 @@ function MainPage:SelectProject(index)
     world = RemoteWorld.LoadFromHref(projectInfo.world.archiveUrl, "self")
     world:GetLocalFileName()
 
+    Toast:ShowPage(L"消耗一个金币")
+
     local mytimer = commonlib.Timer:new(
         {
             callbackFunc = function(timer)
@@ -292,15 +319,11 @@ function MainPage:SelectProject(index)
                     function(bSucceed, localWorldPath)
                         if bSucceed then
                             self.playerBalance = self.playerBalance - 1
+                            self.balance = self.balance - 1
                             Wallet:SetPlayerBalance(self.playerBalance)
+                            Wallet:SetUserBalance(self.balance)
+                            self:HandleGameProcess()
                             MainPage:Close()
-
-                            Utils.SetTimeOut(
-                                function()
-                                    TimeUp:ShowPage()
-                                end,
-                                60000
-                            )
                         end
                     end
                 );
@@ -308,8 +331,40 @@ function MainPage:SelectProject(index)
         }
     );
 
-    -- prevent recursive calls.
-    mytimer:Change(1,nil);
+    Utils.SetTimeOut(
+        function()
+            -- prevent recursive calls.
+            mytimer:Change(2,nil);
+        end,
+        1000
+    )
+end
+
+function MainPage:HandleGameProcess()
+    Utils.SetTimeOut(
+        function()
+            if self.playerBalance > 0 then
+                Toast:ShowPage(L"消耗一个金币")
+                self.playerBalance = self.playerBalance - 1
+                self.balance = self.balance - 1
+                Wallet:SetPlayerBalance(self.playerBalance)
+                Wallet:SetUserBalance(self.balance)
+                self:HandleGameProcess()
+            else
+                TimeUp:ShowPage()
+            end
+        end,
+        60000 * 10
+    )
+
+    Utils.SetTimeOut(
+        function()
+            if self.playerBalance then
+                Toast:ShowPage(L"即将消耗一个金币")
+            end
+        end,
+        60000 * 10 - 60000
+    )
 end
 
 function MainPage:GetSortIndex()

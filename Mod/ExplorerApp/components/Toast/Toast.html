@@ -1,0 +1,23 @@
+<html>
+<body>
+    <pe:mcml>
+        <script refresh="false" type="text/npl" src="Toast.lua">
+            Toast = NPL.load('./Toast.lua')
+
+            Toast:SetPage()
+        </script>
+        <style type="text/mcss">
+            {
+                toast = {
+                    background = 'textures/explorer_32bits.png#4 233 32 32:3 3 3 3',
+                    ['margin-top'] = -200,
+                    padding = 5,
+                    color = '#ffffff',
+                    ['text-align'] = 'center'
+                }
+            }
+        </style>
+        <div class="toast" width="180" height="32"><%=Toast.msg%></div>
+    </pe:mcml>
+</body>
+</html>

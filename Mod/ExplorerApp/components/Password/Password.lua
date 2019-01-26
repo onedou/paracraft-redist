@@ -65,6 +65,18 @@ function Password:FocusPassword()
     PasswordPage:FindControl('password'):Focus()
 end
 
+function Password:ClearPassword()
+    local PasswordPage = Store:Get('page/Password')
+
+    if not PasswordPage then
+        return false
+    end
+
+    PasswordPage:SetValue('password', '')
+    self.password = ''
+    self:Refresh(0)
+end
+
 function Password:Confirm()
     if not self.password then
         return false
@@ -76,6 +88,7 @@ function Password:Confirm()
             SetCoins:ShowPage()
         else
             _guihelper.MessageBox(L'密码错误')
+            self:ClearPassword()
             self:FocusPassword()
         end
     end
@@ -83,6 +96,7 @@ function Password:Confirm()
     if self.mode == 'set' then
         if #self.password < 4 then
             _guihelper.MessageBox(L'密码长度不对')
+            self:ClearPassword(0)
             self:FocusPassword()
             return false
         end

@@ -145,3 +145,9 @@ function Projects:IsFavoriteProject(projectId)
         return false
     end
 end
+
+function Projects:GetAllFavoriteProjects()
+    local favoriteProjects = commonlib.Array:new(self:GetData("favoriteProjects") or {})
+
+    return favoriteProjects
+end

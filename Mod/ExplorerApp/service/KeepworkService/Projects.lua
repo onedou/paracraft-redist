@@ -58,12 +58,12 @@ function Projects:GetProjectsByFilter(filter, sort, callback)
     )
 end
 
-function Projects:GetProjectById(projectId, sort, callback)
+function Projects:GetProjectById(projectIds, sort, callback)
     local headers = KeepworkService:GetHeaders()
     local params = {
         ["$and"] = {
             { classifyTags = { ["$like"] = '%paracraft专属%' } },
-            { id = { ["$eq"] = projectId } },
+            { id = { ["$in"] = projectIds } },
         }
     }
 
