@@ -34,7 +34,7 @@ MainPage.categorySelected = 1
 MainPage.categoryTree = {
     {value = L'精选'},
     {value = L'单人'},
-    {value = L'双人'},
+    {value = L'多人'},
     {value = L'对战'},
     {value = L'动画'},
     {value = L'收藏'}
@@ -299,7 +299,7 @@ function MainPage:SelectProject(index)
                                 function()
                                     TimeUp:ShowPage()
                                 end,
-                                5000
+                                60000
                             )
                         end
                     end

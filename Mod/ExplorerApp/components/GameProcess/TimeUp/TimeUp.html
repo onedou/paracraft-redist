@@ -5,6 +5,8 @@
         <![CDATA[
             TimeUp = NPL.load('./TimeUp.lua')
             Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+            Password = NPL.load("(gl)Mod/ExplorerApp/components/Password/Password.lua")
+            MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 
             TimeUp:SetPage()
 
@@ -15,6 +17,16 @@
 
             function close()
                 TimeUp:ClosePage()
+            end
+
+            function buy()
+                TimeUp:ClosePage()
+                Password:ShowPage()
+            end
+
+            function goback()
+                TimeUp:ClosePage()
+                MainPage:ShowPage()
             end
         ]]>
     </script>
@@ -52,6 +64,7 @@
                 height = 100
             },
             buy = {
+                color = '#ffffff',
                 position = 'relative',
                 align = 'left',
                 width = 88,
@@ -61,6 +74,7 @@
                 background = 'textures/explorer_32bits.png#61 131 16 16:3 3 3 3'
             },
             goback = {
+                color = '#ffffff',
                 position = 'relative',
                 align = 'right',
                 width = 88,
@@ -83,12 +97,8 @@
             <div class="area">
                 <div class="word"><%=L'金币不足，你可以去购买金币'%></div>
                 <div>
-                    <div class="buy">
-                        <%=L'去购买'%>
-                    </div>
-                    <div class="goback">
-                        <%=L'返回主页'%>
-                    </div>
+                    <input type="button" class="buy" value="<%=L'去购买'%>" onclick="buy"/>
+                    <input type="button" class="goback" value="<%=L'返回主页'%>" onclick="goback"/>
                 </div>
             </div>
         </div>
