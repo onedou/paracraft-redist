@@ -61,12 +61,8 @@ function ParacraftDevices:Recharge(code, callback)
                 return false
             end
 
-            if err ~= 200 or not data then
-                callback()
-                return false
-            end
-
             callback(data, err)
-        end
+        end,
+        400
     )
 end

@@ -109,7 +109,25 @@ function MainPage:UpdateCoins()
     self:Refresh()
 end
 
-function MainPage:SetWorkdsTree(index)
+function MainPage:UpdateSort()
+    local sort
+
+    if Store:Get('explorer/selectSortIndex') == 2 then
+        sort = 'hotNo-desc'
+    end
+
+    if Store:Get('explorer/selectSortIndex') == 3 then
+        sort = 'createdAt-desc'
+    end
+
+    if self.categorySelected ~= 0 then
+        self:SetWorkdsTree(self.categorySelected, sort)
+    else
+        self:Search(sort)
+    end
+end
+
+function MainPage:SetWorkdsTree(index, sort)
     local MainPage = Store:Get('page/MainPage')
 
     if (not MainPage) then
@@ -122,7 +140,7 @@ function MainPage:SetWorkdsTree(index)
 
     local filter = {"paracraft专属", self.categoryTree[index].value}
 
-    Projects:GetProjectsByFilter(filter, function(data, err)
+    Projects:GetProjectsByFilter(filter, sort, function(data, err)
         if not data or not data.rows then
             return false
         end
@@ -134,7 +152,7 @@ function MainPage:SetWorkdsTree(index)
     end)
 end
 
-function MainPage:Search()
+function MainPage:Search(sort)
     local MainPage = Store:Get('page/MainPage')
 
     if (not MainPage) then
@@ -149,6 +167,7 @@ function MainPage:Search()
 
     Projects:GetProjectById(
         projectId,
+        sort,
         function(data, err)
             if not data or not data.rows then
                 return false
@@ -239,6 +258,11 @@ function MainPage:SetCoins()
 end
 
 function MainPage:SelectProject(index)
+    if self.playerBalance <= 0 then
+        GameOver:ShowPage(3)
+        return false
+    end
+
     local curItem = self.worksTree[index]
 
     if not curItem or not curItem.id then

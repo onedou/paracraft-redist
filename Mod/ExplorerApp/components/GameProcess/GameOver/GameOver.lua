@@ -13,7 +13,13 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local GameOver = NPL.export()
 
-function GameOver:ShowPage()
+GameOver.mode = 1
+
+function GameOver:ShowPage(mode)
+    if mode and type(mode) == 'number' then
+        self.mode = mode
+    end
+
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.html", "Mod.ExplorerApp.GameProcess.GameOver", 0, 0, "_fi", false)
 end
 

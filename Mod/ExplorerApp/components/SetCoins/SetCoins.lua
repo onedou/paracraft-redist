@@ -10,7 +10,6 @@ local SetCoins = NPL.load("(gl)Mod/ExplorerApp/components/SetCoins/SetCoins.lua"
 ]]
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local UpdatePassword = NPL.load("../Password/UpdatePassword/UpdatePassword.lua")
 local PurchasingCode = NPL.load("../PurchasingCode/PurchasingCode.lua")
 local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
 local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
@@ -45,11 +44,6 @@ function SetCoins:Refresh(time)
     if (SetCoinsPage) then
         SetCoinsPage:Refresh(time or 0.01)
     end
-end
-
-function SetCoins:UpdatePassword()
-    self:ClosePage()
-    UpdatePassword:ShowPage()
 end
 
 function SetCoins:PurchasingCode()

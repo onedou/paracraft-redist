@@ -12,7 +12,7 @@ local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua
 
 local Projects = NPL.export()
 
-function Projects:GetProjectsByFilter(filter, callback)
+function Projects:GetProjectsByFilter(filter, sort, callback)
     local headers = KeepworkService:GetHeaders()
     local params = {}
 
@@ -32,6 +32,10 @@ function Projects:GetProjectsByFilter(filter, callback)
         end
 
         params = { ["$and"] = allFilters }
+    end
+
+    if type(sort) == 'string' then
+        params['x-order'] = sort
     end
 
     KeepworkService:Request(
@@ -54,7 +58,7 @@ function Projects:GetProjectsByFilter(filter, callback)
     )
 end
 
-function Projects:GetProjectById(projectId, callback)
+function Projects:GetProjectById(projectId, sort, callback)
     local headers = KeepworkService:GetHeaders()
     local params = {
         ["$and"] = {
@@ -62,6 +66,10 @@ function Projects:GetProjectById(projectId, callback)
             { id = { ["$eq"] = projectId } },
         }
     }
+
+    if type(sort) == 'string' then
+        params['x-order'] = sort
+    end
 
     KeepworkService:Request(
         format("/projects/search", filterUrl),

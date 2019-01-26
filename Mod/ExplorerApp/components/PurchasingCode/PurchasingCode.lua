@@ -56,6 +56,11 @@ function PurchasingCode:Confirm()
     end
 
     ParacraftDevices:Recharge(code, function(data, err)
+        if err ~= 200 then
+            _guihelper.MessageBox(L"此激活码已被使用")
+            return false
+        end
+
         self.balance = self.balance + tonumber(data)
         Wallet:SetUserBalance(self.balance)
         self:ClosePage()

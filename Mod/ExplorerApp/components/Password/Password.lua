@@ -12,6 +12,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local SetCoins = NPL.load("../SetCoins/SetCoins.lua")
 local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
+local UpdatePassword = NPL.load("./UpdatePassword/UpdatePassword.lua")
 
 local Password = NPL.export()
 
@@ -116,4 +117,9 @@ function Password:UpdateViewPassword()
 
     self:Refresh(0)
     self:FocusPassword()
+end
+
+function Password:UpdatePassword()
+    self:ClosePage()
+    UpdatePassword:ShowPage()
 end

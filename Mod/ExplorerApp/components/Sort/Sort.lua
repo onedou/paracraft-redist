@@ -49,5 +49,5 @@ end
 function Sort:SetSortIndex(index)
     Store:Set('explorer/selectSortIndex', index)
     self:ClosePage()
-    MainPage:Refresh()
+    MainPage:UpdateSort()
 end
