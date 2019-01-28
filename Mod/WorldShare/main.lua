@@ -32,7 +32,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
 NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/ide/System/Core/Event.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua");
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
@@ -147,7 +147,7 @@ function WorldShare:OnWorldLoad()
     local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 end
 
-function WorldShare:OnLeaveWorld(params)
+function WorldShare:OnLeaveWorld()
     Store:Remove("world/selectWorld")
     Store:Remove("world/worldIndex")
     Store:Remove("world/shareMode")

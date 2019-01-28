@@ -8,14 +8,22 @@ use the lib:
 local GameOver = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.lua")
 ------------------------------------------------------------
 ]]
+NPL.load("(gl)Mod/ExplorerApp/tasks/ExplorerTask.lua")
+
+local ExplorerTask = commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask")
+
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 
 local GameOver = NPL.export()
 
 GameOver.mode = 1
 
 function GameOver:ShowPage(mode)
+    self.curTask = ExplorerTask:new()
+    self.curTask:Run()
+
     if mode and type(mode) == 'number' then
         self.mode = mode
     end
@@ -37,4 +45,13 @@ end
 
 function GameOver:Confirm()
 
+end
+
+function GameOver:Replay()
+    MainPage:SelectProject(MainPage.curProjectIndex)
+end
+
+function GameOver:Goback()
+    self:ClosePage()
+    MainPage:ShowPage()
 end

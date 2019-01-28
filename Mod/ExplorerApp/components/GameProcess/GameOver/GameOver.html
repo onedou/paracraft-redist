@@ -18,6 +18,14 @@
                 _guihelper.MessageBox('buy!!!!')
             end
 
+            function replay()
+                GameOver:Replay()
+            end
+
+            function goback()
+                GameOver:Goback()
+            end
+
             function close()
                 GameOver:ClosePage()
             end
@@ -73,6 +81,11 @@
                 ['padding-left'] = 18,
                 ['padding-top'] = 4,
                 background = 'textures/explorer_32bits.png#61 131 16 16:3 3 3 3'
+            },
+            replay_click = {
+                position = 'relative',
+                width = 88,
+                height = 32
             },
             replay_icon = {
                 position = 'relative',
@@ -134,19 +147,18 @@
                 <div>
                     <pe:if condition="<%=GameOver.mode == 1%>">
                         <div class="replay">
+                            <div class="replay_click" onclick="replay"></div>
                             <div class="replay_icon"></div>
                             x1 重玩
                         </div>
-                        <div class="goback">
-                            <%=L'返回主页'%>
-                        </div>
+                        <input type="button" class="goback" value="<%=L'返回主页'%>" onclick="goback" />
                     </pe:if>
                     <pe:if condition="<%=GameOver.mode == 2%>">
-                        <input type="button" class="buy" value="<%=L'去购买'%>" onclick="buy()" />
-                        <input type="button" class="goback" value="<%=L'返回主页'%>" onclick="goback()" />
+                        <input type="button" class="buy" value="<%=L'去购买'%>" onclick="buy" />
+                        <input type="button" class="goback" value="<%=L'返回主页'%>" onclick="goback" />
                     </pe:if>
                     <pe:if condition="<%=GameOver.mode == 3%>">
-                        <input type="button" class="buy_in_main_page" value="<%=L'去购买'%>" onclick="buy_in_main_page()" />
+                        <input type="button" class="buy_in_main_page" value="<%=L'去购买'%>" onclick="buy_in_main_page" />
                     </pe:if>
                 </div>
             </div>

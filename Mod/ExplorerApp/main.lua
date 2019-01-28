@@ -10,6 +10,8 @@ NPL.load("(gl)Mod/ExplorerApp/main.lua")
 local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 ------------------------------------------------------------
 ]]
+
+NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/Task.lua")
 NPL.load("(gl)Mod/ExplorerStore/store/ExplorerStore.lua")
 
 local ExplorerStore = commonlib.gettable('Mod.ExplorerApp.store.Explorer')

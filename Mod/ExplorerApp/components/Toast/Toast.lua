@@ -37,6 +37,7 @@ function Toast:ShowPage(msg)
         function()
             if self.allPreviousMsg[index] then
                 self:ClosePage()
+                self.allPreviousMsg = {}
             end
         end,
         3000

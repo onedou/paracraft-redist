@@ -31,13 +31,8 @@ local Toast = NPL.load("./Toast/Toast.lua")
 
 local MainPage = NPL.export()
 
-MainPage.categorySelected = 1
+MainPage.categorySelected = L"收藏"
 MainPage.categoryTree = {
-    {value = L'精选'},
-    {value = L'单人'},
-    {value = L'多人'},
-    {value = L'对战'},
-    {value = L'动画'},
     {value = L'收藏'}
 }
 MainPage.worksTree = {}
@@ -54,8 +49,7 @@ function MainPage:ShowPage()
     local MainPagePage = Store:Get('page/MainPage')
 
     if MainPagePage then
-        MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', self.categoryTree)
-        MainPage:SetWorkdsTree()
+        self:SetCategoryTree()
     end
 
 	Screen:Connect("sizeChanged", MainPage, MainPage.OnScreenSizeChange, "UniqueConnection")
@@ -129,18 +123,48 @@ function MainPage:UpdateSort()
     end
 end
 
-function MainPage:SetWorkdsTree(index, sort)
+function MainPage:SetCategoryTree()
+    local MainPagePage = Store:Get('page/MainPage')
+
+    if not MainPagePage then
+        return false
+    end
+
+    MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', self.categoryTree)
+
+    Projects:GetAllTags(function(data, err)
+        if err ~= 200 or type(data) ~= 'table' or not data.rows then
+            self:SetWorkdsTree(L"收藏")
+            return false
+        end
+
+        local remoteCategoryTree = {}
+
+        for key, item in ipairs(data.rows) do
+            if item and item.tagname ~= 'paracraft专用' then
+                remoteCategoryTree[#remoteCategoryTree + 1] = { value = item.tagname or '' }
+            end
+        end
+
+        remoteCategoryTree[#remoteCategoryTree + 1] = { value = L'收藏' }
+
+        MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', remoteCategoryTree)
+        self:SetWorkdsTree(remoteCategoryTree[1].value)
+    end)
+end
+
+function MainPage:SetWorkdsTree(value, sort)
     local MainPage = Store:Get('page/MainPage')
 
     if (not MainPage) then
         return false
     end
 
-    if not index then
-        index = 1
+    if not value then
+        value = L'精选'
     end
 
-    if index == 6 then
+    if value == L'收藏' then
         local allFavoriteProjects = ProjectsDatabase:GetAllFavoriteProjects()
 
         Projects:GetProjectById(
@@ -151,7 +175,7 @@ function MainPage:SetWorkdsTree(index, sort)
                     return false
                 end
 
-                self.categorySelected = index
+                self.categorySelected = value
                 self.worksTree = self:HandleWorldsTree(data.rows)
                 MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
                 self:Refresh()
@@ -160,14 +184,14 @@ function MainPage:SetWorkdsTree(index, sort)
         return true
     end
 
-    local filter = {"paracraft专属", self.categoryTree[index].value}
+    local filter = {"paracraft专用", value}
 
     Projects:GetProjectsByFilter(filter, sort, function(data, err)
         if not data or not data.rows then
             return false
         end
 
-        self.categorySelected = index
+        self.categorySelected = value
         self.worksTree = self:HandleWorldsTree(data.rows)
         MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
         self:Refresh()
@@ -283,6 +307,8 @@ function MainPage:SetCoins()
 end
 
 function MainPage:SelectProject(index)
+    self.curProjectIndex = index
+
     if self.playerBalance <= 0 then
         GameOver:ShowPage(3)
         return false
