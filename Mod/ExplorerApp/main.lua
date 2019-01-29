@@ -13,13 +13,16 @@ local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 
 NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/Task.lua")
 NPL.load("(gl)Mod/ExplorerStore/store/ExplorerStore.lua")
+NPL.load("(gl)Mod/ExplorerApp/tasks/ExplorerTask.lua")
 
+local ExplorerTask = commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask")
 local ExplorerStore = commonlib.gettable('Mod.ExplorerApp.store.Explorer')
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
-local ProactiveEnd = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/ProactiveEnd/ProactiveEnd.lua")
 local GameOver = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.lua")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local ProactiveEnd = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/ProactiveEnd/ProactiveEnd.lua")
 
 local ExplorerApp = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.ExplorerApp"))
 
@@ -33,9 +36,19 @@ function ExplorerApp:GetDesc()
 end
 
 function ExplorerApp:Init()
-	Store.storeList.explorer = ExplorerStore
+    Store.storeList.explorer = ExplorerStore
 
-	MainPage:ShowPage()
+    Store:Set("world/noGrade", true)
+
+    MainPage:ShowPage()
+
+    GameLogic.GetFilters():add_filter(
+        "HanldeEscapeKey",
+        function()
+            ProactiveEnd:Toggle()
+            return true
+        end
+    )
 end
 
 function ExplorerApp:OnLogin()
@@ -45,6 +58,8 @@ function ExplorerApp:OnWorldLoad()
     GameLogic.GetCodeGlobal():RegisterTextEvent("dead", function()
         GameOver:ShowPage()
     end)
+
+    self.curTask = ExplorerTask:new()
 end
 
 function ExplorerApp:OnLeaveWorld()
@@ -54,9 +69,6 @@ function ExplorerApp:OnDestroy()
 end
 
 function ExplorerApp:handleKeyEvent(event)
-    if event.virtual_key == 84 then
-        ProactiveEnd:ShowPage()
-    end
 end
 
 function ExplorerApp:OnInitDesktop()

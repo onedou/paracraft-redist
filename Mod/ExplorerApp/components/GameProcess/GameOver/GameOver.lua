@@ -8,9 +8,8 @@ use the lib:
 local GameOver = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.lua")
 ------------------------------------------------------------
 ]]
-NPL.load("(gl)Mod/ExplorerApp/tasks/ExplorerTask.lua")
-
-local ExplorerTask = commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask")
+NPL.load("(gl)Mod/ExplorerApp/main.lua")
+local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
@@ -21,12 +20,12 @@ local GameOver = NPL.export()
 GameOver.mode = 1
 
 function GameOver:ShowPage(mode)
-    self.curTask = ExplorerTask:new()
-    self.curTask:Run()
-
     if mode and type(mode) == 'number' then
         self.mode = mode
     end
+
+    ExplorerApp.curTask:Run()
+    ExplorerApp.curTask:EnableAutoCamera(false)
 
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.html", "Mod.ExplorerApp.GameProcess.GameOver", 0, 0, "_fi", false)
 end
@@ -36,6 +35,9 @@ function GameOver:SetPage()
 end
 
 function GameOver:ClosePage()
+    ExplorerApp.curTask:EnableAutoCamera(true)
+    ExplorerApp.curTask:SetFinished()
+
     local GameOverPage = Store:Get('page/GameOver')
 
     if (GameOverPage) then

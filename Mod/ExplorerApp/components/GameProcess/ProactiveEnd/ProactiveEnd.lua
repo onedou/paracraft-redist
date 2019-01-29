@@ -26,6 +26,17 @@ function ProactiveEnd:ClosePage()
 
     if (ProactiveEndPage) then
         ProactiveEndPage:CloseWindow()
+        Store:Remove('page/ProactiveEnd')
+    end
+end
+
+function ProactiveEnd:Toggle()
+    local ProactiveEndPage = Store:Get('page/ProactiveEnd')
+
+    if not ProactiveEndPage then
+        self:ShowPage()
+    else
+        self:ClosePage()
     end
 end
 

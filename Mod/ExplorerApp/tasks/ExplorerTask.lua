@@ -9,30 +9,27 @@ NPL.load("(gl)Mod/ExplorerApp/tasks/ExplorerTask.lua")
 local ExplorerTask = commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask")
 ------------------------------------------------------------
 ]]
-local ExplorerTask = commonlib.inherit(commonlib.gettable("MyCompany.Aries.Game.Task"), commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask"))
+NPL.load("(gl)script/apps/Aries/Creator/Game/SceneContext/PlayContext.lua")
 
--- handling key/mouse event
--- see: RedirectContext.lua for all key/mouse overridable events
+local PlayContext = commonlib.gettable("MyCompany.Aries.Game.SceneContext.PlayContext")
+
+local AllContext = commonlib.gettable("MyCompany.Aries.Game.AllContext")
+
+local ExplorerTask = commonlib.inherit(commonlib.gettable("MyCompany.Aries.Game.Task"), commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask"))
+local ProactiveEnd = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/ProactiveEnd/ProactiveEnd.lua")
+
 function ExplorerTask:keyPressEvent(event)
-	if(event:isAccepted()) then
-		return
-	end
-	event:accept();
 end
 
-function ExplorerTask:HandleGlobalKey(event)
-	if(event:isAccepted()) then
-		return
+function ExplorerTask:EnableAutoCamera(bEnable)
+	if not self.sceneContext or not self.sceneContext.EnableAutoCamera then
+		return false
 	end
-	event:accept()
+
+	self.sceneContext:EnableAutoCamera(bEnable)
 end
 
 function ExplorerTask:Run()
-	self:LoadSceneContext();
-	ExplorerTask._super.Run(self);
+	self:LoadSceneContext()
+	ExplorerTask._super.Run(self)
 end
-
--- invoke task
--- local task = MyTask:new();
--- task:Run();
--- task:SetFinished();
