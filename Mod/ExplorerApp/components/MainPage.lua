@@ -36,6 +36,7 @@ MainPage.categoryTree = {
     {value = L'收藏'}
 }
 MainPage.worksTree = {}
+MainPage.downloadedGame = '全部游戏'
 
 function MainPage:ShowPage()
     self.balance = Wallet:GetUserBalance()
@@ -117,7 +118,7 @@ function MainPage:UpdateSort()
     end
 
     if self.categorySelected ~= 0 then
-        self:SetWorkdsTree(self.categorySelected, sort)
+        self:SetWorksTree(self.categorySelected, sort)
     else
         self:Search(sort)
     end
@@ -134,7 +135,7 @@ function MainPage:SetCategoryTree()
 
     Projects:GetAllTags(function(data, err)
         if err ~= 200 or type(data) ~= 'table' or not data.rows then
-            self:SetWorkdsTree(L"收藏")
+            self:SetWorksTree(L"收藏")
             return false
         end
 
@@ -149,11 +150,11 @@ function MainPage:SetCategoryTree()
         remoteCategoryTree[#remoteCategoryTree + 1] = { value = L'收藏' }
 
         MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', remoteCategoryTree)
-        self:SetWorkdsTree(remoteCategoryTree[1].value)
+        self:SetWorksTree(remoteCategoryTree[1].value)
     end)
 end
 
-function MainPage:SetWorkdsTree(value, sort)
+function MainPage:SetWorksTree(value, sort)
     local MainPage = Store:Get('page/MainPage')
 
     if (not MainPage) then
@@ -192,8 +193,23 @@ function MainPage:SetWorkdsTree(value, sort)
         end
 
         self.categorySelected = value
-        self.worksTree = self:HandleWorldsTree(data.rows)
-        MainPage:GetNode('worksTree'):SetAttribute('DataSource', data.rows)
+
+        local rows = {}
+
+        if self.downloadedGame == '全部游戏' then
+            rows = data.rows
+        elseif self.downloadedGame == '本地游戏' then
+            for key, item in ipairs(data.rows) do
+                if ProjectsDatabase:IsProjectDownloaded(item.id) then
+                    rows[#rows + 1] = item
+                end
+            end
+        else
+            return false
+        end
+
+        self.worksTree = self:HandleWorldsTree(rows)
+        MainPage:GetNode('worksTree'):SetAttribute('DataSource', rows)
         self:Refresh()
     end)
 end
@@ -391,6 +407,18 @@ function MainPage:HandleGameProcess()
         end,
         60000 * 10 - 60000
     )
+end
+
+function MainPage:SelectDownloadedCategory()
+    local MainPagePage = Store:Get("page/MainPage")
+
+    if not MainPagePage then
+        return false
+    end
+
+    self.downloadedGame = MainPagePage:GetValue("downloaded_game")
+    echo(self.downloadedGame)
+    self:SetWorksTree(self.categorySelected)
 end
 
 function MainPage:GetSortIndex()
