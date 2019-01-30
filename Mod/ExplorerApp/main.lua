@@ -38,8 +38,6 @@ end
 function ExplorerApp:Init()
     Store.storeList.explorer = ExplorerStore
 
-    Store:Set("world/noGrade", true)
-
     MainPage:ShowPage()
 
     GameLogic.GetFilters():add_filter(

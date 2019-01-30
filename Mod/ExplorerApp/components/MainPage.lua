@@ -336,7 +336,7 @@ end
 function MainPage:SelectProject(index)
     self.curProjectIndex = index
 
-    if self.playerBalance <= 0 then
+    if self.playerBalance <= 0 and not Store:Get("world/personalMode") then
         GameOver:ShowPage(3)
         return false
     end
@@ -371,10 +371,12 @@ function MainPage:SelectProject(index)
                     "never",
                     function(bSucceed, localWorldPath)
                         if bSucceed then
-                            self.playerBalance = self.playerBalance - 1
-                            self.balance = self.balance - 1
-                            Wallet:SetPlayerBalance(self.playerBalance)
-                            Wallet:SetUserBalance(self.balance)
+                            if not Store:Get("world/personalMode") then
+                                self.playerBalance = self.playerBalance - 1
+                                self.balance = self.balance - 1
+                                Wallet:SetPlayerBalance(self.playerBalance)
+                                Wallet:SetUserBalance(self.balance)
+                            end
                             self:HandleGameProcess()
                             MainPage:Close()
                         end
