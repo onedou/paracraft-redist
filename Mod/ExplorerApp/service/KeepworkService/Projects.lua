@@ -12,10 +12,11 @@ local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua
 
 local Projects = NPL.export()
 
-function Projects:GetProjectsByFilter(filter, sort, callback)
+function Projects:GetProjectsByFilter(filter, sort, pages, callback)
     local headers = KeepworkService:GetHeaders()
     local params = {
-        ["x-per-page"] = 10000
+        ["x-page"] = pages and pages.page and pages.page or 1,
+        ["x-per-page"] = pages and pages.perPage and pages.perPage or 10
     }
 
     if type(filter) == 'string' then

@@ -37,6 +37,7 @@ MainPage.categoryTree = {
 }
 MainPage.worksTree = {}
 MainPage.downloadedGame = '全部游戏'
+MainPage.curPage = 1
 
 function MainPage:ShowPage()
     self.balance = Wallet:GetUserBalance()
@@ -139,18 +140,18 @@ function MainPage:SetCategoryTree()
             return false
         end
 
-        local remoteCategoryTree = {}
+        self.remoteCategoryTree = {}
 
         for key, item in ipairs(data.rows) do
             if item and item.tagname ~= 'paracraft专用' then
-                remoteCategoryTree[#remoteCategoryTree + 1] = { value = item.tagname or '' }
+                self.remoteCategoryTree[#self.remoteCategoryTree + 1] = { value = item.tagname or '' }
             end
         end
 
-        remoteCategoryTree[#remoteCategoryTree + 1] = { value = L'收藏' }
+        self.remoteCategoryTree[#self.remoteCategoryTree + 1] = { value = L'收藏' }
 
-        MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', remoteCategoryTree)
-        self:SetWorksTree(remoteCategoryTree[1].value)
+        MainPagePage:GetNode('categoryTree'):SetAttribute('DataSource', self.remoteCategoryTree)
+        self:SetWorksTree(self.remoteCategoryTree[1].value)
     end)
 end
 
@@ -187,7 +188,8 @@ function MainPage:SetWorksTree(value, sort)
 
     local filter = {"paracraft专用", value}
 
-    Projects:GetProjectsByFilter(filter, sort, function(data, err)
+    Projects:GetProjectsByFilter(filter, sort, { page = self.curPage }, function(data, err)
+        echo('refresh', true)
         if not data or not data.rows then
             return false
         end
@@ -208,8 +210,17 @@ function MainPage:SetWorksTree(value, sort)
             return false
         end
 
-        self.worksTree = self:HandleWorldsTree(rows)
-        MainPage:GetNode('worksTree'):SetAttribute('DataSource', rows)
+        if self.curPage ~= 1 then
+            rows = self:HandleWorldsTree(rows)
+           
+            for key, item in ipairs(rows) do
+                self.worksTree[#self.worksTree + 1] = item
+            end
+        else
+            self.worksTree = self:HandleWorldsTree(rows)
+        end
+
+        MainPage:GetNode('worksTree'):SetAttribute('DataSource', self.worksTree)
         self:Refresh()
     end)
 end
@@ -417,7 +428,6 @@ function MainPage:SelectDownloadedCategory()
     end
 
     self.downloadedGame = MainPagePage:GetValue("downloaded_game")
-    echo(self.downloadedGame)
     self:SetWorksTree(self.categorySelected)
 end
 

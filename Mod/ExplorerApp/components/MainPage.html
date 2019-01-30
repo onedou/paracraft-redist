@@ -9,6 +9,7 @@
             MainPage.SetPage()
 
             function select_category(value)
+                MainPage.curPage = 1
                 MainPage:SetWorksTree(value)
             end
 
@@ -56,6 +57,30 @@
 
             function select_downloaded_category()
                 MainPage:SelectDownloadedCategory()
+            end
+
+            function is_load_more_items(index)
+                if index == #MainPage.worksTree then
+                    return true
+                end
+            end
+
+            function mycreate()
+                if MainPage.categorySelected == L'收藏' then
+                    return false
+                end
+
+                if MainPage.worksTree[#MainPage.worksTree].isLoaded then
+                    return false
+                end
+
+                MainPage.worksTree[#MainPage.worksTree].isLoaded = true
+                MainPage.curPage = MainPage.curPage + 1
+                MainPage:SetWorksTree(MainPage.categorySelected)
+            end
+
+            function get_page_size()
+                return #MainPage.worksTree
             end
         ]]>
     </script>
@@ -383,7 +408,7 @@
                     </div>
                 </div>
                 <div class="list_content">
-                    <pe:gridview name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="3" AllowPaging="false">
+                    <pe:gridview name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="10" pagesize="<%=get_page_size%>" ItemsPerLine="3" AllowPaging="false">
                         <Columns>
                             <div class="work_item">
                                 <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
@@ -416,6 +441,9 @@
                                     </pe:if>
                                 </div>
                                 <div style="<%=get_image(Eval('extra'))%>"></div>
+                                <pe:if condition="<%= is_load_more_items(Eval('index')) %>">
+                                    <pe:custom oncreate="<%=mycreate%>"></pe:custom>
+                                </pe:if>
                             </div>
                         </Columns>
                         <PagerSettings Position="Bottom" height="1" />
