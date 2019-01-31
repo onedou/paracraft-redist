@@ -189,7 +189,6 @@ function MainPage:SetWorksTree(value, sort)
     local filter = {"paracraft专用", value}
 
     Projects:GetProjectsByFilter(filter, sort, { page = self.curPage }, function(data, err)
-        echo('refresh', true)
         if not data or not data.rows then
             return false
         end
@@ -429,6 +428,7 @@ function MainPage:SelectDownloadedCategory()
         return false
     end
 
+    self.curPage = 1
     self.downloadedGame = MainPagePage:GetValue("downloaded_game")
     self:SetWorksTree(self.categorySelected)
 end

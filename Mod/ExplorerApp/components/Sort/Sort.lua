@@ -47,6 +47,7 @@ function Sort:GetSortList()
 end
 
 function Sort:SetSortIndex(index)
+    MainPage.curPage = 1
     Store:Set('explorer/selectSortIndex', index)
     self:ClosePage()
     MainPage:UpdateSort()
