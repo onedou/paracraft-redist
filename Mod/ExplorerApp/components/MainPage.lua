@@ -9,7 +9,9 @@ local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 ------------------------------------------------------------
 ]]
 NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua");
 
+local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
@@ -290,6 +292,7 @@ function MainPage:DownloadWorld(index)
 
             local archiveUrl = data.world.archiveUrl
 
+            DownloadWorld.ShowPage(archiveUrl)
             FileDownloader:new():Init(
                 nil,
                 archiveUrl,
@@ -301,6 +304,8 @@ function MainPage:DownloadWorld(index)
                         self:HandleWorldsTree(self.worksTree)
                         self:Refresh()
                     end
+
+                    DownloadWorld.Close();
                 end,
                 "access plus 5 mins",
                 true
