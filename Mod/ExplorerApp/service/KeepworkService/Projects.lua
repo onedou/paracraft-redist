@@ -94,8 +94,9 @@ function Projects:GetProjectById(projectIds, sort, callback)
     )
 end
 
-function Projects:GetProjectDetailById(projectId, callback)
-    KeepworkService:GetProject(projectId, callback)
+-- redirect to keepwork get project
+function Projects:GetProjectDetailById(projectId, callback, noTryStatus)
+    KeepworkService:GetProject(projectId, callback, noTryStatus)
 end
 
 function Projects:GetAllTags(callback)

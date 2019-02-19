@@ -58,6 +58,9 @@ function ExplorerApp:OnWorldLoad()
     end)
 
     self.curTask = ExplorerTask:new()
+
+    MainPage:OnWorldLoad()
+    ProactiveEnd:OnWorldLoad()
 end
 
 function ExplorerApp:OnLeaveWorld()

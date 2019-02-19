@@ -12,6 +12,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local ParacraftDevices = NPL.load('(gl)Mod/ExplorerApp/service/KeepworkService/ParacraftDevices.lua')
 local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
+local Password = NPL.load("../Password.lua")
 
 local UpdatePassword = NPL.export()
 
@@ -28,6 +29,7 @@ function UpdatePassword:ClosePage()
 
     if (UpdatePasswordPage) then
         UpdatePasswordPage:CloseWindow()
+        Password:ShowPage()
     end
 end
 

@@ -52,6 +52,7 @@ function PurchasingCode:Confirm()
     local code = PurchasingCodePage:GetValue('code')
 
     if not code or #code == 0 then
+        _guihelper.MessageBox(L"请输入激活码")
         return false
     end
 

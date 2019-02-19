@@ -17,6 +17,33 @@ function ProactiveEnd:ShowPage()
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/ProactiveEnd/ProactiveEnd.html", "Mod.ExplorerApp.GameProcess.ProactiveEnd", 0, 0, "_fi", false)
 end
 
+function ProactiveEnd:ExitIcon()
+    local params = {
+        url = "Mod/ExplorerApp/components/GameProcess/ProactiveEnd/Exit.html",
+        name = "Mod.ExplorerApp.GameProcess.Exit",
+        isShowTitleBar = false,
+        DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+        style = CommonCtrl.WindowFrame.ContainerStyle,
+        zorder = 0,
+        allowDrag = false,
+        bShow = true,
+        directPosition = true,
+        align = "_rt",
+        x = -50,
+        y = 25,
+        width = 17,
+        height = 17,
+        cancelShowAnimation = true,
+        bToggleShowHide = true
+    }
+
+    System.App.Commands.Call("File.MCMLWindowFrame", params)
+end
+
+function ProactiveEnd:OnWorldLoad()
+    self:ExitIcon()
+end
+
 function ProactiveEnd:SetPage()
     Store:Set("page/ProactiveEnd", document:GetPageCtrl())
 end

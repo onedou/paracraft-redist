@@ -5,6 +5,7 @@
         <![CDATA[
             PurchasingCode = NPL.load('./PurchasingCode.lua')
             Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
+            local SetCoins = NPL.load('../SetCoins/SetCoins.lua')
 
             PurchasingCode:SetPage()
 
@@ -13,6 +14,7 @@
             end
 
             function close()
+                SetCoins:ShowPage()
                 PurchasingCode:ClosePage()
             end
 
@@ -95,7 +97,7 @@
                 color = '#ffffff',
                 width = 87,
                 height = 32,
-                background = 'textures/explorer_32bits.png#60 131 17 16:3 3 3 3',
+                background = 'textures/explorer_32bits.png#61 131 16 16:3 3 3 3',
                 ['margin-top'] = 55
             }
         }

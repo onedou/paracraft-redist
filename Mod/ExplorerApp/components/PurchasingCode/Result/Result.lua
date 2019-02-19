@@ -12,6 +12,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
 local PurchasingCode = NPL.load("(gl)Mod/ExplorerApp/components/PurchasingCode/PurchasingCode.lua")
+local SetCoins = NPL.load('../../SetCoins/SetCoins.lua')
 
 local Result = NPL.export()
 
@@ -32,6 +33,7 @@ function Result:ClosePage()
     local ResultPage = Store:Get('page/Result')
 
     if (ResultPage) then
+        SetCoins:ShowPage()
         ResultPage:CloseWindow()
     end
 end

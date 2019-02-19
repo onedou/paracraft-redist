@@ -24,8 +24,10 @@ function GameOver:ShowPage(mode)
         self.mode = mode
     end
 
-    ExplorerApp.curTask:Run()
-    ExplorerApp.curTask:EnableAutoCamera(false)
+    if ExplorerApp.curTask then
+        ExplorerApp.curTask:Run()
+        ExplorerApp.curTask:EnableAutoCamera(false)
+    end
 
     local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.html", "Mod.ExplorerApp.GameProcess.GameOver", 0, 0, "_fi", false)
 end
@@ -35,8 +37,10 @@ function GameOver:SetPage()
 end
 
 function GameOver:ClosePage()
-    ExplorerApp.curTask:EnableAutoCamera(true)
-    ExplorerApp.curTask:SetFinished()
+    if ExplorerApp.curTask then
+        ExplorerApp.curTask:EnableAutoCamera(true)
+        ExplorerApp.curTask:SetFinished()
+    end
 
     local GameOverPage = Store:Get('page/GameOver')
 

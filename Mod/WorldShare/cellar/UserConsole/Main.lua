@@ -157,7 +157,10 @@ end
 function UserConsole.OnClickOfficialWorlds()
     if ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_LCONTROL) or ParaUI.IsKeyPressed(DIK_SCANCODE.DIK_RCONTROL) then
         Store:Set("world/personalMode", true)
-        ExplorerApp:Init()
+
+        if ExplorerApp then
+            ExplorerApp:Init()
+        end
 
         return true
     end
