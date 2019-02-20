@@ -10,6 +10,7 @@ local ProactiveEnd = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/Proact
 ]]
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 
 local ProactiveEnd = NPL.export()
 
@@ -67,6 +68,9 @@ function ProactiveEnd:Toggle()
     end
 end
 
-function ProactiveEnd:Confirm()
-
+function ProactiveEnd:Exit()
+    self:ClosePage()
+    Store:Set('explorer/reduceRemainingTime', 0)
+    Store:Set('explorer/warnReduceRemainingTime', 0)
+    MainPage:ShowPage()
 end

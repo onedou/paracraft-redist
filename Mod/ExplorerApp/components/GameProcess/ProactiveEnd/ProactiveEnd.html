@@ -5,7 +5,6 @@
         <![CDATA[
             ProactiveEnd = NPL.load('./ProactiveEnd.lua')
             Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
-            MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 
             ProactiveEnd:SetPage()
 
@@ -19,8 +18,7 @@
             end
 
             function exit()
-                ProactiveEnd:ClosePage()
-                MainPage:ShowPage()
+                ProactiveEnd:Exit()
             end
 
             function close()

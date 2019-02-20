@@ -39,6 +39,17 @@ function ExplorerApp:Init()
     Store.storeList.explorer = ExplorerStore
 
     MainPage:ShowPage()
+end
+
+function ExplorerApp:OnLogin()
+end
+
+function ExplorerApp:OnWorldLoad()
+    local mode = Store:Get('explorer/mode')
+
+    if not mode or mode ~= 'recommend' then
+        return false
+    end
 
     GameLogic.GetFilters():add_filter(
         "HanldeEscapeKey",
@@ -47,12 +58,7 @@ function ExplorerApp:Init()
             return true
         end
     )
-end
 
-function ExplorerApp:OnLogin()
-end
-
-function ExplorerApp:OnWorldLoad()
     GameLogic.GetCodeGlobal():RegisterTextEvent("dead", function()
         GameOver:ShowPage()
     end)

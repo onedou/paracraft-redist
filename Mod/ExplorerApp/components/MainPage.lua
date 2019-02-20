@@ -406,8 +406,11 @@ function MainPage:SelectProject(index)
                                 self.balance = self.balance - 1
                                 Wallet:SetPlayerBalance(self.playerBalance)
                                 Wallet:SetUserBalance(self.balance)
+                                Store:Remove('explorer/reduceRemainingTime')
+                                Store:Remove('explorer/warnReduceRemainingTime')
+                                self:HandleGameProcess()
                             end
-                            self:HandleGameProcess()
+
                             MainPage:Close()
                         end
                     end
@@ -418,32 +421,54 @@ function MainPage:SelectProject(index)
 
     -- prevent recursive calls.
     mytimer:Change(2, nil)
+    Store:Set("explorer/mode", "recommend")
 end
 
 function MainPage:HandleGameProcess()
-    Utils.SetTimeOut(
-        function()
-            if self.playerBalance > 0 then
-                Toast:ShowPage(L "消耗一个金币")
-                self.playerBalance = self.playerBalance - 1
-                self.balance = self.balance - 1
-                Wallet:SetPlayerBalance(self.playerBalance)
-                Wallet:SetUserBalance(self.balance)
-                self:HandleGameProcess()
-            else
-                TimeUp:ShowPage()
-            end
-        end,
-        60000 * 10
-    )
+    if not Store:Get('explorer/warnReduceRemainingTime') then
+        Store:Set('explorer/warnReduceRemainingTime', (1000 * 60 * 10) - (60 * 1000))
+    end
+
+    if not Store:Get('explorer/reduceRemainingTime') then
+        Store:Set('explorer/reduceRemainingTime', 1000 * 60 * 10)
+    end
 
     Utils.SetTimeOut(
         function()
-            if self.playerBalance then
-                Toast:ShowPage(L "即将消耗一个金币")
+            local reduceRemainingTime = Store:Get('explorer/reduceRemainingTime')
+            local warnReduceRemainingTime = Store:Get('explorer/warnReduceRemainingTime')
+
+            if warnReduceRemainingTime == 1000 then
+                if self.playerBalance > 0 then
+                    Toast:ShowPage(L "即将消耗一个金币")
+                end
+
+                Store:Set('explorer/warnReduceRemainingTime', warnReduceRemainingTime - 1000)
+            elseif warnReduceRemainingTime > 0 then
+                Store:Set('explorer/warnReduceRemainingTime', warnReduceRemainingTime - 1000)
+            end
+
+            if reduceRemainingTime == 1000 then
+                if self.playerBalance > 0 then
+                    Toast:ShowPage(L "消耗一个金币")
+                    self.playerBalance = self.playerBalance - 1
+                    self.balance = self.balance - 1
+                    Wallet:SetPlayerBalance(self.playerBalance)
+                    Wallet:SetUserBalance(self.balance)
+
+                    Store:Set('explorer/reduceRemainingTime', reduceRemainingTime - 1000)
+                    Store:Remove('explorer/reduceRemainingTime')
+                    Store:Remove('explorer/warnReduceRemainingTime')
+                    self:HandleGameProcess()
+                else
+                    TimeUp:ShowPage()
+                end
+            elseif reduceRemainingTime > 0 then
+                Store:Set('explorer/reduceRemainingTime', reduceRemainingTime - 1000)
+                self:HandleGameProcess()
             end
         end,
-        60000 * 10 - 60000
+        1000
     )
 end
 
@@ -468,10 +493,14 @@ function MainPage:GetSortList()
 end
 
 function MainPage:OnWorldLoad()
-    Utils.SetTimeOut(
-        function()
-            Toast:ShowPage(L "消耗一个金币")
-        end,
-        1000
-    )
+    local personalMode = Store:Get("world/personalMode")
+
+    if not personalMode then
+        Utils.SetTimeOut(
+            function()
+                Toast:ShowPage(L "消耗一个金币")
+            end,
+            1000
+        )
+    end
 end
