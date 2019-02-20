@@ -8,7 +8,10 @@ use the lib:
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 ------------------------------------------------------------
 ]]
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+
 local KeepworkService = NPL.load("../KeepworkService.lua")
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local KeepworkServiceProject = NPL.export()
 
@@ -23,4 +26,22 @@ function KeepworkServiceProject:Visit(projectId)
         function(data, err)
         end
     )
+end
+
+function KeepworkServiceProject:GetProjectId()
+    local tagInfo = WorldCommon.GetWorldInfo()
+    local openKpProjectId = Store:Get('world/openKpProjectId')
+    local urlKpProjectId = KeepworkService:GetProjectFromUrlProtocol()
+
+    if tagInfo and tagInfo.kpProjectId then
+        return tagInfo.kpProjectId
+    end
+
+    if urlKpProjectId then
+        return urlKpProjectId
+    end
+
+    if openKpProjectId then
+        return openKpProjectId
+    end
 end

@@ -11,6 +11,7 @@ local ProactiveEnd = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/Proact
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
+local AudioEngine = commonlib.gettable("AudioEngine")
 
 local ProactiveEnd = NPL.export()
 
@@ -72,5 +73,7 @@ function ProactiveEnd:Exit()
     self:ClosePage()
     Store:Set('explorer/reduceRemainingTime', 0)
     Store:Set('explorer/warnReduceRemainingTime', 0)
+    Store:Set('explorer/canGoBack', false)
+    AudioEngine.StopAllSounds()
     MainPage:ShowPage()
 end

@@ -17,6 +17,7 @@ local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua
 local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local GradeLocalData = NPL.load("(gl)Mod/WorldShare/database/GradeLocaldata.lua")
 
 local Grade = NPL.export()
@@ -34,7 +35,7 @@ function Grade:OnWorldLoad()
         return false
     end
 
-    if not GradeLocalData:IsProjectIdExist(self:GetProjectId()) then
+    if not GradeLocalData:IsProjectIdExist(KeepworkServiceProject:GetProjectId()) then
         Utils.SetTimeOut(
             function()
                 self:ShowNoticeButton()
@@ -49,24 +50,6 @@ function Grade:ClosePage()
 
     if (GradePage) then
         GradePage:CloseWindow()
-    end
-end
-
-function Grade:GetProjectId()
-    local tagInfo = WorldCommon.GetWorldInfo()
-    local openKpProjectId = Store:Get('world/openKpProjectId')
-    local urlKpProjectId = KeepworkService:GetProjectFromUrlProtocol()
-
-    if tagInfo and tagInfo.kpProjectId then
-        return tagInfo.kpProjectId
-    end
-
-    if urlKpProjectId then
-        return urlKpProjectId
-    end
-
-    if openKpProjectId then
-        return openKpProjectId
     end
 end
 

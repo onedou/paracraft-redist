@@ -504,3 +504,13 @@ function MainPage:OnWorldLoad()
         )
     end
 end
+
+function MainPage:CanGoBack()
+    local canGoBack = Store:Get('explorer/canGoBack')
+
+    if canGoBack == false then
+        return false
+    end
+
+    MainPage:Close()
+end
