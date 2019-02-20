@@ -16,6 +16,10 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local KeepworkServiceProject = NPL.export()
 
 function KeepworkServiceProject:Visit(projectId)
+    if not projectId then
+        return false
+    end
+
     local url = format("/projects/%d/visit", projectId)
 
     KeepworkService:Request(

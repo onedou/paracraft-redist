@@ -375,6 +375,13 @@
                 width = 250,
                 height = 180,
                 background = ''
+            },
+            sort_icon = {
+                background = "textures/explorer_32bits.png;183 131 10 5",
+                float = 'left',
+                width = 10,
+                height = 5,
+                ['margin-top'] = 12
             }
         }
     </style>
@@ -431,6 +438,7 @@
                     </div>
                     <div class="list_filter">
                         <input class="list_filter_button" onclick="select_sort()" type="button" value='<%=get_cur_sort()%>' />
+                        <div class="sort_icon"></div>
                     </div>
                 </div>
                 <div class="list_content">
