@@ -35,7 +35,7 @@ function Grade:OnWorldLoad()
         return false
     end
 
-    if not GradeLocalData:IsProjectIdExist(KeepworkServiceProject:GetProjectId()) then
+    if KeepworkServiceProject:GetProjectId() and not GradeLocalData:IsProjectIdExist(KeepworkServiceProject:GetProjectId()) then
         Utils.SetTimeOut(
             function()
                 self:ShowNoticeButton()
