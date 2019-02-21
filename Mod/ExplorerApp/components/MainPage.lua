@@ -313,7 +313,7 @@ function MainPage:DownloadWorld(index)
 
                 local archiveUrl = data.world.archiveUrl
 
-                DownloadWorld.ShowPage(archiveUrl)
+                DownloadWorld.ShowPage(format("【%s%d】 %s %s%s", L"项目ID:", curItem.id, curItem.name, L"作者：", curItem.user.username))
                 FileDownloader:new():Init(
                     "official_texture_package",
                     archiveUrl,

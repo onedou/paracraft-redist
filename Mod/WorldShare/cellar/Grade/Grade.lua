@@ -40,7 +40,7 @@ function Grade:OnWorldLoad()
             function()
                 self:ShowNoticeButton()
             end,
-            (1000 * 60 * 3)
+            (5000)
         )
     end
 end
@@ -115,7 +115,7 @@ end
 function Grade:Confirm(score)
     local tagInfo = WorldCommon.GetWorldInfo()
 
-    if not self:GetProjectId() then
+    if not KeepworkServiceProject:GetProjectId() then
         return false
     end
 
@@ -126,11 +126,11 @@ function Grade:Confirm(score)
     local rate = score * 20
 
     KeepworkService:SetRatedProject(
-        self:GetProjectId(),
+        KeepworkServiceProject:GetProjectId(),
         rate,
         function(data, err)
             if err == 200 then
-                GradeLocalData:RecordProjectId(self:GetProjectId())
+                GradeLocalData:RecordProjectId(KeepworkServiceProject:GetProjectId())
                 _guihelper.MessageBox(L"感谢您为该作品打分！")
             end
         end
