@@ -37,11 +37,11 @@
                 MainPage:SetCoins()
             end
 
-            function get_image(extra)
-                if not extra or not extra.imageUrl then
+            function get_image(cover)
+                if not cover then
                     return "position:relative;top:0px;left:0;width:250px;height:120px;background:url();"
                 else
-                    return "position:relative;top:0px;left:0;width:250px;height:120px;background:url(" .. extra.imageUrl .. ");"
+                    return "position:relative;top:0px;left:0;width:250px;height:120px;background:url(" .. cover .. ");"
                 end
             end
 
@@ -447,11 +447,11 @@
                             <div class="work_item">
                                 <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
                                 <div class="radius"></div>
-                                <div style="<%=get_image(Eval('extra'))%>"></div>
+                                <div style="<%=get_image(Eval('cover'))%>"></div>
                                 <div class="work_item_info">
                                     <div class="work_item_info_left">
                                         <div class="work_item_info_workname"><%=Eval("name")%></div>
-                                        <div class="work_item_info_author"><%=Eval("user")['username']%></div>
+                                        <div class="work_item_info_author"><%=Eval("username")%></div>
                                     </div>
                                     <div class="work_item_info_right">
                                         <div class="project_id"><%= format('%s%d', L'项目ID:', Eval('id'))%></div>

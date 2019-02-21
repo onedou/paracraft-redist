@@ -21,7 +21,8 @@ local Screen = commonlib.gettable("System.Windows.Screen")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Projects = NPL.load("../service/KeepworkService/Projects.lua")
+local KeepworkServiceProjects = NPL.load("../service/KeepworkService/Projects.lua")
+local KeepworkEsServiceProjects = NPL.load("../service/KeepworkEsService/Projects.lua")
 local Password = NPL.load("./Password/Password.lua")
 local GameOver = NPL.load("./GameProcess/GameOver/GameOver.lua")
 local TimeUp = NPL.load("./GameProcess/TimeUp/TimeUp.lua")
@@ -123,11 +124,11 @@ function MainPage:UpdateSort()
     local sort
 
     if Store:Get("explorer/selectSortIndex") == 2 then
-        sort = "hotNo-desc"
+        sort = "recent_view"
     end
 
     if Store:Get("explorer/selectSortIndex") == 3 then
-        sort = "createdAt-desc"
+        sort = "updated_at"
     end
 
     if self.categorySelected ~= 0 then
@@ -146,7 +147,7 @@ function MainPage:SetCategoryTree()
 
     MainPagePage:GetNode("categoryTree"):SetAttribute("DataSource", self.categoryTree)
 
-    Projects:GetAllTags(
+    KeepworkServiceProjects:GetAllTags(
         function(data, err)
             if err ~= 200 or type(data) ~= "table" or not data.rows then
                 self:SetWorksTree(L "收藏")
@@ -183,12 +184,23 @@ function MainPage:SetWorksTree(value, sort)
     if value == L "收藏" then
         local allFavoriteProjects = ProjectsDatabase:GetAllFavoriteProjects()
 
-        Projects:GetProjectById(
+        KeepworkServiceProjects:GetProjectById(
             allFavoriteProjects,
             sort,
             function(data, err)
                 if not data or not data.rows then
                     return false
+                end
+                echo(data, true)
+                -- map to es data format
+                for key, item in ipairs(data.rows) do
+                    if item.extra and item.extra.imageUrl then
+                        item.cover = item.extra.imageUrl
+                    end
+
+                    if item.user and item.user.username then
+                        item.username = item.user.username
+                    end
                 end
 
                 self.categorySelected = value
@@ -202,12 +214,12 @@ function MainPage:SetWorksTree(value, sort)
 
     local filter = {"paracraft专用", value}
 
-    Projects:GetProjectsByFilter(
+    KeepworkEsServiceProjects:GetEsProjectsByFilter(
         filter,
         sort,
         {page = self.curPage},
         function(data, err)
-            if not data or not data.rows then
+            if not data or err ~= 200 then
                 return false
             end
 
@@ -216,9 +228,9 @@ function MainPage:SetWorksTree(value, sort)
             local rows = {}
 
             if self.downloadedGame == "全部游戏" then
-                rows = data.rows
+                rows = data.hits
             elseif self.downloadedGame == "本地游戏" then
-                for key, item in ipairs(data.rows) do
+                for key, item in ipairs(data.hits) do
                     if ProjectsDatabase:IsProjectDownloaded(item.id) then
                         rows[#rows + 1] = item
                     end
@@ -241,6 +253,47 @@ function MainPage:SetWorksTree(value, sort)
             self:Refresh()
         end
     )
+
+    -- KeepworkServiceProjects:GetProjectsByFilter(
+    --     filter,
+    --     sort,
+    --     {page = self.curPage},
+    --     function(data, err)
+    --         echo(data, true)
+    --         if not data or not data.rows then
+    --             return false
+    --         end
+
+    --         self.categorySelected = value
+
+    --         local rows = {}
+
+    --         if self.downloadedGame == "全部游戏" then
+    --             rows = data.rows
+    --         elseif self.downloadedGame == "本地游戏" then
+    --             for key, item in ipairs(data.rows) do
+    --                 if ProjectsDatabase:IsProjectDownloaded(item.id) then
+    --                     rows[#rows + 1] = item
+    --                 end
+    --             end
+    --         else
+    --             return false
+    --         end
+
+    --         if self.curPage ~= 1 then
+    --             rows = self:HandleWorldsTree(rows)
+
+    --             for key, item in ipairs(rows) do
+    --                 self.worksTree[#self.worksTree + 1] = item
+    --             end
+    --         else
+    --             self.worksTree = self:HandleWorldsTree(rows)
+    --         end
+
+    --         MainPage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+    --         self:Refresh()
+    --     end
+    -- )
 end
 
 function MainPage:Search(sort)
@@ -256,7 +309,7 @@ function MainPage:Search(sort)
         return false
     end
 
-    Projects:GetProjectById(
+    KeepworkServiceProjects:GetProjectById(
         {projectId},
         sort,
         function(data, err)
@@ -303,7 +356,7 @@ function MainPage:DownloadWorld(index)
     end
 
     if not ProjectsDatabase:IsProjectDownloaded(curItem.id) then
-        Projects:GetProjectDetailById(
+        KeepworkServiceProjects:GetProjectDetailById(
             curItem.id,
             function(data, err)
                 if not data or not data.world or not data.world.archiveUrl or err ~= 200 then
@@ -313,7 +366,7 @@ function MainPage:DownloadWorld(index)
 
                 local archiveUrl = data.world.archiveUrl
 
-                DownloadWorld.ShowPage(format("【%s%d】 %s %s%s", L"项目ID:", curItem.id, curItem.name, L"作者：", curItem.user.username))
+                DownloadWorld.ShowPage(format("【%s%d】 %s %s%s", L"项目ID:", curItem.id, curItem.name, L"作者：", curItem.username))
                 FileDownloader:new():Init(
                     "official_texture_package",
                     archiveUrl,
