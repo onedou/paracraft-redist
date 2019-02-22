@@ -191,7 +191,7 @@ function MainPage:SetWorksTree(value, sort)
                 if not data or not data.rows then
                     return false
                 end
-                echo(data, true)
+
                 -- map to es data format
                 for key, item in ipairs(data.rows) do
                     if item.extra and item.extra.imageUrl then
@@ -253,47 +253,6 @@ function MainPage:SetWorksTree(value, sort)
             self:Refresh()
         end
     )
-
-    -- KeepworkServiceProjects:GetProjectsByFilter(
-    --     filter,
-    --     sort,
-    --     {page = self.curPage},
-    --     function(data, err)
-    --         echo(data, true)
-    --         if not data or not data.rows then
-    --             return false
-    --         end
-
-    --         self.categorySelected = value
-
-    --         local rows = {}
-
-    --         if self.downloadedGame == "全部游戏" then
-    --             rows = data.rows
-    --         elseif self.downloadedGame == "本地游戏" then
-    --             for key, item in ipairs(data.rows) do
-    --                 if ProjectsDatabase:IsProjectDownloaded(item.id) then
-    --                     rows[#rows + 1] = item
-    --                 end
-    --             end
-    --         else
-    --             return false
-    --         end
-
-    --         if self.curPage ~= 1 then
-    --             rows = self:HandleWorldsTree(rows)
-
-    --             for key, item in ipairs(rows) do
-    --                 self.worksTree[#self.worksTree + 1] = item
-    --             end
-    --         else
-    --             self.worksTree = self:HandleWorldsTree(rows)
-    --         end
-
-    --         MainPage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
-    --         self:Refresh()
-    --     end
-    -- )
 end
 
 function MainPage:Search(sort)
@@ -315,6 +274,17 @@ function MainPage:Search(sort)
         function(data, err)
             if not data or not data.rows then
                 return false
+            end
+
+            -- map to es data format
+            for key, item in ipairs(data.rows) do
+                if item.extra and item.extra.imageUrl then
+                    item.cover = item.extra.imageUrl
+                end
+
+                if item.user and item.user.username then
+                    item.username = item.user.username
+                end
             end
 
             self.categorySelected = 0
