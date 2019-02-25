@@ -18,3 +18,4 @@
 /apps
 *.dmp
 access.log
+/assets.log

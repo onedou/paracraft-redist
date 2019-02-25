@@ -5,6 +5,7 @@
         <![CDATA[
             MainPage = NPL.load("./MainPage.lua")
             Sort = NPL.load("./Sort/Sort.lua")
+            KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
             MainPage.SetPage()
 
@@ -55,8 +56,20 @@
                 return MainPage:GetSortList()[MainPage:GetSortIndex()].value
             end
 
-            function select_downloaded_category()
-                MainPage:SelectDownloadedCategory()
+            function select_downloaded_category(value)
+                local page = MainPage:GetPage()
+            
+                if not page then
+                    return false
+                end
+
+                if value == 'all' then
+                    page:SetValue('downloaded_game_local', false)
+                elseif value == 'local' then
+                    page:SetValue('downloaded_game_all', false)
+                end
+
+                MainPage:SelectDownloadedCategory(value)
             end
 
             function is_load_more_items(index)
@@ -81,6 +94,14 @@
 
             function get_page_size()
                 return #MainPage.worksTree
+            end
+
+            function go_project_web(id)
+                MainPage:OpenProject(id)
+            end
+
+            function get_project_url_text(id)
+                return format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), id or 0)
             end
         ]]>
     </script>
@@ -427,8 +448,10 @@
             <div class="list">
                 <div class=list_search_tool>
                     <div class="downloaded_game">
-                        <input name="downloaded_game" onclick="select_downloaded_category" style="margin-top:3px;margin-right: 3px;" type="radio" value="全部游戏" checked="checked"/>全部游戏
-                        <input name="downloaded_game" onclick="select_downloaded_category" style="margin-top:3px;margin-right: 3px;" type="radio" value="本地游戏" />本地游戏
+                        <input name="downloaded_game_all" onclick="select_downloaded_category" value="all" style="margin-top:3px;margin-right: 3px;" type="radio" checked="checked"/>
+                        <div style="float:left" for="downloaded_game">全部游戏</div>
+                        <input name="downloaded_game_local" onclick="select_downloaded_category" value="local" style="margin-top:3px;margin-right: 3px;" type="radio" />
+                        <div style="float:left" for="downloaded_game_local">本地游戏</div>
                     </div>
                     <div class="list_search_bar">
                         <div class="list_search_bar_radius"></div>
@@ -456,7 +479,7 @@
                                         <div class="work_item_info_author"><%=Eval("username")%></div>
                                     </div>
                                     <div class="work_item_info_right">
-                                        <div class="project_id"><%= format('%s%d', L'项目ID:', Eval('id'))%></div>
+                                        <div class="project_id" name='<%=Eval("id")%>' tooltip="<%=get_project_url_text(Eval('id'))%>" onclick="go_project_web"><%= format('%s%d', L'项目ID:', Eval('id'))%></div>
                                         <div class="item_button">
                                             <pe:if condition="<%= Eval('downloaded') %>">
                                                 <div class="download">

@@ -21,6 +21,7 @@ local Screen = commonlib.gettable("System.Windows.Screen")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceProjects = NPL.load("../service/KeepworkService/Projects.lua")
 local KeepworkEsServiceProjects = NPL.load("../service/KeepworkEsService/Projects.lua")
 local Password = NPL.load("./Password/Password.lua")
@@ -39,7 +40,7 @@ MainPage.categoryTree = {
     {value = L "收藏"}
 }
 MainPage.worksTree = {}
-MainPage.downloadedGame = "全部游戏"
+MainPage.downloadedGame = "all"
 MainPage.curPage = 1
 
 function MainPage:ShowPage()
@@ -124,11 +125,11 @@ function MainPage:UpdateSort()
     local sort
 
     if Store:Get("explorer/selectSortIndex") == 2 then
-        sort = "recent_view"
+        sort = "updated_at"
     end
 
     if Store:Get("explorer/selectSortIndex") == 3 then
-        sort = "updated_at"
+        sort = "recent_view"
     end
 
     if self.categorySelected ~= 0 then
@@ -227,9 +228,9 @@ function MainPage:SetWorksTree(value, sort)
 
             local rows = {}
 
-            if self.downloadedGame == "全部游戏" then
+            if self.downloadedGame == "all" then
                 rows = data.hits
-            elseif self.downloadedGame == "本地游戏" then
+            elseif self.downloadedGame == "local" then
                 for key, item in ipairs(data.hits) do
                     if ProjectsDatabase:IsProjectDownloaded(item.id) then
                         rows[#rows + 1] = item
@@ -495,15 +496,15 @@ function MainPage:HandleGameProcess()
     )
 end
 
-function MainPage:SelectDownloadedCategory()
+function MainPage:SelectDownloadedCategory(value)
     local MainPagePage = Store:Get("page/MainPage")
 
-    if not MainPagePage then
+    if not MainPagePage or not value then
         return false
     end
 
     self.curPage = 1
-    self.downloadedGame = MainPagePage:GetValue("downloaded_game")
+    self.downloadedGame = value
     self:SetWorksTree(self.categorySelected)
 end
 
@@ -536,4 +537,16 @@ function MainPage:CanGoBack()
     end
 
     MainPage:Close()
+end
+
+function MainPage:OpenProject(id)
+    if type(id) ~= 'number' then
+        return false
+    end
+
+    ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), id), "", "", 1)
+end
+
+function MainPage:GetPage()
+    return Store:Get('page/MainPage')
 end
