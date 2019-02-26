@@ -17,7 +17,7 @@ local Projects = NPL.export()
 function Projects:GetEsProjectsByFilter(filter, sort, pages, callback)
     local sysTags = Utils:UrlEncode(Utils:Implode("|", filter))
 
-    params = {
+    local params = {
         ['sys_tags'] = sysTags,
         page = pages and pages.page and pages.page or 1,
         ["per-page"] = pages and pages.perPage and pages.perPage or 10,
