@@ -138,9 +138,6 @@ function Grade:Confirm(score)
         KeepworkServiceProject:GetProjectId(),
         rate,
         function(data, err)
-            echo(data, true)
-            echo(err, true)
-
             if err == 200 then
                 GradeLocalData:RecordProjectId(KeepworkServiceProject:GetProjectId(), username)
                 _guihelper.MessageBox(L"感谢您为该作品打分！")
