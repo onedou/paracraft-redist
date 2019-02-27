@@ -53,7 +53,7 @@ function ExplorerApp:OnWorldLoad()
     end
 
     GameLogic.GetFilters():add_filter(
-        "HanldeEscapeKey",
+        "HandleEscapeKey",
         function()
             ProactiveEnd:Toggle()
             return true
