@@ -31,7 +31,7 @@ function Grade:SetPage()
 end
 
 function Grade:OnWorldLoad()
-    if Store:Get("world/noGrade") then
+    if Store:Get("explorer/mode") and Store:Get("explorer/mode") == 'recommend' then
         return false
     end
 
