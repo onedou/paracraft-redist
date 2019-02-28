@@ -6,6 +6,7 @@
             MainPage = NPL.load("./MainPage.lua")
             Sort = NPL.load("./Sort/Sort.lua")
             KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+            Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
             UniString = commonlib.gettable("System.Core.UniString")
 
             MainPage.SetPage()
@@ -121,6 +122,10 @@
 
             function get_project_url_text(id)
                 return format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), id or 0)
+            end
+
+            function is_show_balance()
+                return not Store:Get("world/personalMode")
             end
         ]]>
     </script>
@@ -430,11 +435,13 @@
     <div class="area" name="area">
         <div class="strip" name="strip">
             <div class="title"><%=L"探索"%></div>
-            <div class="balance">
-                <div class="strip_icon_1"></div>
-                <div class="strip_coins"><%=MainPage.playerBalance%></div>
-                <input type="button" value='<%=L"投币"%>' class="strip_icon_2" onclick="set_coins"/>
-            </div>
+            <pe:if condition="<%=is_show_balance()%>">
+                <div class="balance">
+                    <div class="strip_icon_1"></div>
+                    <div class="strip_coins"><%=MainPage.playerBalance%></div>
+                    <input type="button" value='<%=L"投币"%>' class="strip_icon_2" onclick="set_coins"/>
+                </div>
+            </pe:if>
             <div class="close" align="right">
                 <div onclick="close()" class="close_click"></div>
                 <div class="close_icon"></div>

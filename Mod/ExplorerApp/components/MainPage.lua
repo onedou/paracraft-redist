@@ -59,7 +59,8 @@ function MainPage:ShowPage()
         0,
         0,
         "_fi",
-        false
+        false,
+        2
     )
 
     local MainPagePage = Store:Get("page/MainPage")
