@@ -22,7 +22,7 @@ PurchasingCode.balance = 0
 function PurchasingCode:ShowPage()
     self.balance = Wallet:GetUserBalance()
 
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/PurchasingCode.html", "Mod.ExplorerApp.PurchasingCode", 0, 0, "_fi", false)
+    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/PurchasingCode.html", "Mod.ExplorerApp.PurchasingCode", 0, 0, "_fi", false, 3)
 end
 
 function PurchasingCode:SetPage()

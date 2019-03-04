@@ -14,7 +14,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Notice = NPL.export()
 
 function Notice:ShowPage()
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/Notice/Notice.html", "Mod.ExplorerApp.PurchasingCode.Notice", 0, 0, "_fi", false)
+    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/Notice/Notice.html", "Mod.ExplorerApp.PurchasingCode.Notice", 0, 0, "_fi", false, 3)
 end
 
 function Notice:SetPage()

@@ -23,7 +23,7 @@ function SetCoins:ShowPage()
     self.balance = Wallet:GetUserBalance()
     self.playerBalance = Wallet:GetPlayerBalance()
 
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/SetCoins/SetCoins.html", "Mod.ExplorerApp.SetCoins", 0, 0, "_fi", false)
+    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/SetCoins/SetCoins.html", "Mod.ExplorerApp.SetCoins", 0, 0, "_fi", false, 3)
 end
 
 function SetCoins:SetPage()

@@ -17,7 +17,7 @@ local Password = NPL.load("../Password.lua")
 local UpdatePassword = NPL.export()
 
 function UpdatePassword:ShowPage()
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/UpdatePassword/UpdatePassword.html", "Mod.ExplorerApp.Password.UpdatePassword", 0, 0, "_fi", false)
+    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/UpdatePassword/UpdatePassword.html", "Mod.ExplorerApp.Password.UpdatePassword", 0, 0, "_fi", false, 3)
 end
 
 function UpdatePassword:SetPage()

@@ -78,7 +78,7 @@ function Projects:IsProjectDownloaded(projectId)
 end
 
 function Projects:SetDownloadedProject(info)
-    if not info then
+    if not info or not info.id or not info.world then
         return false
     end
 
@@ -89,7 +89,13 @@ function Projects:SetDownloadedProject(info)
 
     local downloadedProjects = self:GetData("downloadedProjects") or {}
 
-    downloadedProjects[#downloadedProjects + 1] = data
+    local downItem, downKey = self:GetDownloadedProject(data.projectId)
+
+    if downItem then
+        downloadedProjects[downKey] = data
+    else
+        downloadedProjects[#downloadedProjects + 1] = data
+    end
 
     self:SetData('downloadedProjects', downloadedProjects)
 end
@@ -103,7 +109,7 @@ function Projects:GetDownloadedProject(projectId)
 
     for key, item in ipairs(downloadedProjects) do
         if item.projectId == projectId then
-            return item
+            return item, key
         end
     end
 end
