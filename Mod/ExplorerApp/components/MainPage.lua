@@ -45,7 +45,11 @@ MainPage.worksTree = {}
 MainPage.downloadedGame = "all"
 MainPage.curPage = 1
 
-function MainPage:ShowPage()
+function MainPage:ShowPage(callback)
+    if type(callback) then
+        self.CloseCallback = callback
+    end
+
     self.balance = Wallet:GetUserBalance()
     self.playerBalance = Wallet:GetPlayerBalance()
 
@@ -91,6 +95,10 @@ function MainPage:Close()
     local MainPagePage = Store:Get("page/MainPage")
 
     if MainPagePage then
+        if type(self.CloseCallback) == 'function' then
+            self.CloseCallback()
+        end
+
         MainPagePage:CloseWindow()
     end
 end

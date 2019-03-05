@@ -38,10 +38,10 @@ function ExplorerApp:GetDesc()
 	return "This is explorer app"
 end
 
-function ExplorerApp:Init()
+function ExplorerApp:Init(callback)
     Store.storeList.explorer = ExplorerStore
 
-    MainPage:ShowPage()
+    MainPage:ShowPage(callback)
 end
 
 function ExplorerApp:OnLogin()

@@ -40,7 +40,7 @@ function Grade:OnWorldLoad()
             function()
                 self:ShowNoticeButton()
             end,
-            (3000)
+            (1000 * 60 * 3)
         )
     end
 end
@@ -88,7 +88,7 @@ function Grade:ShowNoticeButton()
                     Store:Set('user/AfterLogined', Handle)
                     return false
                 end
-
+        
                 KeepworkService:LoginWithTokenApi(Handle)
                 return false
             end
