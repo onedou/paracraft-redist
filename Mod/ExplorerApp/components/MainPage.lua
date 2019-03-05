@@ -413,49 +413,22 @@ function MainPage:CheckoutNewVersion(worldInfo, callback)
     end
 
     local function Handle(data)
-        if not data or not data.world or not data.world.commitId then
+        if not data or not data.world or not data.world.revision then
             return false
         end
 
-        local rawBaseUrl, dataSourceUsername, worldName = string.match(worldInfo.archiveUrl, "^(https://[%a%.]+)/([^/]+)/([^/]+)/")
-
-        if not rawBaseUrl or
-        not dataSourceUsername or
-        not worldName then
+        if type(callback) ~= 'function' then
             return false
         end
 
-        local remoteRevisionUrl =
-            format(
-            "%s/%s/%s/raw/%s/revision.xml",
-            rawBaseUrl,
-            dataSourceUsername,
-            worldName,
-            data.world.commitId
-        )
+        local remoteRevision = tonumber(data.world.revision)
+        local localRevision = tonumber(worldInfo.revision)
 
-        HttpRequest:GetUrl(
-            remoteRevisionUrl,
-            function(data, err)
-                if not tonumber(data) or
-                   not tonumber(worldInfo.revision) or
-                   type(callback) ~= 'function' then
-                    return false
-                end
-
-                local remoteRevision = tonumber(data)
-                local localRevision = tonumber(worldInfo.revision)
-
-                echo(remoteRevision, true)
-
-                if remoteRevision > localRevision then
-                    callback(true)
-                else
-                    callback(false)
-                end
-            end,
-            {0, 502}
-        )
+        if remoteRevision > localRevision then
+            callback(true)
+        else
+            callback(false)
+        end
     end
 
     KeepworkServiceProjects:GetProjectDetailById(worldInfo.projectId, Handle)
