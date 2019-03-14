@@ -450,14 +450,24 @@
         </div>
         <div class="area_content" name="area_content">
             <div class="sidebar">
-                <pe:gridview name="categoryTree" DefaultNodeHeight="10" pagesize="10" ItemsPerLine="1" AllowPaging="false">
+                <pe:gridview name="categoryTree" DefaultNodeHeight="10" pagesize="100" ItemsPerLine="1" AllowPaging="false">
                     <Columns>
                         <div>
                             <pe:if condition='<%= Eval("value") == MainPage.categorySelected %>'>
-                                <input type="button" value='<%=Eval("value")%>' class="category_button_selected"/>
+                                <pe:if condition='<%= global_type(Eval("enValue")) == "string" %>'>
+                                    <input type="button" value='<%=Eval("enValue")%>' class="category_button_selected"/>
+                                </pe:if>
+                                <pe:if condition='<%= global_type(Eval("enValue")) ~= "string" %>'>
+                                    <input type="button" value='<%=Eval("value")%>' class="category_button_selected"/>
+                                </pe:if>
                             </pe:if>
                             <pe:if condition='<%= Eval("value") ~= MainPage.categorySelected %>'>
-                                <input type="button" value='<%=Eval("value")%>' name="<%=Eval('value')%>" onclick="select_category" class="category_button"/>
+                                <pe:if condition='<%= global_type(Eval("enValue")) == "string" %>'>
+                                    <input type="button" value='<%=Eval("enValue")%>' name="<%=Eval('value')%>" onclick="select_category" class="category_button"/>
+                                </pe:if>
+                                <pe:if condition='<%= global_type(Eval("enValue")) ~= "string" %>'>
+                                    <input type="button" value='<%=Eval("value")%>' name="<%=Eval('value')%>" onclick="select_category" class="category_button"/>
+                                </pe:if>
                             </pe:if>
                         </div>
                     </Columns>

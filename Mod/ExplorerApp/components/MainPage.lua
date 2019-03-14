@@ -170,7 +170,13 @@ function MainPage:SetCategoryTree()
 
             for key, item in ipairs(data.rows) do
                 if item and item.tagname ~= "paracraft专用" then
-                    self.remoteCategoryTree[#self.remoteCategoryTree + 1] = {value = item.tagname or ""}
+                    local curItem = {value = item.tagname or ""}
+
+                    if item and item.extra and item.extra.enTagname then
+                        curItem.enValue = item.extra.enTagname
+                    end
+
+                    self.remoteCategoryTree[#self.remoteCategoryTree + 1] = curItem
                 end
             end
 
