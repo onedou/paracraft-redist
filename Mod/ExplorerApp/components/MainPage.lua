@@ -18,6 +18,7 @@ local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.Remot
 local Wallet = NPL.load("(gl)Mod/ExplorerApp/database/Wallet.lua")
 local Screen = commonlib.gettable("System.Windows.Screen")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
+local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
@@ -172,7 +173,7 @@ function MainPage:SetCategoryTree()
                 if item and item.tagname ~= "paracraft专用" then
                     local curItem = {value = item.tagname or ""}
 
-                    if item and item.extra and item.extra.enTagname then
+                    if item and item.extra and item.extra.enTagname and self:IsEnglish() then
                         curItem.enValue = item.extra.enTagname
                     end
 
@@ -620,4 +621,12 @@ end
 
 function MainPage:GetPage()
     return Store:Get("page/MainPage")
+end
+
+function MainPage:IsEnglish()
+    if Translation.GetCurrentLanguage() == 'enUS' then
+        return true
+    else
+        return false
+    end
 end

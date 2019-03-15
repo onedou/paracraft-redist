@@ -17,6 +17,7 @@ NPL.load("(gl)Mod/ExplorerApp/tasks/ExplorerTask.lua")
 NPL.load("(gl)script/ide/AudioEngine/AudioEngine.lua")
 NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Common/Translation.lua")
 
 local ExplorerTask = commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask")
 local ExplorerStore = commonlib.gettable('Mod.ExplorerApp.store.Explorer')
