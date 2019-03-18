@@ -382,8 +382,9 @@ function MainPage:DownloadWorld(index)
                     if bSuccess then
                         Toast:ShowPage(L"下载成功")
                         ProjectsDatabase:SetDownloadedProject(data)
-                        self:HandleWorldsTree(self.worksTree)
-                        self:Refresh()
+                        -- self:HandleWorldsTree(self.worksTree)
+                        -- self:Refresh()
+                        self:SelectProject(index)
                     end
 
                     DownloadWorld.Close()

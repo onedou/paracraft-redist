@@ -352,7 +352,7 @@
             work_item_info_right = {
                 position = 'relative',
                 ['margin-left'] = 130,
-                ['margin-top'] = 5
+                ['margin-top'] = 0
             },
             radius = {
                 position = 'relative',
@@ -495,9 +495,9 @@
                 <div class=list_search_tool>
                     <div class="downloaded_game" style="<%=get_english_style('width: 180px;')%>">
                         <input name="downloaded_game_all" onclick="select_downloaded_category" value="all" style="margin-top:3px;margin-right: 3px;" type="radio" checked="checked"/>
-                        <div style="float:left" for="downloaded_game_all"><%=L"全部游戏"%></div>
+                        <div style="float:left;margin-right:5px;" for="downloaded_game_all"><%=L"全部"%></div>
                         <input name="downloaded_game_local" onclick="select_downloaded_category" value="local" style="margin-top:3px;margin-right: 3px;" type="radio" />
-                        <div style="float:left" for="downloaded_game_local"><%=L"本地游戏"%></div>
+                        <div style="float:left" for="downloaded_game_local"><%=L"本地"%></div>
                     </div>
                     <div class="list_search_bar" style="<%=get_english_style('width: 270px;')%>">
                         <div class="list_search_bar_radius"></div>
