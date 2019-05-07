@@ -50,7 +50,7 @@ function UserConsole:ShowPage()
         return false
     end
 
-    local params = Utils:ShowWindow(850, 470, "Mod/WorldShare/cellar/UserConsole/UserConsole.html", "UserConsole", 850, 470, nil, true, 12)
+    local params = Utils:ShowWindow(850, 470, "Mod/WorldShare/cellar/UserConsole/UserConsole.html", "UserConsole")
 
     params._page.OnClose = function()
         Store:Remove('page/UserConsole')
