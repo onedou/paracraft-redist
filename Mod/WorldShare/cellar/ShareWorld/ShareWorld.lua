@@ -26,9 +26,9 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local ShareWorld = NPL.export()
 
 function ShareWorld:Init()
-    local enterWorld = self:GetEnterWorld()
+    local currentWorld = self:GetEnterWorld()
 
-    if(not enterWorld or enterWorld.is_zip) then
+    if(not currentWorld or currentWorld.is_zip) then
         _guihelper.MessageBox(L"此世界不支持分享")
         return false
     end
@@ -41,26 +41,17 @@ function ShareWorld:Init()
     if (not KeepworkService:IsSignedIn()) then
         function Handle()
             KeepworkService:GetProjectIdByWorldName(
-                enterWorld.foldername,
+                currentWorld.foldername,
                 function()
-                    local isCommandEnter = Store:Get("world/isCommandEnter")
-                    if isCommandEnter then
-                        SyncMain:CommandEnter(
-                            function()
-                                Compare:Init(
-                                    function()
-                                        self:ShowPage()
-                                    end
-                                )
-                            end
-                        )
-                    else
-                        Compare:Init(
-                            function()
-                                self:ShowPage()
-                            end
-                        )
-                    end
+                    SyncMain:GetCurrentWorldInfo(
+                        function()
+                            Compare:Init(
+                                function()
+                                    self:ShowPage()
+                                end
+                            )
+                        end
+                    )
                 end
             )
         end
@@ -107,7 +98,7 @@ function ShareWorld:GetEnterFoldername()
 end
 
 function ShareWorld:GetEnterWorld()
-    return Store:Get("world/enterWorld")
+    return Store:Get("world/currentWorld")
 end
 
 function ShareWorld:GetPreviewImagePath()

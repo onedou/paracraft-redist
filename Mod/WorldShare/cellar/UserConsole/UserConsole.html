@@ -112,10 +112,10 @@
                     return WorldList.FormatDatetime(WorldList.GetCurWorldInfo("modifyTime", Eval("index")))
                 end
 
-                function selected_version()
+                function selected_version(index)
                     return '<input type="button" \
                              class="common_button login_button" \
-                             onclick="WorldList:SelectVersion()" \
+                             onclick="WorldList:SelectVersion(" .. index .. ")" \
                              style="float:left;margin-left:0px;base-font-size:6px;font-size:6px;height:15px;width:50px" \
                              value="v' .. get_world_version() .. '"/>'
                 end
@@ -507,7 +507,7 @@
                                                     <div style="float:left;width:25px;height:20px;background:#fff" />
                                                 </pe:if>
                                                 <pe:if condition='<%= not Eval("is_zip") %>'>
-                                                    <%= selected_version() %>
+                                                    <%= selected_version(Eval("index")) %>
                                                     <span style="float:left;margin-left:15px;">
                                                         <%= get_world_size() %>
                                                     </span>

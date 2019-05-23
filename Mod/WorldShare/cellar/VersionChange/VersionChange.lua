@@ -9,7 +9,6 @@ use the lib:
 local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua")
 ------------------------------------------------------------
 ]]
-local DeleteWorld = NPL.load("(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -20,21 +19,18 @@ local Encoding = commonlib.gettable("commonlib.Encoding")
 
 local VersionChange = NPL.export()
 
-function VersionChange:Init()
+function VersionChange:Init(foldername)
     if (not KeepworkService:IsSignedIn()) then
         _guihelper.MessageBox(L"登录后才能继续")
         return false
     end
 
-    self.foldername = Store:Get("world/foldername")
-
     local isEnterWorld = Store:Get("world/isEnterWorld")
 
     if (isEnterWorld) then
-        local selectWorld = Store:Get("world/selectWorld")
-        local enterWorld = Store:Get("world/enterWorld")
+        local currentWorld = Store:Get("world/currentWorld")
 
-        if(enterWorld.foldername == selectWorld.foldername) then
+        if(foldername == currentWorld.foldername) then
             _guihelper.MessageBox(L"不能切换当前编辑的世界")
             return
         end
@@ -71,7 +67,7 @@ function VersionChange:ShowPage()
 end
 
 function VersionChange:GetVersionSource(callback)
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local commitId = SyncMain:GetCurrentRevisionInfo()
 
     self.allRevision = commonlib.vector:new()
@@ -92,7 +88,7 @@ function VersionChange:GetVersionSource(callback)
             for key, item in ipairs(world.extra.commitIds) do
                 item.shortId = string.sub(item.commitId, 1, 5)
 
-                if (tonumber(selectWorld.revision) == tonumber(item.revision)) then
+                if (tonumber(currentWorld.revision) == tonumber(item.revision)) then
                     item.isActive = true
                 else
                     item.isActive = false
@@ -117,7 +113,7 @@ function VersionChange:GetAllRevision()
 end
 
 function VersionChange:SelectVersion(index)
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local foldername = Store:Get("world/foldername")
     local commitId = self.allRevision[index]["commitId"]
 

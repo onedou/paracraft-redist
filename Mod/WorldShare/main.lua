@@ -144,9 +144,8 @@ function WorldShare:OnWorldLoad()
 end
 
 function WorldShare:OnLeaveWorld()
-    Store:Remove("world/selectWorld")
+    Store:Remove("world/currentWorld")
     Store:Remove("world/worldIndex")
-    Store:Remove("world/shareMode")
     Store:Remove("world/worldDir")
     Store:Remove("world/foldername")
 end

@@ -25,16 +25,14 @@ local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
 function SyncToDataSource:Init()
-    local world
+    local currentWorld = Store:Get('world/currentWorld')
 
     if Store:Get("world/isEnterWorld") then
         self.worldDir = Store:Get("world/enterWorldDir")
         self.foldername = Store:Get("world/enterFoldername")
-        world = Store:Get("world/enterWorld")
     else
         self.worldDir = Store:Get("world/worldDir")
         self.foldername = Store:Get("world/foldername")
-        world = Store:Get("world/selectWorld")
     end
 
 
@@ -55,19 +53,15 @@ function SyncToDataSource:Init()
             if beExisted then
                 -- update world
                 KeepworkService:GetProjectIdByWorldName(self.foldername.utf8, function()
-                    if Store:Get('world/isEnterWorld') then
-                        world = Store:Get('world/enterWorld') 
-                    else
-                        world = Store:Get('world/selectWorld')
-                    end
+                    currentWorld = Store:Get('world/currentWorld') 
 
-                    if world and world.kpProjectId then
+                    if currentWorld and currentWorld.kpProjectId then
                         local tag = LocalService:GetTag(self.foldername.utf8)
 
                         if type(tag) == 'table' then
-                            tag.kpProjectId = world.kpProjectId
+                            tag.kpProjectId = currentWorld.kpProjectId
 
-                            LocalService:SetTag(world.worldpath, tag)
+                            LocalService:SetTag(currentWorld.worldpath, tag)
                         end
                     end
 
@@ -84,24 +78,19 @@ function SyncToDataSource:Init()
                             return false
                         end
 
-                        world.kpProjectId = data.id
+                        currentWorld.kpProjectId = data.id
 
-                        if (world and world.kpProjectId) then
+                        if (currentWorld and currentWorld.kpProjectId) then
                             local tag = LocalService:GetTag(self.foldername.utf8)
 
                             if type(tag) == 'table' then
-                                tag.kpProjectId = world.kpProjectId
+                                tag.kpProjectId = currentWorld.kpProjectId
 
-                                LocalService:SetTag(world.worldpath, tag)
+                                LocalService:SetTag(currentWorld.worldpath, tag)
                             end
                         end
 
-                        if Store:Get("world/isEnterWorld") then
-                            Store:Set("world/enterWorld", world)
-                        else
-                            Store:Set("world/selectWorld", world)
-                        end
-
+                        Store:Set("world/currentWorld", currentWorld)
                         self:SyncToDataSource()
                     end
                 )

@@ -90,22 +90,16 @@ function Compare:SetFinish(value)
 end
 
 function Compare:GetCompareResult(callback)
-    local world
+    local currentWorld = Store:Get('world/currentWorld')
 
-    if Store:Get("world/isEnterWorld") then
-        world = Store:Get('world/enterWorld')
-    else
-        world = Store:Get('world/selectWorld')
-    end
-
-    if (world and world.status == 2) then
+    if (currentWorld and currentWorld.status == 2) then
         if (type(callback) == "function") then
             callback(JUSTREMOTE)
             return true
         end
     end
 
-    if (not world or world.is_zip) then
+    if (not currentWorld or currentWorld.is_zip) then
         self:SetFinish(true)
         MsgBox:Close()
         return false
@@ -117,19 +111,17 @@ end
 function Compare:CompareRevision(callback)
     local foldername
     local worldDir
-    local world
+    local currentWorld = Store:Get('world/currentWorld')
 
     if Store:Get("world/isEnterWorld") then
         foldername = Store:Get("world/enterFoldername")
         worldDir = Store:Get("world/enterWorldDir")
-        world = Store:Get('world/enterWorld')
     else
         foldername = Store:Get("world/foldername")
         worldDir = Store:Get("world/worldDir")
-        world = Store:Get('world/selectWorld')
     end
 
-    if (not foldername or not worldDir or not world) then
+    if (not foldername or not worldDir or not currentWorld) then
         return false
     end
 
@@ -157,7 +149,7 @@ function Compare:CompareRevision(callback)
 
         local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
 
-        if (world and not world.kpProjectId) then
+        if (currentWorld and not currentWorld.kpProjectId) then
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
 
@@ -196,7 +188,7 @@ function Compare:CompareRevision(callback)
             end
         end
 
-        GitService:GetWorldRevision(world.kpProjectId, foldername, HandleRevision)
+        GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)
     else
         _guihelper.MessageBox(L"本地世界沒有版本信息")
         self:SetFinish(true)

@@ -43,14 +43,14 @@ function SyncToLocal:Init(callback)
 end
 
 function SyncToLocal:SyncToLocal()
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local commitId = Store:Get("world/commitId")
 
     self.compareListIndex = 1
     self.compareListTotal = 0
 
     local function Handle(data, err)
-        if (commitId or selectWorld.status == 2 and #data ~= 0) then
+        if (commitId or currentWorld.status == 2 and #data ~= 0) then
             -- down zip
             self:DownloadZIP()
             return false
@@ -60,7 +60,7 @@ function SyncToLocal:SyncToLocal()
 
         if (#data == 0) then
             UserConsole:ClosePage()
-            CreateWorld:CreateNewWorld(selectWorld.foldername)
+            CreateWorld:CreateNewWorld(currentWorld.foldername)
             return false
         end
 
@@ -154,8 +154,8 @@ function SyncToLocal:HandleCompareList()
         self:SetFinish(true)
         self:RefreshList()
 
-        local selectWorld = Store:Get("world/selectWorld")
-        KeepworkService:SetCurrentCommidId(selectWorld.lastCommitId)
+        local currentWorld = Store:Get("world/currentWorld")
+        KeepworkService:SetCurrentCommidId(currentWorld.lastCommitId)
 
         self.compareListIndex = 1
         return false

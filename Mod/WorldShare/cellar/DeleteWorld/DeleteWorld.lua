@@ -42,17 +42,16 @@ function DeleteWorld:ClosePage()
 end
 
 function DeleteWorld.GetSelectWorld()
-    return Store:Get("world/selectWorld")
+    return Store:Get("world/currentWorld")
 end
 
-function DeleteWorld:DeleteWorld()
+function DeleteWorld:DeleteWorld(foldername)
     local isEnterWorld = Store:Get("world/isEnterWorld")
 
     if (isEnterWorld) then
-        local selectWorld = Store:Get("world/selectWorld")
-        local enterWorld = Store:Get("world/enterWorld")
+        local currentWorld = Store:Get("world/currentWorld")
 
-        if (enterWorld and enterWorld.foldername == selectWorld.foldername) then
+        if (foldername == currentWorld.foldername) then
             _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return false
         end
@@ -62,17 +61,17 @@ function DeleteWorld:DeleteWorld()
 end
 
 function DeleteWorld:DeleteLocal(callback)
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    if (not selectWorld) then
+    if (not currentWorld) then
         _guihelper.MessageBox(L"请先选择世界")
         return
     end
 
     local function Delete()
-        local worldDir = selectWorld.worldpath
+        local worldDir = currentWorld.worldpath
 
-        if (selectWorld.is_zip) then
+        if (currentWorld.is_zip) then
             if (ParaIO.DeleteFile(worldDir)) then
                 if (type(callback) == "function") then
                     callback()
@@ -101,9 +100,9 @@ function DeleteWorld:DeleteLocal(callback)
         end
     end
 
-    if (selectWorld.status ~= 2) then
+    if (currentWorld.status ~= 2) then
         _guihelper.MessageBox(
-            format(L"确定删除本地世界:%s?", selectWorld.text or ""),
+            format(L"确定删除本地世界:%s?", currentWorld.text or ""),
             function(res)
                 if (res and res == _guihelper.DialogResult.Yes) then
                     Delete()
@@ -139,13 +138,13 @@ function DeleteWorld:DeleteRemote()
 end
 
 function DeleteWorld:DeleteRecord()
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    if (not selectWorld) then
+    if (not currentWorld) then
         return false
     end
 
-    local kpProjectId = selectWorld.kpProjectId
+    local kpProjectId = currentWorld.kpProjectId
 
     KeepworkService:DeleteWorld(
         kpProjectId,
@@ -174,15 +173,15 @@ function DeleteWorld:DeleteGitlab()
 end
 
 function DeleteWorld.DeleteWorldMd()
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local userinfo = Store:Get("user/userinfo")
     local dataSourceInfo = Store:Get("user/dataSourceInfo")
 
-    if (not selectWorld or not userinfo or not dataSourceInfo) then
+    if (not currentWorld or not userinfo or not dataSourceInfo) then
         return false
     end
 
-    local foldername = selectWorld.foldername
+    local foldername = currentWorld.foldername
 
     if (dataSourceInfo.dataSourceType == "github") then
     elseif (dataSourceInfo.dataSourceType == "gitlab") then

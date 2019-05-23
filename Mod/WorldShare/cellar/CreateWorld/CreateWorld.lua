@@ -31,13 +31,11 @@ function CreateWorld:CreateNewWorld(foldername)
 end
 
 function CreateWorld.OnClickCreateWorld()
-    Store:Remove("world/enterWorld")
+    Store:Remove("world/currentWorld")
 end
 
 function CreateWorld:CheckRevision(callback)
-    local enterWorld = Store:Get("world/enterWorld")
-
-    if (enterWorld and enterWorld.is_zip) then
+    if GameLogic.IsReadOnly() then
         return false
     end
 
@@ -67,11 +65,7 @@ function CreateWorld:CheckRevision(callback)
         end
     end
 
-    if (SyncMain:IsCommandEnter()) then
-        SyncMain:CommandEnter(Handle)
-    else
-        Handle()
-    end
+    SyncMain:GetCurrentWorldInfo(Handle)
 end
 
 function CreateWorld:CreateRevisionXml()

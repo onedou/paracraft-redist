@@ -37,31 +37,10 @@ function SyncMain:SyncWillEnterWorld()
         end
     end
 
-    if (self:IsCommandEnter()) then
-        self:CommandEnter(Handle)
-    else
-        Handle()
-    end
+    self:GetCurrentWorldInfo(Handle)
 end
 
-function SyncMain:SyncWillLeavaWorld()
-    Store:Remove("world/enterWorld")
-end
-
-function SyncMain:IsCommandEnter()
-    local enterWorld = Store:Get("world/enterWorld")
-
-    if (not enterWorld) then
-        return true
-    else
-        return false
-    end
-end
-
-function SyncMain:CommandEnter(callback)
-    Store:Set("world/isCommandEnter", true)
-    Store:Set("world/isEnterWorld", true)
-
+function SyncMain:GetCurrentWorldInfo(callback)
     local worldName = self:GetWorldDefaultName()
     local foldername = {}
 
@@ -84,7 +63,7 @@ function SyncMain:CommandEnter(callback)
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
         Store:Set("world/worldTag", worldTag)
-        Store:Set("world/enterWorld", {
+        Store:Set("world/currentWorld", {
             IsFolder = false,
             is_zip = true,
             Title = worldTag.name,
@@ -129,7 +108,7 @@ function SyncMain:CommandEnter(callback)
                 worldTag.size = filesize
                 LocalService:SetTag(worldDir.default, worldTag)
                 Store:Set("world/worldTag", worldTag)
-                Store:Set("world/enterWorld", currentWorld)
+                Store:Set("world/currentWorld", currentWorld)
             end
         end
 
@@ -322,11 +301,11 @@ function SyncMain:CheckWorldSize()
 end
 
 function SyncMain:GetWorldDateTable()
-    local selectWorld = Store:Get("world/selectWorld")
+    local currentWorld = Store:Get("world/currentWorld")
     local date = {}
 
-    if (selectWorld and selectWorld.tooltip) then
-        for item in string.gmatch(selectWorld.tooltip, "[^:]+") do
+    if (currentWorld and currentWorld.tooltip) then
+        for item in string.gmatch(currentWorld.tooltip, "[^:]+") do
             date[#date + 1] = item
         end
 

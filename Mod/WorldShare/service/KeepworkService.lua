@@ -325,21 +325,9 @@ function KeepworkService:GetProjectIdByWorldName(worldName, callback)
                 return false
             end
 
-            local world
-
-            if Store:Get("world/isEnterWorld") then
-                world = Store:Get('world/enterWorld')
-            else
-                world = Store:Get('world/selectWorld')
-            end
-
-            world.kpProjectId = data[1].projectId
-
-            if Store:Get("world/isEnterWorld") then
-                Store:Set('world/enterWorld', world)
-            else
-                Store:Set('world/selectWorld', world)
-            end
+            local currentWorld = Store:Get('world/currentWorld')
+            currentWorld.kpProjectId = data[1].projectId
+            Store:Set('world/currentWorld', currentWorld)
 
             if type(callback) == 'function' then
                 callback(data[1].projectId)
@@ -446,9 +434,9 @@ end
 -- get keepwork project url
 function KeepworkService:GetShareUrl()
     local env = self:GetEnv()
-    local enterWorld = Store:Get("world/enterWorld")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    if not enterWorld or not enterWorld.kpProjectId then
+    if not currentWorld or not currentWorld.kpProjectId then
         return ''
     end
 
@@ -456,7 +444,7 @@ function KeepworkService:GetShareUrl()
     local foldername = Store:Get("world/foldername")
     local username = Store:Get("user/username")
 
-    return format("%s/pbl/project/%d/", baseUrl, enterWorld.kpProjectId)
+    return format("%s/pbl/project/%d/", baseUrl, currentWorld.kpProjectId)
 end
 
 function KeepworkService:PWDValidation()
@@ -639,13 +627,12 @@ function KeepworkService:UpdateRecord(callback)
         end
 
         local worldDir
-        local world
+        local currentWorld = Store:Get('world/currentWorld')
+
         if Store:Get("world/isEnterWorld") then
             worldDir = Store:Get("world/enterWorldDir")
-            world = Store:Get("world/enterWorld")
         else
             worldDir = Store:Get("world/worldDir")
-            world = Store:Get("world/selectWorld")
         end
 
 
@@ -665,7 +652,7 @@ function KeepworkService:UpdateRecord(callback)
             foldername.base32
         )
 
-        local filesTotals = world and world.size or 0
+        local filesTotals = currentWorld and currentWorld.size or 0
 
         local function HandleGetWorld(data)
             local oldWorldInfo = data or false
@@ -709,11 +696,11 @@ function KeepworkService:UpdateRecord(callback)
             WorldList.SetRefreshing(true)
 
             self:GetProject(
-                world.kpProjectId,
+                currentWorld.kpProjectId,
                 function(data)
                     if data and data.extra and not data.extra.imageUrl then
                         self:UpdateProject(
-                            world.kpProjectId,
+                            currentWorld.kpProjectId,
                             {
                                 extra = {
                                     imageUrl = format(

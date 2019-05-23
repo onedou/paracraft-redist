@@ -378,8 +378,8 @@ function LocalService:SaveWorldInfo(ctx, node)
 
     node.attr.clientversion = self:GetClientVersion() or ctx.clientversion
 
-    local enterWorld = Store:Get('world/enterWorld')
-    node.attr.kpProjectId = enterWorld and enterWorld.kpProjectId or ctx.kpProjectId
+    local currentWorld = Store:Get('world/currentWorld')
+    node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
 end
 
 function LocalService:LoadWorldInfo(ctx, node)

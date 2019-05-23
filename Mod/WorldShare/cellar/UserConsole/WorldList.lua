@@ -218,15 +218,16 @@ function WorldList:ChangeRevision(callback)
     end
 end
 
-function WorldList:SelectVersion()
-    local selectWorld = Store:Get('world/selectWorld')
+function WorldList:SelectVersion(index)
+    local currentWorld = Store:Get('world/currentWorld')
+    echo(currentWorld, true)
 
-    if(selectWorld.status == 1) then
+    if(currentWorld.status == 1) then
         _guihelper.MessageBox(L"此世界仅在本地，无法切换版本")
         return false
     end
 
-    VersionChange:Init()
+    VersionChange:Init('test')
 end
 
 --[[
@@ -407,8 +408,20 @@ function WorldList:Sync(index)
     Compare:Init()
 end
 
+function WorldList:GetFoldernameByIndex(index)
+    local compareWorldList = Store:Get('world/compareWorldList')
+
+    return compareWorldList[index]
+end
+
 function WorldList.DeleteWorld(index)
-    DeleteWorld:DeleteWorld(index)
+    local compareWorldList = Store:Get('world/compareWorldList')
+
+    local currentWorld = GetFoldernameByIndex(index)
+    echo(currentWorld)
+    local foldername = 'test'
+
+    DeleteWorld:DeleteWorld(foldername)
 end
 
 function WorldList.GetWorldType()
@@ -454,7 +467,7 @@ function WorldList:UpdateWorldInfo(worldIndex)
         end
     end
 
-    Store:Set("world/selectWorld", currentWorld)
+    Store:Set("world/currentWorld", currentWorld)
     Store:Set("world/worldIndex", worldIndex)
 
     local foldername = {}
@@ -494,21 +507,15 @@ end
 function WorldList:EnterWorld(index)
     self:OnSwitchWorld(index)
 
-    local enterWorld = Store:Get("world/selectWorld")
-    local enterWorldDir = Store:Get("world/worldDir")
-    local enterFoldername = Store:Get("world/foldername")
+    local currentWorld = Store:Get("world/currentWorld")
     local compareWorldList = Store:Get("world/compareWorldList")
-
-    Store:Set("world/enterWorld", enterWorld)
-    Store:Set("world/enterWorldDir", enterWorldDir)
-    Store:Set("world/enterFoldername", enterFoldername)
 
     if (not KeepworkService:IsSignedIn()) then
         InternetLoadWorld.EnterWorld()
         return
     end
 
-    if (enterWorld.status == 2) then
+    if (currentWorld.status == 2) then
         Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
         Compare:Init()
     else
