@@ -49,9 +49,9 @@ function DeleteWorld:DeleteWorld(foldername)
     local isEnterWorld = Store:Get("world/isEnterWorld")
 
     if (isEnterWorld) then
-        local currentWorld = Store:Get("world/currentWorld")
+        local worldTag = WorldCommon.GetWorldInfo()
 
-        if (foldername == currentWorld.foldername) then
+        if (foldername == worldTag.name) then
             _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return false
         end

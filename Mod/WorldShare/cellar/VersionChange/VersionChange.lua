@@ -9,6 +9,8 @@ use the lib:
 local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua")
 ------------------------------------------------------------
 ]]
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -28,9 +30,9 @@ function VersionChange:Init(foldername)
     local isEnterWorld = Store:Get("world/isEnterWorld")
 
     if (isEnterWorld) then
-        local currentWorld = Store:Get("world/currentWorld")
+        local worldTag = WorldCommon.GetWorldInfo()
 
-        if(foldername == currentWorld.foldername) then
+        if(foldername == worldTag.name) then
             _guihelper.MessageBox(L"不能切换当前编辑的世界")
             return
         end

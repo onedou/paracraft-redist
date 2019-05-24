@@ -31,12 +31,7 @@ LocalService.output = {}
 
 function LocalService:LoadFiles(worldDir)
     self.output = {}
-
-    if (string.sub(worldDir, -1, -1) == "/") then
-        self.worldDir = string.sub(worldDir, 1, -2)
-    else
-        self.worldDir = worldDir
-    end
+    self.worldDir = worldDir
 
     local result = Files.Find({}, self.worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
 

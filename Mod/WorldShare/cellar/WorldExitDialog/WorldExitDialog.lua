@@ -18,6 +18,7 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local Grade = NPL.load("./Grade.lua")
 
 local WorldExitDialog = NPL.export()
@@ -25,6 +26,7 @@ local self = WorldExitDialog
 
 -- @param callback: function(res) end.
 function WorldExitDialog.ShowPage(callback)
+    UserConsole:ClosePage()
     local function Handle()
         local params = Utils:ShowWindow(610, 400, "Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.html", "WorldExitDialog")
 
@@ -64,18 +66,15 @@ function WorldExitDialog.ShowPage(callback)
     else
         Compare:Init(function()
             local currentWorld = Store:Get('world/currentWorld')
-            echo(currentWorld, true)
+
             if currentWorld and currentWorld.kpProjectId then
                 KeepworkService:GetProject(tonumber(currentWorld.kpProjectId), function(data)
-                    echo(data, true)
                     if data and data.world and data.world.worldName then
                         self.currentWorldKeepworkInfo = data
                     end
-                    echo(22222, true)
+
                     if KeepworkService:IsSignedIn() then
-                        echo(3333, true)
                         Grade:IsRated(function(isRated)
-                            echo(isRated, true)
                             self.isRated = isRated
                             Handle()
                         end)

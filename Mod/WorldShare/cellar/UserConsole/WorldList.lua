@@ -147,6 +147,7 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
 
                         self:SetRefreshing(false)
                         self:UpdateWorldListFromInternetLoadWorld(callback)
+                        WorldCommon.LoadWorldTag() -- reset default world tag
                     end
                 )
             end
@@ -162,6 +163,7 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
                             function()
                                 self:SetRefreshing(false)
                                 self:UpdateWorldListFromInternetLoadWorld(callback)
+                                WorldCommon.LoadWorldTag() -- reset default world tag
                             end
                         )
                     end
@@ -419,7 +421,7 @@ function WorldList:DeleteWorld(index)
 
     local selectedWorld = self:GetSelectWorld(index)
 
-    DeleteWorld:DeleteWorld(currentWorld and currentWorld.foldername)
+    DeleteWorld:DeleteWorld(selectedWorld and selectedWorld.foldername)
 end
 
 function WorldList.GetWorldType()
