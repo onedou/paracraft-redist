@@ -34,6 +34,8 @@ function LocalService:LoadFiles(worldDir)
 
     if (string.sub(worldDir, -1, -1) == "/") then
         self.worldDir = string.sub(worldDir, 1, -2)
+    else
+        self.worldDir = worldDir
     end
 
     local result = Files.Find({}, self.worldDir, self.nMaxFileLevels, self.nMaxFilesNum, self.filter)
@@ -241,47 +243,12 @@ function LocalService:MoveZipToFolder(path)
     ParaAsset.CloseArchive(path)
 end
 
---[[
-    function LocalService:FileDownloader(foldername, path, callback)
-        local foldername = GitEncoding.Base32(SyncMain.foldername.utf8)
-    
-        local url = ""
-        local downloadDir = ""
-    
-        if (UserConsole.dataSourceType == "github") then
-        elseif (UserConsole.dataSourceType == "gitlab") then
-            url =
-                UserConsole.rawBaseUrl ..
-                "/" .. UserConsole.dataSourceUsername .. "/" .. foldername .. "/raw/" .. SyncMain.commitId .. "/" .. path
-            downloadDir = SyncMain.worldDir.default .. path
-        end
-    
-        local Files =
-            FileDownloader:new():Init(
-            _path,
-            url,
-            downloadDir,
-            function(bSuccess, downloadPath)
-                local content = LocalService:getFileContent(downloadPath)
-    
-                if (bSuccess) then
-                    local returnData = {filename = _path, content = content}
-                    return callback(bSuccess, returnData)
-                else
-                    return callback(bSuccess, nil)
-                end
-            end,
-            "access plus 5 mins",
-            true
-        )
-    end
-]]
-
-function LocalService:GetWorldSize(WorldDir)
+-- get all world total files size
+function LocalService:GetWorldSize(worldDir)
     local files =
         commonlib.Files.Find(
         {},
-        WorldDir,
+        worldDir,
         5,
         5000,
         function(item)

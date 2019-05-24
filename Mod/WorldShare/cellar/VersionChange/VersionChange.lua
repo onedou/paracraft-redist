@@ -38,6 +38,8 @@ function VersionChange:Init(foldername)
 
     MsgBox:Show(L"请稍后...")
 
+    self.foldername = foldername
+
     self:GetVersionSource(
         function()
             MsgBox:Close()
@@ -70,15 +72,18 @@ function VersionChange:GetVersionSource(callback)
     local currentWorld = Store:Get("world/currentWorld")
     local commitId = SyncMain:GetCurrentRevisionInfo()
 
+    if not currentWorld or not commitId then
+        return false
+    end
+
     self.allRevision = commonlib.vector:new()
 
     KeepworkService:GetWorld(
-        Encoding.url_encode(self.foldername.utf8 or ''),
+        Encoding.url_encode(self.foldername or ''),
         function(world)
             if type(callback) ~= 'function' then
                 return false
             end
-
 
             if not world or not world.extra or not world.extra.commitIds then
                 callback()

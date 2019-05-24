@@ -64,15 +64,18 @@ function WorldExitDialog.ShowPage(callback)
     else
         Compare:Init(function()
             local currentWorld = Store:Get('world/currentWorld')
-    
+            echo(currentWorld, true)
             if currentWorld and currentWorld.kpProjectId then
                 KeepworkService:GetProject(tonumber(currentWorld.kpProjectId), function(data)
+                    echo(data, true)
                     if data and data.world and data.world.worldName then
                         self.currentWorldKeepworkInfo = data
                     end
-
+                    echo(22222, true)
                     if KeepworkService:IsSignedIn() then
+                        echo(3333, true)
                         Grade:IsRated(function(isRated)
+                            echo(isRated, true)
                             self.isRated = isRated
                             Handle()
                         end)

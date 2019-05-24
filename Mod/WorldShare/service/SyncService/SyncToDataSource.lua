@@ -25,18 +25,12 @@ local UPLOAD = "UPLOAD"
 local DELETE = "DELETE"
 
 function SyncToDataSource:Init()
+    self.foldername = Store:Get("world/foldername")
     local currentWorld = Store:Get('world/currentWorld')
 
-    if Store:Get("world/isEnterWorld") then
-        self.worldDir = Store:Get("world/enterWorldDir")
-        self.foldername = Store:Get("world/enterFoldername")
-    else
-        self.worldDir = Store:Get("world/worldDir")
-        self.foldername = Store:Get("world/foldername")
-    end
+    self.worldDir = currentWorld.worldpath
 
-
-    if (not self.worldDir or not self.worldDir.default or self.worldDir.default == "") then
+    if (not self.worldDir or self.worldDir == "") then
         _guihelper.MessageBox(L"上传失败，将使用离线模式，原因：上传目录为空")
         return false
     end
@@ -56,7 +50,7 @@ function SyncToDataSource:Init()
                     currentWorld = Store:Get('world/currentWorld') 
 
                     if currentWorld and currentWorld.kpProjectId then
-                        local tag = LocalService:GetTag(self.foldername.utf8)
+                        local tag = LocalService:GetTag(self.foldername.default)
 
                         if type(tag) == 'table' then
                             tag.kpProjectId = currentWorld.kpProjectId
@@ -81,7 +75,7 @@ function SyncToDataSource:Init()
                         currentWorld.kpProjectId = data.id
 
                         if (currentWorld and currentWorld.kpProjectId) then
-                            local tag = LocalService:GetTag(self.foldername.utf8)
+                            local tag = LocalService:GetTag(self.foldername.default)
 
                             if type(tag) == 'table' then
                                 tag.kpProjectId = currentWorld.kpProjectId
@@ -125,7 +119,7 @@ function SyncToDataSource:SyncToDataSource()
     local function Handle(data, err)
         self.dataSourceFiles = data
         self.localFiles = commonlib.vector:new()
-        self.localFiles:AddAll(LocalService:LoadFiles(self.worldDir.default)) --再次获取本地文件，保证上传的内容为最新
+        self.localFiles:AddAll(LocalService:LoadFiles(self.worldDir)) --再次获取本地文件，保证上传的内容为最新
 
         Store:Set('world/localFiles', self.localFiles)
 
@@ -173,7 +167,7 @@ function SyncToDataSource:CheckReadmeFile()
     end
 
     if (not hasReadme) then
-        local filePath = format("%sREADME.md", self.worldDir.default)
+        local filePath = format("%sREADME.md", self.worldDir)
         local file = ParaIO.open(filePath, "w")
         local content = KeepworkGen:GetReadmeFile()
 

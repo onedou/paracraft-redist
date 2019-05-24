@@ -35,12 +35,8 @@ function CreateWorld.OnClickCreateWorld()
 end
 
 function CreateWorld:CheckRevision(callback)
-    if GameLogic.IsReadOnly() then
-        return false
-    end
-
     function Handle()
-        if (not Compare:HasRevision()) then
+        if (not GameLogic.IsReadOnly() and not Compare:HasRevision()) then
             MsgBox:Show(L"正在初始化世界...")
 
             Utils.SetTimeOut(
@@ -49,7 +45,7 @@ function CreateWorld:CheckRevision(callback)
 
                     MsgBox:Close()
 
-                    if (type(callback) == "function") then
+                    if type(callback) == "function" then
                         callback()
                     end
                 end,
@@ -58,8 +54,7 @@ function CreateWorld:CheckRevision(callback)
 
             MsgBox:Close()
         else
-
-            if (type(callback) == "function") then
+            if type(callback) == "function" then
                 callback()
             end
         end

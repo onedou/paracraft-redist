@@ -32,7 +32,6 @@ function SyncMain:SyncWillEnterWorld()
     function Handle()
         -- 没有登陆则直接使用离线模式
         if (KeepworkService:IsSignedIn()) then
-            Store:Remove("world/shareMode")
             Compare:Init()
         end
     end
@@ -41,25 +40,17 @@ function SyncMain:SyncWillEnterWorld()
 end
 
 function SyncMain:GetCurrentWorldInfo(callback)
-    local worldName = self:GetWorldDefaultName()
-    local foldername = {}
+    local folderDefauleName = self:GetWorldDefaultName()
+    local foldername = {
+        default = folderDefauleName,
+        utf8 = Encoding.DefaultToUtf8(folderDefauleName),
+        base32 = GitEncoding.Base32(Encoding.DefaultToUtf8(folderDefauleName))
+    }
 
-    foldername.default = worldName
-    foldername.utf8 = Encoding.DefaultToUtf8(foldername.default)
-    foldername.base32 = GitEncoding.Base32(foldername.utf8)
-
-    Store:Set("world/enterFoldername", foldername)
+    Store:Set("world/foldername", foldername)
 
     if GameLogic.IsReadOnly() then
         local originWorldPath = ParaWorld.GetWorldDirectory()
-
-        local worldDir = {
-            default = originWorldPath,
-            utf8 = Encoding.DefaultToUtf8(originWorldPath)
-        }
-
-        Store:Set("world/enterWorldDir", worldDir)
-
         local worldTag = WorldCommon.GetWorldInfo() or {}
 
         Store:Set("world/worldTag", worldTag)
@@ -70,7 +61,33 @@ function SyncMain:GetCurrentWorldInfo(callback)
             author = "None",
             costTime = "0:0:0",
             filesize = 0,
-            foldername = foldername.default,
+            foldername = foldername.utf8,
+            grade = "primary",
+            icon = "Texture/3DMapSystem/common/page_world.png",
+            ip = "127.0.0.1",
+            mode = "survival",
+            modifyTime = 0,
+            nid = "",
+            order = 0,
+            preview = "",
+            progress = "0",
+            size = 0,
+            worldpath = originWorldPath,
+            kpProjectId = worldTag.kpProjectId
+        })
+    elseif not currentWorld then -- new world
+        local originWorldPath = ParaWorld.GetWorldDirectory()
+        local worldTag = WorldCommon.GetWorldInfo() or {}
+
+        Store:Set("world/worldTag", worldTag)
+        Store:Set("world/currentWorld", {
+            IsFolder = true,
+            is_zip = false,
+            Title = worldTag.name,
+            author = "None",
+            costTime = "0:0:0",
+            filesize = 0,
+            foldername = foldername.utf8,
             grade = "primary",
             icon = "Texture/3DMapSystem/common/page_world.png",
             ip = "127.0.0.1",
@@ -85,43 +102,27 @@ function SyncMain:GetCurrentWorldInfo(callback)
             kpProjectId = worldTag.kpProjectId
         })
     else
-        local function Handle()
-            local compareWorldList = Store:Get("world/compareWorldList")
-    
-            local currentWorld = nil
-            local worldDir = {}
-    
-            for key, item in ipairs(compareWorldList) do
-                if (item.foldername == foldername.utf8) then
-                    currentWorld = item
-                end
-            end
-    
-            if (currentWorld) then
-                worldDir.default = format("%s/", currentWorld.worldpath)
-                worldDir.utf8 = Encoding.DefaultToUtf8(worldDir.default)
-    
-                Store:Set("world/enterWorldDir", worldDir)
-    
-                local worldTag = LocalService:GetTag(foldername.default)
-    
-                worldTag.size = filesize
-                LocalService:SetTag(worldDir.default, worldTag)
-                Store:Set("world/worldTag", worldTag)
-                Store:Set("world/currentWorld", currentWorld)
+        local compareWorldList = Store:Get("world/compareWorldList")
+        local currentWorld = nil
+
+        for key, item in ipairs(compareWorldList) do
+            if (item.foldername == foldername.utf8) then
+                currentWorld = item
             end
         end
 
-        WorldList:RefreshCurrentServerList(
-            function()
-                Handle()
-    
-                if type(callback) == "function" then
-                    callback()
-                end
-            end,
-            true
-        )
+        if (currentWorld) then
+            local worldTag = LocalService:GetTag(foldername.default)
+            worldTag.size = filesize
+            LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
+
+            Store:Set("world/worldTag", worldTag)
+            Store:Set("world/currentWorld", currentWorld)
+        end
+    end
+
+    if type(callback) == 'function' then
+        callback()
     end
 end
 
@@ -235,10 +236,10 @@ function SyncMain:ShowDialog(url, name)
 end
 
 function SyncMain:BackupWorld()
-    local worldDir = Store:Get("world/worldDir")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    local world_revision = WorldRevision:new():init(worldDir.default)
-    world_revision:Backup()
+    local worldRevision = WorldRevision:new():init(currentWorld and currentWorld.worldpath)
+    worldRevision:Backup()
 end
 
 function SyncMain:SyncToLocal()
@@ -266,23 +267,20 @@ function SyncMain.GetRemoteRevision()
 end
 
 function SyncMain:GetCurrentRevisionInfo()
-    local worldDir = Store:Get("world/worldDir")
+    local currentWorld = Store:Get("world/currentWorld")
 
-    return WorldShare:GetWorldData("revision", worldDir.default)
+    return WorldShare:GetWorldData("revision", currentWorld and currentWorld.worldpath .. '/')
 end
 
 function SyncMain:CheckWorldSize()
-    local worldDir
-
-    if Store:Get("world/isEnterWorld") then
-        worldDir = Store:Get("world/enterWorldDir")
-    else
-        worldDir = Store:Get("world/worldDir")
-    end
-
+    local currentWorld = Store:Get("world/currentWorld")
     local userType = Store:Get("user/userType")
 
-    local filesTotal = LocalService:GetWorldSize(worldDir.default)
+    if not currentWorld or not currentWorld.worldpath  or #currentWorld.worldpath == 0 then
+        return false
+    end
+
+    local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
     local maxSize = 0
 
     if (userType == "vip") then
@@ -292,7 +290,7 @@ function SyncMain:CheckWorldSize()
     end
 
     if (filesTotal > maxSize) then
-        SyncMain:showBeyondVolume()
+        self:ShowBeyondVolume()
 
         return true
     else

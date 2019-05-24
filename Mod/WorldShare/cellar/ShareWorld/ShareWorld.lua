@@ -89,12 +89,8 @@ function ShareWorld:ShowPage()
     self:Refresh()
 end
 
-function ShareWorld:GetEnterWorldDir()
-    return Store:Get("world/enterWorldDir")
-end
-
 function ShareWorld:GetEnterFoldername()
-    return Store:Get("world/enterFoldername")
+    return Store:Get("world/foldername")
 end
 
 function ShareWorld:GetEnterWorld()
@@ -102,9 +98,8 @@ function ShareWorld:GetEnterWorld()
 end
 
 function ShareWorld:GetPreviewImagePath()
-    local worldDir = self:GetEnterWorldDir()
-
-    return format("%spreview.jpg", worldDir.default)
+    local currentWorld = Store:Get("world/currentWorld")
+    return format("%s/preview.jpg", currentWorld and currentWorld.worldpath)
 end
 
 function ShareWorld:SetPage()

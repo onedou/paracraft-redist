@@ -555,9 +555,13 @@ function GitlabService:DeleteResp(projectId, callback)
 end
 
 function GitlabService:GetWorldRevision(projectId, foldername, callback)
+    if type(callback) ~= "function" then
+        return false
+    end
+
     KeepworkService:GetProject(tonumber(projectId), function(data, err)
         if not data or not data.world or not data.world.worldName or not data.world.archiveUrl then
-            return false
+            return callback()
         end
 
         local commitId = self:GetCommitIdByFoldername(foldername.utf8)
@@ -575,9 +579,7 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
         HttpRequest:GetUrl(
             contentUrl,
             function(data, err)
-                if type(callback) == "function" then
-                    callback(tonumber(data) or 0)
-                end
+                callback(tonumber(data) or 0, err)
             end,
             {0, 502}
         )

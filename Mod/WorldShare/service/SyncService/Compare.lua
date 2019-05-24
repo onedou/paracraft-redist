@@ -109,25 +109,16 @@ function Compare:GetCompareResult(callback)
 end
 
 function Compare:CompareRevision(callback)
-    local foldername
-    local worldDir
+    local foldername = Store:Get("world/foldername")
     local currentWorld = Store:Get('world/currentWorld')
 
-    if Store:Get("world/isEnterWorld") then
-        foldername = Store:Get("world/enterFoldername")
-        worldDir = Store:Get("world/enterWorldDir")
-    else
-        foldername = Store:Get("world/foldername")
-        worldDir = Store:Get("world/worldDir")
-    end
-
-    if (not foldername or not worldDir or not currentWorld) then
+    if (not foldername or not currentWorld or not currentWorld.worldpath) then
         return false
     end
 
     local remoteWorldsList = Store:Get("world/remoteWorldsList")
     local remoteRevision = 0
-    
+
     if (self:HasRevision()) then
         local function CompareRevision(currentRevision, remoteRevision)
             if (remoteRevision == 0) then
@@ -147,7 +138,7 @@ function Compare:CompareRevision(callback)
             end
         end
 
-        local currentRevision = WorldRevision:new():init(worldDir.default):Checkout()
+        local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
 
         if (currentWorld and not currentWorld.kpProjectId) then
             currentRevision = tonumber(currentRevision) or 0
@@ -219,19 +210,9 @@ function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
 end
 
 function Compare:HasRevision()
-    local worldDir
+    local currentWorld = Store:Get("world/currentWorld")
 
-    if Store:Get("world/isEnterWorld") then
-        worldDir = Store:Get("world/enterWorldDir")
-    else
-        worldDir = Store:Get("world/worldDir")
-    end
-
-    if (not worldDir or not worldDir.default) then
-        return false
-    end
-
-    local localFiles = LocalService:LoadFiles(worldDir.default)
+    local localFiles = LocalService:LoadFiles(currentWorld and currentWorld.worldpath)
     local hasRevision = false
 
     Store:Set("world/localFiles", localFiles)

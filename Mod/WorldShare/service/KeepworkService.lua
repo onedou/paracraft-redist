@@ -604,12 +604,7 @@ end
 -- update world info
 function KeepworkService:UpdateRecord(callback)
     local username = Store:Get("user/username")
-    local foldername
-    if Store:Get("world/isEnterWorld") then
-        foldername = Store:Get("world/enterFoldername")
-    else
-        foldername = Store:Get("world/foldername")
-    end
+    local foldername = Store:Get("world/foldername")
 
     local function Handle(data, err)
         if type(data) ~= "table" or #data == 0 then
@@ -626,19 +621,11 @@ function KeepworkService:UpdateRecord(callback)
             return false
         end
 
-        local worldDir
         local currentWorld = Store:Get('world/currentWorld')
-
-        if Store:Get("world/isEnterWorld") then
-            worldDir = Store:Get("world/enterWorldDir")
-        else
-            worldDir = Store:Get("world/worldDir")
-        end
-
 
         local worldTag = Store:Get("world/worldTag")
         local dataSourceInfo = Store:Get("user/dataSourceInfo")
-        local localFiles = LocalService:LoadFiles(worldDir.default)
+        local localFiles = LocalService:LoadFiles(currentWorld and currentWorld.worldpath)
 
         self:SetCurrentCommidId(lastCommitSha)
 
@@ -738,15 +725,10 @@ function KeepworkService:UpdateRecord(callback)
 end
 
 function KeepworkService:SetCurrentCommidId(commitId)
-    local worldDir
-    if Store:Get('world/isEnterWorld') then
-        worldDir = Store:Get("world/enterWorldDir")
-    else
-        worldDir = Store:Get("world/worldDir")
-    end
+    local currentWorld = Store:Get("world/currentWorld")
+    local saveUrl = format("%s/", currentWorld.worldpath)
 
-    WorldShare:SetWorldData("revision", {id = commitId}, worldDir.default)
-
-    ParaIO.CreateDirectory(format("%smod/", worldDir.default))
-    WorldShare:SaveWorldData(worldDir.default)
+    WorldShare:SetWorldData("revision", {id = commitId}, saveUrl)
+    ParaIO.CreateDirectory(saveUrl)
+    WorldShare:SaveWorldData(saveUrl)
 end
