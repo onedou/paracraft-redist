@@ -39,10 +39,6 @@ function Compare:Init(callback)
 
     self:SetFinish(false)
 
-    if not self:IsCompareFinish() then
-        MsgBox:Show(L"请稍后...")
-    end
-
     self:GetCompareResult(
         function(result)
             if (isEnterWorld and not isShowUserConsolePage) then
@@ -177,6 +173,10 @@ function Compare:CompareRevision(callback)
             if (type(callback) == "function") then
                 callback(result)
             end
+        end
+
+        if not self:IsCompareFinish() then
+            MsgBox:Show(L"请稍后...")
         end
 
         GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)

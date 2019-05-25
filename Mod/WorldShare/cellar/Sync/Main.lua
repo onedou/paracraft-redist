@@ -20,6 +20,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
 local SyncToDataSource = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToDataSource.lua")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -28,7 +29,7 @@ local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevi
 
 local SyncMain = NPL.export()
 
-function SyncMain:SyncWillEnterWorld()
+function SyncMain:OnWorldLoad()
     function Handle()
         -- 没有登陆则直接使用离线模式
         if (KeepworkService:IsSignedIn()) then
@@ -36,7 +37,9 @@ function SyncMain:SyncWillEnterWorld()
         end
     end
 
-    self:GetCurrentWorldInfo(Handle)
+    CreateWorld:CheckRevision(function()
+        self:GetCurrentWorldInfo(Handle)
+    end)
 end
 
 function SyncMain:GetCurrentWorldInfo(callback)
@@ -112,7 +115,7 @@ function SyncMain:GetCurrentWorldInfo(callback)
         end
 
         if (currentWorld) then
-            local worldTag = LocalService:GetTag(foldername.default)
+            local worldTag = LocalService:GetTag(currentWorld.worldpath)
             worldTag.size = filesize
             LocalService:SetTag(format("%s/", currentWorld.worldpath), worldTag)
 

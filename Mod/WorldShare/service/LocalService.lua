@@ -316,12 +316,12 @@ function LocalService:SetTag(worldDir, newTag)
     end
 end
 
-function LocalService:GetTag(foldername)
-    if (not foldername) then
+function LocalService:GetTag(worldDir)
+    if (not worldDir) then
         return {}
     end
 
-    local filePath = format("%s/%s/tag.xml", SyncMain:GetWorldFolderFullPath() , foldername)
+    local filePath = format("%s/tag.xml", worldDir)
     local tag = ParaXML.LuaXML_ParseFile(filePath)
 
     if (type(tag) == "table" and type(tag[1]) == "table" and type(tag[1][1]) == "table") then

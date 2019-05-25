@@ -567,6 +567,10 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
         local commitId = self:GetCommitIdByFoldername(foldername.utf8)
         local gitlabUsername = string.match(data.world.archiveUrl, "keepwork.com/([%w_]+)/")
 
+        if not gitlabUsername then
+            callback()
+        end
+
         local contentUrl =
             format(
             "%s/%s/%s/raw/%s/revision.xml",

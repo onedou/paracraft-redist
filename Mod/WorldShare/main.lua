@@ -136,11 +136,7 @@ function WorldShare:OnWorldLoad()
 
     -- if enter with lesson method, we will not check revision
     if not curLesson then
-        CreateWorld:CheckRevision(
-            function()
-                SyncMain:SyncWillEnterWorld()
-            end
-        )
+        SyncMain:OnWorldLoad()
     end   
 end
 

@@ -28,6 +28,7 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local WorldList = NPL.export()
 
@@ -282,6 +283,14 @@ function WorldList:SyncWorldsList(callback)
 
                     isExist = true
                     worldpath = LItem["worldpath"]
+
+                    if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
+                        local tag = WorldCommon.LoadWorldTag(worldpath)
+
+                        tag.kpProjectId = DItem['projectId']
+                        LocalService:SetTag(worldpath, tag)
+                    end
+
                     break
                 end
             end
@@ -413,7 +422,9 @@ function WorldList:UnifiedTimestampFormat(data)
 end
 
 function WorldList:Sync(index)
-    Compare:Init()
+    CreateWorld:CheckRevision(function()
+        Compare:Init()
+    end)
 end
 
 function WorldList:DeleteWorld(index)
@@ -446,7 +457,7 @@ function WorldList:UpdateWorldInfo(worldIndex)
 
         if not currentWorld.is_zip then
             local filesize = LocalService:GetWorldSize(currentWorld.worldpath)
-            local worldTag = LocalService:GetTag(Encoding.Utf8ToDefault(currentWorld.foldername))
+            local worldTag = LocalService:GetTag(currentWorld.worldpath)
 
             worldTag.size = filesize
             LocalService:SetTag(currentWorld.worldpath, worldTag)
@@ -496,7 +507,7 @@ end
 function WorldList:EnterWorld(index)
     self:OnSwitchWorld(index)
 
-    local currentWorld = Store:Get("world/currentWorld")
+    local selectedWorld = self:GetSelectWorld(index)
     local compareWorldList = Store:Get("world/compareWorldList")
 
     if (not KeepworkService:IsSignedIn()) then
@@ -504,7 +515,7 @@ function WorldList:EnterWorld(index)
         return
     end
 
-    if (currentWorld.status == 2) then
+    if (selectedWorld.status == 2) then
         Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
         Compare:Init()
     else

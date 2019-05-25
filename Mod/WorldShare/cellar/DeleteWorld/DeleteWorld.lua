@@ -16,6 +16,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 
 local DeleteWorld = NPL.export()
@@ -137,8 +138,8 @@ function DeleteWorld:DeleteRemote()
     )
 end
 
-function DeleteWorld:DeleteRecord()
-    local currentWorld = Store:Get("world/currentWorld")
+function DeleteWorld:DeleteRecord(world)
+    local currentWorld = world or Store:Get("world/currentWorld")
 
     if (not currentWorld) then
         return false
@@ -149,25 +150,18 @@ function DeleteWorld:DeleteRecord()
     KeepworkService:DeleteWorld(
         kpProjectId,
         function(data, err)
-            if (err == 204 or err == 200) then
-                WorldList:RefreshCurrentServerList()
+            if (err ~= 204 and err ~= 200) then
+                _guihelper.MessageBox(format("%s:%d", L"服务器返回错误状态码", err))
             end
-        end
-    )
-end
 
-function DeleteWorld:DeleteGitlab()
-    local foldername = Store:Get("world/foldername")
+            if currentWorld and currentWorld.worldpath and #currentWorld.worldpath > 0 then
+                local tag = LocalService:GetTag(currentWorld.worldpath)
 
-    _guihelper.MessageBox(
-        format(L"确定删除Gitlab远程世界:%s?", foldername.utf8 or ""),
-        function(res)
-            self:ClosePage()
-            WorldList:SetRefreshing(true)
-
-            if (res and res == 6) then
-                DeleteWorld.DeleteKeepworkRecord()
+                tag.kpProjectId = nil
+                LocalService:SetTag(currentWorld.worldpath, tag)
             end
+
+            WorldList:RefreshCurrentServerList()
         end
     )
 end

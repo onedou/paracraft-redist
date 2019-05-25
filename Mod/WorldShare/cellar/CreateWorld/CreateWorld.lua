@@ -35,37 +35,29 @@ function CreateWorld.OnClickCreateWorld()
 end
 
 function CreateWorld:CheckRevision(callback)
-    function Handle()
-        if (not GameLogic.IsReadOnly() and not Compare:HasRevision()) then
-            MsgBox:Show(L"正在初始化世界...")
+    if (not GameLogic.IsReadOnly() and not Compare:HasRevision()) then
+        MsgBox:Show(L"正在初始化世界...")
+        self:CreateRevisionXml()
+        MsgBox:Close()
 
-            Utils.SetTimeOut(
-                function()
-                    self:CreateRevisionXml()
-
-                    MsgBox:Close()
-
-                    if type(callback) == "function" then
-                        callback()
-                    end
-                end,
-                1000
-            )
-
-            MsgBox:Close()
-        else
-            if type(callback) == "function" then
-                callback()
-            end
+        if type(callback) == "function" then
+            callback()
+        end
+    else
+        if type(callback) == "function" then
+            callback()
         end
     end
-
-    SyncMain:GetCurrentWorldInfo(Handle)
 end
 
 function CreateWorld:CreateRevisionXml()
-    local path = ParaWorld.GetWorldDirectory()
-    local revisionPath = format("%srevision.xml", path)
+    local currentWorld = Store:Get('world/currentWorld')
+
+    if not currentWorld or not currentWorld.worldpath then
+        return false
+    end
+
+    local revisionPath = format("%s/revision.xml", currentWorld.worldpath)
 
     local exist = ParaIO.DoesFileExist(revisionPath)
 

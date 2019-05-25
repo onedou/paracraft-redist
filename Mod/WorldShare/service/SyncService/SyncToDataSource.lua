@@ -50,11 +50,10 @@ function SyncToDataSource:Init()
                     currentWorld = Store:Get('world/currentWorld') 
 
                     if currentWorld and currentWorld.kpProjectId then
-                        local tag = LocalService:GetTag(self.foldername.default)
+                        local tag = LocalService:GetTag(currentWorld.worldpath)
 
                         if type(tag) == 'table' then
                             tag.kpProjectId = currentWorld.kpProjectId
-
                             LocalService:SetTag(currentWorld.worldpath, tag)
                         end
                     end
@@ -75,7 +74,7 @@ function SyncToDataSource:Init()
                         currentWorld.kpProjectId = data.id
 
                         if (currentWorld and currentWorld.kpProjectId) then
-                            local tag = LocalService:GetTag(self.foldername.default)
+                            local tag = LocalService:GetTag(currentWorld.worldpath)
 
                             if type(tag) == 'table' then
                                 tag.kpProjectId = currentWorld.kpProjectId
@@ -167,7 +166,7 @@ function SyncToDataSource:CheckReadmeFile()
     end
 
     if (not hasReadme) then
-        local filePath = format("%sREADME.md", self.worldDir)
+        local filePath = format("%s/README.md", self.worldDir)
         local file = ParaIO.open(filePath, "w")
         local content = KeepworkGen:GetReadmeFile()
 
