@@ -81,7 +81,7 @@ function WorldExitDialog.ShowPage(callback)
                     else
                         Handle()
                     end
-                end)
+                end, {0})
 
                 return true
             end

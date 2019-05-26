@@ -587,7 +587,7 @@ function GitlabService:GetWorldRevision(projectId, foldername, callback)
             end,
             {0, 502}
         )
-    end)
+    end, {0})
 end
 
 function GitlabService:GetSingleProject(projectName, callback)
