@@ -112,6 +112,10 @@ function UserConsole:ClosePage()
     if (UserConsolePage) then
         UserConsolePage:CloseWindow()
     end
+
+    if Store:Get('world/isEnterWorld') then
+        SyncMain:GetCurrentWorldInfo(callback)
+    end
 end
 
 function UserConsole:Refresh(time)
@@ -245,7 +249,7 @@ function UserConsole:HandleWorldId(pid)
     KeepworkService:GetWorldByProjectId(
         tonumber(pid),
         function(worldInfo)
-            if worldInfo and worldInfo.archiveUrl then
+            if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
                 Store:Set('world/openKpProjectId', pid)
                 HandleLoadWorld(worldInfo.archiveUrl)
             else
