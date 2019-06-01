@@ -133,8 +133,7 @@ function Compare:CompareRevision(callback)
                 return EQUAL
             end
         end
-        echo('from compare!!!!!!!!', true)
-        echo(currentWorld, true)
+
         local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
 
         if (currentWorld and not currentWorld.kpProjectId) then

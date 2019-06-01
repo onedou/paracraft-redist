@@ -198,7 +198,7 @@ function WorldList:UpdateRevision(callback)
             value.revision = worldRevision:GetDiskRevision()
 
             local tag = WorldCommon.LoadWorldTag(value.worldpath)
-            echo(tag, true)
+
             if type(tag) ~= 'table' then
                 return false
             end
