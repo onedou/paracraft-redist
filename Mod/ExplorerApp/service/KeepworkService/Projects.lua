@@ -103,7 +103,7 @@ function Projects:GetAllTags(callback)
     local headers = KeepworkService:GetHeaders()
 
     KeepworkService:Request(
-        "/systemTags/search",
+        "/systemTags/search?classify=1",
         "POST",
         {},
         headers,

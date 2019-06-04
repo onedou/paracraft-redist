@@ -55,13 +55,13 @@ function ExplorerApp:OnWorldLoad()
         return false
     end
 
-    GameLogic.GetFilters():add_filter(
-        "HandleEscapeKey",
-        function()
-            ProactiveEnd:Toggle()
-            return true
-        end
-    )
+    -- GameLogic.GetFilters():add_filter(
+    --     "HandleEscapeKey",
+    --     function()
+    --         ProactiveEnd:Toggle()
+    --         return true
+    --     end
+    -- )
 
     GameLogic.GetCodeGlobal():RegisterTextEvent("dead", function()
         GameOver:ShowPage()
