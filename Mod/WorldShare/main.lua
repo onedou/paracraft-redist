@@ -33,6 +33,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
 NPL.load("(gl)script/ide/System/Core/UniString.lua")
 NPL.load("(gl)script/ide/System/Core/Event.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua")
+NPL.load("(gl)script/ide/System/os/os.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
