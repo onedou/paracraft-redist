@@ -105,6 +105,9 @@ function Compare:GetCompareResult(callback)
     self:CompareRevision(callback)
 end
 
+-- create revision try times
+Compare.createRevisionTimes = 0
+
 function Compare:CompareRevision(callback)
     local foldername = Store:Get("world/foldername")
     local currentWorld = Store:Get('world/currentWorld')
@@ -117,6 +120,8 @@ function Compare:CompareRevision(callback)
     local remoteRevision = 0
 
     if (self:HasRevision()) then
+        self.createRevisionTimes = 0
+
         local function CompareRevision(currentRevision, remoteRevision)
             if (remoteRevision == 0) then
                 return JUSTLOCAL
@@ -182,6 +187,14 @@ function Compare:CompareRevision(callback)
 
         GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)
     else
+        self.createRevisionTimes = self.createRevisionTimes + 1
+
+        if self.createRevisionTimes > 3 then
+            self.createRevisionTimes = 0
+            _guihelper.MessageBox(L'创建版本信息失败')
+            return false
+        end
+
         CreateWorld:CheckRevision(function()
             self:CompareRevision(callback)
         end)

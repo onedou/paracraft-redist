@@ -68,11 +68,14 @@ function WorldList:UpdateWorldListFromInternetLoadWorld(callbackFunc)
         function(InternetWorldList)
             for CKey, CItem in ipairs(compareWorldList) do
                 for IKey, IItem in ipairs(InternetWorldList) do
-                    if (IItem.foldername == CItem.foldername) then
-                        for key, value in pairs(IItem) do
-                            if(key ~= "revision") then
-                                CItem[key] = value
+                    if IItem.foldername == CItem.foldername then
+                        if IItem.is_zip == CItem.is_zip then 
+                            for key, value in pairs(IItem) do
+                                if(key ~= "revision") then
+                                    CItem[key] = value
+                                end
                             end
+                            break
                         end
                     end
                 end
@@ -212,6 +215,8 @@ function WorldList:UpdateRevision(callback)
             else
                 value.size = 0
             end
+
+            value.is_zip = false
         else
             value.foldername = value.Title
             value.text = value.Title
