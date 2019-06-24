@@ -271,16 +271,16 @@ function WorldList:SyncWorldsList(callback)
             local status
 
             for LKey, LItem in ipairs(localWorlds) do
-                if (DItem["worldName"] == LItem["foldername"]) then
-                    if (tonumber(LItem["revision"]) == tonumber(DItem["revision"])) then
+                if DItem["worldName"] == LItem["foldername"] then
+                    if (tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0)) then
                         status = 3 --本地网络一致
                         revision = LItem['revision']
-                    elseif (tonumber(LItem["revision"]) > tonumber(DItem["revision"])) then
+                    elseif (tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0)) then
                         status = 4 --网络更新
                         revision = LItem['revision']
-                    elseif (tonumber(LItem["revision"]) < tonumber(DItem["revision"])) then
+                    elseif (tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0)) then
                         status = 5 --本地更新
-                        revision = LItem['revision']
+                        revision = LItem['revision'] or 0
                     end
 
                     isExist = true

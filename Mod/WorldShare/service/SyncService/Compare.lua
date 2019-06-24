@@ -24,6 +24,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local Compare = NPL.export()
 
@@ -181,15 +182,9 @@ function Compare:CompareRevision(callback)
 
         GitService:GetWorldRevision(currentWorld.kpProjectId, foldername, HandleRevision)
     else
-        _guihelper.MessageBox(L"本地世界沒有版本信息")
-        self:SetFinish(true)
-        MsgBox:Close()
-
-        if (type(callback) == "function") then
-            callback()
-        end
-
-        return false
+        CreateWorld:CheckRevision(function()
+            self:CompareRevision(callback)
+        end)
     end
 end
 
