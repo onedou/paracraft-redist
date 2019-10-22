@@ -16,6 +16,9 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
+local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+
 local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
 
 local LoginModal = NPL.export()
@@ -27,15 +30,11 @@ function LoginModal:Init(callbackFunc)
 end
 
 function LoginModal:ShowPage()
-    if (KeepworkService:LoginWithTokenApi()) then
+    if KeepworkService:LoginWithTokenApi() then
         return true
     end
 
     local params = Utils:ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
-
-    params._page.OnClose = function()
-        Store:Remove('page/LoginModal')
-    end
 
     local LoginModalPage = Store:Get('page/LoginModal')
 
@@ -46,34 +45,21 @@ function LoginModal:ShowPage()
     local PWDInfo = KeepworkService:LoadSigninInfo()
 
     if PWDInfo then
-        local rememberMeNode = LoginModalPage:GetNode('rememberPassword')
-        local autoLoginNode = LoginModalPage:GetNode('autoLogin')
-
-        rememberMeNode:SetAttribute('checked', 'checked')
-
-        if PWDInfo.autoLogin then
-            autoLoginNode:SetAttribute('checked', 'checked')
-        end
-
-        LoginModalPage:SetValue('account', PWDInfo.account or '')
+        LoginModalPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
+        LoginModalPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
         LoginModalPage:SetValue('password', PWDInfo.password or '')
+
+        self.loginServer = PWDInfo.loginServer
+        self.account = PWDInfo.account
     end
 
-    local forgotUrl = format("%s/u/set", KeepworkService:GetKeepworkUrl())
-    local registerUrl = format("%s/u/r/register", KeepworkService:GetKeepworkUrl())
+    -- local forgotUrl = format("%s/u/set", KeepworkService:GetKeepworkUrl())
+    -- local registerUrl = format("%s/u/r/register", KeepworkService:GetKeepworkUrl())
 
-    LoginModalPage:GetNode('forgot'):SetAttribute('href', forgotUrl)
-    LoginModalPage:GetNode('register'):SetAttribute('href', registerUrl)
+    -- LoginModalPage:GetNode('forgot'):SetAttribute('href', forgotUrl)
+    -- LoginModalPage:GetNode('register'):SetAttribute('onclick', registerUrl)
 
-    self:Refresh(0)
-
-    if PWDInfo then
-        LoginModalPage:SetValue('loginServer', PWDInfo.loginServer or '')
-    end
-end
-
-function LoginModal:SetPage()
-    Store:Set('page/LoginModal', document:GetPageCtrl())
+    self:Refresh(0.01)
 end
 
 function LoginModal:ClosePage()
@@ -82,6 +68,9 @@ function LoginModal:ClosePage()
     if(not LoginModalPage) then
         return false
     end
+
+    self.loginServer = nil
+    self.account = nil
 
     LoginModalPage:CloseWindow()
 end
@@ -114,56 +103,42 @@ function LoginModal:LoginAction()
 
     local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
-    local env = LoginModalPage:GetValue("loginServer")
+    local loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
     local autoLogin = LoginModalPage:GetValue("autoLogin")
-    local rememberMe = LoginModalPage:GetValue("rememberPassword")
-
-    local inputLoginInfo = {
-        account = account,
-        password = password,
-        site = env,
-        autoLogin = autoLogin,
-        rememberMe = rememberme
-    }
-
-    Store:Set("user/inputLoginInfo", inputLoginInfo)
+    local rememberMe = LoginModalPage:GetValue("rememberMe")
 
     if (not account or account == "") then
-        _guihelper.MessageBox(L"账号不能为空")
+        GameLogic.AddBBS(nil, L"账号不能为空", 3000, "255 0 0")
         return false
     end
-
+    
     if (not password or password == "") then
-        _guihelper.MessageBox(L"密码不能为空")
+        GameLogic.AddBBS(nil, L"密码不能为空", 3000, "255 0 0")
+        return false
+    end
+    
+    if (not loginServer) then
+        GameLogic.AddBBS(nil, L"登陆站点不能为空", 3000, "255 0 0")
         return false
     end
 
-    if (not env) then
-        _guihelper.MessageBox(L"登陆站点不能为空")
-        return false
-    end
+    Store:Set("user/env", loginServer)
 
-    Store:Set("user/env", env)
-
-    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
+    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
 
     local function HandleLogined()
         local token = Store:Get("user/token") or ""
 
-        -- 如果记住密码则保存密码到redist根目录下
-        if (rememberMe) then
-            KeepworkService:SaveSigninInfo(
-                {
-                    account = account,
-                    password = password,
-                    loginServer = env,
-                    token = token,
-                    autoLogin = autoLogin
-                }
-            )
-        else
-            KeepworkService:SaveSigninInfo()
-        end
+        KeepworkService:SaveSigninInfo(
+            {
+                account = account,
+                password = password,
+                loginServer = loginServer,
+                token = token,
+                autoLogin = autoLogin,
+                rememberMe = rememberMe
+            }
+        )
 
         self:ClosePage()
         WorldList:RefreshCurrentServerList()
@@ -180,13 +155,28 @@ function LoginModal:LoginAction()
         account,
         password,
         function(response, err)
+            if err == 200 and type(response) == 'table' and not response.cellphone and not response.email then
+                RegisterModal:ShowBindingPage()
+            end
+
             KeepworkService:LoginResponse(response, err, HandleLogined)
         end
     )
 end
 
 function LoginModal:GetServerList()
-    return KeepworkService:GetServerList()
+    local serverList = KeepworkService:GetServerList()
+
+    if self.loginServer then
+        for key, item in ipairs(serverList) do
+            item.selected = nil
+            if item.value == self.loginServer then
+                item.selected = true
+            end
+        end
+    end
+
+    return serverList
 end
 
 function LoginModal:SetAutoLogin()
@@ -197,30 +187,108 @@ function LoginModal:SetAutoLogin()
     end
 
     local autoLogin = LoginModalPage:GetValue("autoLogin")
-    local loginServer = LoginModalPage:GetValue("loginServer")
-    local account = LoginModalPage:GetValue("account")
+    local rememberMe = LoginModalPage:GetValue("rememberMe")
     local password = LoginModalPage:GetValue("password")
-    local rememberMe = LoginModalPage:GetValue("rememberPassword")
+    self.loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
+    self.account = string.lower(LoginModalPage:GetValue("account"))
 
-    if (autoLogin) then
-        LoginModalPage:SetValue("rememberPassword", true)
-        LoginModalPage:SetValue("autoLogin", true)
+    if autoLogin then
+        LoginModalPage:SetValue("rememberMe", true)
     else
-        LoginModalPage:SetValue("rememberPassword", rememberMe)
-        LoginModalPage:SetValue("autoLogin", false)
+        LoginModalPage:SetValue("rememberMe", rememberMe)
     end
-
-    LoginModalPage:SetValue("loginServer", loginServer)
-    LoginModalPage:SetValue("account", account)
+    
+    LoginModalPage:SetValue("autoLogin", autoLogin)
     LoginModalPage:SetValue("password", password)
 
     self:Refresh()
 end
 
-function LoginModal:IsEnglish()
-    if Translation.GetCurrentLanguage() == 'enUS' then
-        return true
-    else
+function LoginModal:SetRememberMe()
+    local LoginModalPage = Store:Get("page/LoginModal")
+
+    if (not LoginModalPage) then
         return false
+    end
+
+    local loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
+    local password = LoginModalPage:GetValue("password")
+    local rememberMe = LoginModalPage:GetValue("rememberMe")
+    self.loginServer = 'ONLINE' -- LoginModalPage:GetValue("loginServer")
+    self.account = string.lower(LoginModalPage:GetValue("account"))
+
+    if rememberMe then
+        LoginModalPage:SetValue("autoLogin", autoLogin)
+    else
+        LoginModalPage:SetValue("autoLogin", false)
+    end
+
+    LoginModalPage:SetValue("rememberMe", rememberMe)
+    LoginModalPage:SetValue("password", password)
+
+    self:Refresh()
+end
+
+function LoginModal:RemoveAccount(username)
+    local LoginModalPage = Store:Get('page/LoginModal')
+
+    if not LoginModalPage then
+        return false
+    end
+
+    SessionsData:RemoveSession(username)
+
+    if self.account == username then
+        self.account = nil
+        self.loginServer = nil
+
+        LoginModalPage:SetValue("autoLogin", false)
+        LoginModalPage:SetValue("rememberMe", false)
+        LoginModalPage:SetValue("password", "")
+    end
+
+    self:Refresh()
+end
+
+function LoginModal:SelectAccount(username)
+    local LoginModalPage = Store:Get('page/LoginModal')
+
+    if not LoginModalPage then
+        return false
+    end
+
+    local session = SessionsData:GetSessionByUsername(username)
+
+    self.loginServer = session and session.loginServer or 'ONLINE'
+    self.account = session and session.account or ''
+
+    LoginModalPage:SetValue("autoLogin", session.autoLogin)
+    LoginModalPage:SetValue("rememberMe", session.rememberMe)
+    LoginModalPage:SetValue("password", session.password)
+
+    LoginModalPage:Refresh(0.01)
+end
+
+function LoginModal:GetHistoryUsers()
+    if self.account and #self.account > 0 then
+        local allUsers = commonlib.Array:new(SessionsData:GetSessions().allUsers)
+        local beExist = false
+
+        for key, item in ipairs(allUsers) do
+            item.selected = nil
+
+            if item.value == self.account then
+                item.selected = true
+                beExist = true
+            end
+        end
+
+        if not beExist then
+            allUsers:push_front({ text = self.account, value = self.account, selected = true })
+        end
+
+        return allUsers
+    else
+        return SessionsData:GetSessions().allUsers
     end
 end

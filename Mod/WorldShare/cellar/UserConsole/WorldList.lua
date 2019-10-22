@@ -32,6 +32,8 @@ local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.
 
 local WorldList = NPL.export()
 
+WorldList.zipDownloadFinished = true
+
 function WorldList.GetCurWorldInfo(infoType, worldIndex)
     local index = tonumber(worldIndex)
     local selectedWorld = WorldList:GetSelectWorld(index)
@@ -276,7 +278,7 @@ function WorldList:SyncWorldsList(callback)
             local status
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem["worldName"] == LItem["foldername"] then
+                if DItem["worldName"] == LItem["foldername"] and not LItem.is_zip then
                     if (tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0)) then
                         status = 3 --本地网络一致
                         revision = LItem['revision']
@@ -317,7 +319,8 @@ function WorldList:SyncWorldsList(callback)
                 lastCommitId = DItem["commitId"], 
                 worldpath = worldpath,
                 status = status,
-                kpProjectId = DItem["projectId"]
+                kpProjectId = DItem["projectId"],
+                is_zip = false,
             }
 
             compareWorldList:push_back(currentWorld)
@@ -328,17 +331,18 @@ function WorldList:SyncWorldsList(callback)
             local isExist = false
 
             for DKey, DItem in ipairs(remoteWorldsList) do
-                if (LItem["foldername"] == DItem["worldName"]) then
+                if LItem["foldername"] == DItem["worldName"] and not LItem.is_zip then
                     isExist = true
                     break
                 end
             end
 
-            if (not isExist) then
+            if not isExist then
                 currentWorld = LItem
                 currentWorld.modifyTime = self:UnifiedTimestampFormat(currentWorld.writedate)
                 currentWorld.text = currentWorld.foldername
                 currentWorld.status = 1 --仅本地
+                currentWorld.is_zip = LItem['is_zip'] or false
                 compareWorldList:push_back(currentWorld)
             end
         end
@@ -428,7 +432,7 @@ function WorldList:UnifiedTimestampFormat(data)
     end
 end
 
-function WorldList:Sync(index)
+function WorldList:Sync()
     CreateWorld:CheckRevision(function()
         Compare:Init()
     end)
@@ -439,7 +443,7 @@ function WorldList:DeleteWorld(index)
 
     local selectedWorld = self:GetSelectWorld(index)
 
-    DeleteWorld:DeleteWorld(selectedWorld and selectedWorld.foldername)
+    DeleteWorld:DeleteWorld(selectedWorld)
 end
 
 function WorldList.GetWorldType()
@@ -523,11 +527,35 @@ function WorldList:EnterWorld(index)
     end
 
     if (selectedWorld.status == 2) then
-        Store:Set("world/willEnterWorld", InternetLoadWorld.EnterWorld)
-        Compare:Init()
+        if not self.zipDownloadFinished then
+            return false
+        end
+
+        self.zipDownloadFinished = false
+
+        Compare:Init(function(result, callback)
+            InternetLoadWorld.EnterWorld()
+            self.zipDownloadFinished = true
+        end)
     else
-        InternetLoadWorld.EnterWorld()
-        UserConsole:ClosePage()
+        if (selectedWorld.status == 1) then
+            InternetLoadWorld.EnterWorld()	
+            UserConsole:ClosePage()	
+        end
+
+        Compare:Init(function(result, callback)
+            if result == 'REMOTEBIGGER' then
+                if type(callback) == 'function' then	
+                    callback(function()	
+                        InternetLoadWorld.EnterWorld()	
+                        UserConsole:ClosePage()	
+                    end)
+                end	
+            else	
+                InternetLoadWorld.EnterWorld()	
+                UserConsole:ClosePage()	
+            end	
+        end)
     end
 
     Store:Set("explorer/mode", "mine")

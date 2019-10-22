@@ -10,7 +10,6 @@ local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
-local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
@@ -49,9 +48,9 @@ function Compare:Init(callback)
                     return false
                 end
 
-                if (result == REMOTEBIGGER) then
-                    SyncMain:ShowStartSyncPage()
-                end
+                -- if (result == REMOTEBIGGER) then
+                --     SyncMain:ShowStartSyncPage()
+                -- end
 
                 MsgBox:Close()
             else
@@ -62,12 +61,17 @@ function Compare:Init(callback)
                 end
 
                 if (result == JUSTREMOTE) then
-                    SyncMain:SyncToLocal()
+                    SyncMain:SyncToLocal(callback)
                     return true
                 end
 
                 if (result == REMOTEBIGGER or result == LOCALBIGGER or result == EQUAL) then
-                    SyncMain:ShowStartSyncPage()
+                    if type(callback) == 'function' then
+                        callback(result, function(callback) SyncMain:ShowStartSyncPage(callback, true) end)
+                    else
+                        SyncMain:ShowStartSyncPage()
+                    end
+
                     MsgBox:Close()
                     return true
                 end

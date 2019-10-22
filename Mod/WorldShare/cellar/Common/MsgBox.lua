@@ -18,15 +18,24 @@ MsgBox.msgIdCount = 0
 MsgBox.allMsg = {}
 MsgBox.allMsgBox = commonlib.Array:new()
 
-function MsgBox:Show(msg, sec, overtimeMsg)
+function MsgBox:Show(msg, sec, overtimeMsg, witdh, height)
     self.msgIdCount = self.msgIdCount + 1
-    
+
     local msgId = self.msgIdCount
 
     self.allMsgBox:push_back(msgId)
     self.allMsg[msgId] = msg
 
-    local params = Utils:ShowWindow(0, 0, "Mod/WorldShare/cellar/Common/MsgBox.html?msgId=" .. msgId, "MsgBox", 0, 0, "_fi", false)
+    local params = Utils:ShowWindow(
+        0,
+        0,
+        "Mod/WorldShare/cellar/Common/MsgBox.html?msgId=" .. msgId .. "&width=" .. (witdh or 0) .. "&height=" .. (height or 0),
+        "MsgBox",
+        0,
+        0,
+        "_fi",
+        false
+    )
 
     params._page.OnClose = function()
         Store:Remove("page/MsgBox" .. msgId)
@@ -37,7 +46,7 @@ function MsgBox:Show(msg, sec, overtimeMsg)
             for key, item in ipairs(self.allMsgBox) do
                 if (item == msgId) then
                     if overtimeMsg then
-                        _guihelper.MessageBox(overtimeMsg)
+                        GameLogic.AddBBS(nil, overtimeMsg, 3000, "255 0 0")
                     end
 
                     self:Close(msgId)

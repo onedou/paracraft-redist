@@ -20,6 +20,7 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
 local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
 local UserInfo = NPL.export()
 
@@ -122,12 +123,27 @@ function UserInfo:CheckDoAutoSignin(callback)
         return false
     end
 
-    MsgBox:Show(L"正在登陆，请稍后...")
+    MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时")
 
     Store:Set("user/env", info.loginServer)
 
     KeepworkService:Profile(
         function(data, err)
+            if err == 401 then
+                info.token = nil
+                info.autoLogin = false
+                SessionsData:SaveSession(info)
+                MsgBox:Close()
+                GameLogic.AddBBS(nil, L"Token已过期，请重新登录", 3000, "255 0 0")
+
+                return false
+            elseif err ~= 200 then
+                MsgBox:Close()
+                GameLogic.AddBBS(nil, format("%s%d", L"登陆失败了， 错误码：", err), 3000, "255 0 0")
+
+                return false
+            end
+
             if (type(data) == 'table' and data.username) then
                 data.token = info.token
                 KeepworkService:LoginResponse(
@@ -148,9 +164,6 @@ function UserInfo:CheckDoAutoSignin(callback)
                         end
                     end
                 )
-            else
-                MsgBox:Close()
-                KeepworkService:DeletePWDFile()
             end
         end,
         info.token

@@ -30,16 +30,16 @@ local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevi
 local SyncMain = NPL.export()
 
 function SyncMain:OnWorldLoad()
-    function Handle()
-        -- 没有登陆则直接使用离线模式
-        if (KeepworkService:IsSignedIn()) then
-            Compare:Init()
-        end
-    end
+    -- function Handle()
+    --     -- 没有登陆则直接使用离线模式
+    --     if (KeepworkService:IsSignedIn()) then
+    --         Compare:Init()
+    --     end
+    -- end
 
     self:GetCurrentWorldInfo(function()
         CreateWorld:CheckRevision(function()
-            Handle()
+            -- Handle()
         end)
     end)
 end
@@ -141,10 +141,6 @@ function SyncMain:GetCurrentWorldInfo(callback)
     end
 end
 
-function SyncMain:GetWorldFolder()
-    return LocalLoadWorld.GetWorldFolder()
-end
-
 function SyncMain:GetWorldFolderFullPath()
     return LocalLoadWorld.GetWorldFolderFullPath()
 end
@@ -170,8 +166,9 @@ function SyncMain:GetWorldDefaultName()
     return world
 end
 
-function SyncMain:ShowStartSyncPage()
-    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSync.html", "StartSync")
+function SyncMain:ShowStartSyncPage(callback, useOffline)
+    self.callback = callback
+    local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSync.html?useOffline=" .. (useOffline and "true" or "false"), "StartSync")
 
     params._page.OnClose = function()
         Store:Remove('page/StartSync')
@@ -210,7 +207,7 @@ function SyncMain:ShowStartSyncUseLocalPage()
     local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/UseLocal.html", "StartSyncUseLocal")
 
     params._page.OnClose = function()
-        Store:remove('page/StartSyncUseLocal')
+        Store:Remove('page/StartSyncUseLocal')
     end
 end
 
@@ -257,12 +254,17 @@ function SyncMain:BackupWorld()
     worldRevision:Backup()
 end
 
-function SyncMain:SyncToLocal()
+function SyncMain:SyncToLocal(callback)
+    if type(callback) ~= 'function' then
+        callback = self.callback
+        self.callback = nil
+    end
+
     if (self:CheckWorldSize()) then
         return false
     end
 
-    SyncToLocal:Init()
+    SyncToLocal:Init(callback)
 end
 
 function SyncMain:SyncToDataSource()
@@ -270,7 +272,8 @@ function SyncMain:SyncToDataSource()
         return false
     end
 
-    SyncToDataSource:Init()
+    SyncToDataSource:Init(self.callback)
+    self.callback = nil
 end
 
 function SyncMain.GetCurrentRevision()
@@ -282,6 +285,7 @@ function SyncMain.GetRemoteRevision()
 end
 
 function SyncMain:GetCurrentRevisionInfo()
+    WorldShare.worldData = nil
     local currentWorld = Store:Get("world/currentWorld")
 
     return WorldShare:GetWorldData("revision", currentWorld and currentWorld.worldpath .. '/')
