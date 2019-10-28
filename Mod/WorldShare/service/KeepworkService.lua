@@ -611,17 +611,43 @@ function KeepworkService:UpdateRecord(callback)
                 commitIds = commitIds
             }
 
+            
+            if worldTag and worldTag.name ~= foldername.utf8 then
+                worldInfo.extra.worldTagName = worldTag.name
+            end
+
             WorldList.SetRefreshing(true)
 
             self:GetProject(
                 currentWorld.kpProjectId,
                 function(data)
-                    if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
+                    if Mod.WorldShare.Store:Get('world/isPreviewUpdated') and
+                       worldTag and worldTag.name ~= foldername.utf8 then
+
                         self:UpdateProject(
                             currentWorld.kpProjectId,
                             {
                                 extra = {
-                                    imageUrl = preview
+                                    imageUrl = preview,
+                                    worldTagName = worldTag.name
+                                }
+                            }
+                        )
+                    elseif Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
+                        self:UpdateProject(
+                            currentWorld.kpProjectId,
+                            {
+                                extra = {
+                                    imageUrl = preview,
+                                }
+                            }
+                        )
+                    elseif worldTag and worldTag.name ~= foldername.utf8 then
+                        self:UpdateProject(
+                            currentWorld.kpProjectId,
+                            {
+                                extra = {
+                                    worldTagName = worldTag.name,
                                 }
                             }
                         )
