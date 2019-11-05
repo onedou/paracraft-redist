@@ -38,20 +38,22 @@ function ShareWorld:Init()
         PackageShareWorld.TakeSharePageImage()
     end
 
-    if (not KeepworkService:IsSignedIn()) then
+    if not KeepworkService:IsSignedIn() then
         function Handle()
             KeepworkService:GetProjectIdByWorldName(
                 currentWorld.foldername,
                 function()
-                    SyncMain:GetCurrentWorldInfo(
-                        function()
-                            Compare:Init(
-                                function()
-                                    self:ShowPage()
-                                end
-                            )
-                        end
-                    )
+                    WorldList:RefreshCurrentServerList(function()
+                        SyncMain:GetCurrentWorldInfo(
+                            function()
+                                Compare:Init(
+                                    function()
+                                        self:ShowPage()
+                                    end
+                                )
+                            end
+                        )
+                    end, true)
                 end
             )
         end
@@ -87,10 +89,6 @@ function ShareWorld:ShowPage()
     end
 
     self:Refresh()
-end
-
-function ShareWorld:GetEnterFoldername()
-    return Store:Get("world/foldername")
 end
 
 function ShareWorld:GetEnterWorld()
@@ -151,8 +149,10 @@ function ShareWorld:OnClick()
     end
 
     local function Handle()
-        SyncMain:SyncToDataSource()
-        self:ClosePage()
+        SyncMain:CheckTagName(function()
+            SyncMain:SyncToDataSource()
+            self:ClosePage()
+        end)
     end
 
     if (not canBeShare) then
