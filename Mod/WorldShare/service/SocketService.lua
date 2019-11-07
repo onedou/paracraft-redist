@@ -9,6 +9,7 @@ NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 ------------------------------------------------------------
 ]]
+local NetworkMain = commonlib.gettable("MyCompany.Aries.Game.Network.NetworkMain")
 
 local SocketService = commonlib.inherit(commonlib.gettable("System.Core.ToolBase"), commonlib.gettable("Mod.WorldShare.service.SocketService"))
 
@@ -47,6 +48,8 @@ end
 
 -- send who online msg request
 function SocketService:SendUDPWhoOnlineMsg()
+	Mod.WorldShare.Store:Remove('user/udpServerList')
+
 	local att = NPL.GetAttributeObject()
 	local broadcastAddressList = att:GetField("BroadcastAddressList")
 	broadcastAddressList = commonlib.split(broadcastAddressList, ",")
@@ -71,7 +74,11 @@ function SocketService:SendUDPWhoOnlineMsg()
 end
 
 function SocketService:SendUDPIamOnlineMsg(ip, port)
-	self:SendUDPMsg({ type = "ONLINE", result = "IAM", ip = ip, port = port }, ip, port)
+	if not NetworkMain:IsServerStarted() then
+		return false
+	end
+
+	self:SendUDPMsg({ type = "ONLINE", result = "IAM", username = "nil", serverName = "nil" }, ip, port)
 end
 
 -- send udp msg
@@ -103,19 +110,21 @@ function SocketService:ReceiveUDPMsg(msg)
 		end
 
 		if msg.result == "IAM" then
-			if not msg.ip or not msg.port then
+			local ip, port = string.match(msg.nid, "~udp(.+)_(%d+)")
+
+			if not ip or not port then
 				return false
 			end
 
 			local udpServerList = Mod.WorldShare.Store:Get('user/udpServerList') or {}
 
 			for key, item in ipairs(udpServerList) do
-				if item.ip == msg.ip then
+				if item.ip == ip then
 					return false
 				end
 			end
 
-			udpServerList[#udpServerList + 1] = { ip = msg.ip, port = msg.port }
+			udpServerList[#udpServerList + 1] = { ip = ip, port = "8099", username = msg.username, serverName = msg.serverName }
 
 			Mod.WorldShare.Store:Set('user/udpServerList', udpServerList)
 		end

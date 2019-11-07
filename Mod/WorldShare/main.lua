@@ -37,6 +37,7 @@ NPL.load("(gl)script/ide/System/os/os.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
 NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox.lua")
@@ -57,7 +58,7 @@ local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
 WorldShare:Property({"Name", "WorldShare"})
-WorldShare.version = '0.0.8'
+WorldShare.version = '0.0.9'
 
 -- register mod global variable
 WorldShare.Store = Store
