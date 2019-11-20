@@ -27,9 +27,9 @@
                 end
             end
 
-            function select_category(value)
+            function select_category(index)
                 MainPage.curPage = 1
-                MainPage:SetWorksTree(value)
+                MainPage:SetWorksTree(MainPage.remoteCategoryTree[index], Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
             end
 
             function search()
@@ -98,18 +98,14 @@
                 end
             end
 
-            function mycreate()
-                if MainPage.categorySelected == L'收藏' then
-                    return false
-                end
-
+            function lazy_load()
                 if MainPage.worksTree[#MainPage.worksTree].isLoaded then
                     return false
                 end
 
                 MainPage.worksTree[#MainPage.worksTree].isLoaded = true
                 MainPage.curPage = MainPage.curPage + 1
-                MainPage:SetWorksTree(MainPage.categorySelected)
+                MainPage:SetWorksTree(MainPage.categorySelected, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
             end
 
             function get_page_size()
@@ -463,7 +459,7 @@
                 <pe:gridview name="categoryTree" DefaultNodeHeight="10" pagesize="100" ItemsPerLine="1" AllowPaging="false">
                     <Columns>
                         <div>
-                            <pe:if condition='<%= Eval("value") == MainPage.categorySelected %>'>
+                            <pe:if condition='<%= Eval("value") == MainPage.categorySelected.value %>'>
                                 <pe:if condition='<%= global_type(Eval("enValue")) == "string" %>'>
                                     <input type="button" value='<%=Eval("enValue")%>' class="category_button_selected"/>
                                 </pe:if>
@@ -471,12 +467,12 @@
                                     <input type="button" value='<%=Eval("value")%>' class="category_button_selected"/>
                                 </pe:if>
                             </pe:if>
-                            <pe:if condition='<%= Eval("value") ~= MainPage.categorySelected %>'>
+                            <pe:if condition='<%= Eval("value") ~= MainPage.categorySelected.value %>'>
                                 <pe:if condition='<%= global_type(Eval("enValue")) == "string" %>'>
-                                    <input type="button" value='<%=Eval("enValue")%>' name="<%=Eval('value')%>" onclick="select_category" class="category_button"/>
+                                    <input type="button" value='<%=Eval("enValue")%>' name="<%= Eval('index') %>" onclick="select_category" class="category_button"/>
                                 </pe:if>
                                 <pe:if condition='<%= global_type(Eval("enValue")) ~= "string" %>'>
-                                    <input type="button" value='<%=Eval("value")%>' name="<%=Eval('value')%>" onclick="select_category" class="category_button"/>
+                                    <input type="button" value='<%=Eval("value")%>' name="<%= Eval('index') %>" onclick="select_category" class="category_button"/>
                                 </pe:if>
                             </pe:if>
                         </div>
@@ -555,7 +551,7 @@
                                     </div>
                                 </div>
                                 <pe:if condition="<%= is_load_more_items(Eval('index')) %>">
-                                    <pe:custom oncreate="<%=mycreate%>"></pe:custom>
+                                    <pe:custom oncreate="<%=lazy_load%>"></pe:custom>
                                 </pe:if>
                             </div>
                         </Columns>

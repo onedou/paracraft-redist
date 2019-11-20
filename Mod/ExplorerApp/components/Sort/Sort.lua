@@ -27,11 +27,11 @@ function Sort:ShowPage(x, y)
 end
 
 function Sort:SetPage()
-    Store:Set("page/Sort", document:GetPageCtrl())
+    Mod.WorldShare.Store:Set("page/Sort", document:GetPageCtrl())
 end
 
 function Sort:ClosePage()
-    local SortPage = Store:Get('page/Sort')
+    local SortPage = Mod.WorldShare.Store:Get('page/Sort')
 
     if SortPage then
         SortPage:CloseWindow()
@@ -39,16 +39,16 @@ function Sort:ClosePage()
 end
 
 function Sort:GetSortIndex()
-    return Store:Get('explorer/selectSortIndex')
+    return Mod.WorldShare.Store:Get('explorer/selectSortIndex')
 end
 
 function Sort:GetSortList()
-    return Store:Get('explorer/sortList')
+    return Mod.WorldShare.Store:Get('explorer/sortList')
 end
 
 function Sort:SetSortIndex(index)
     MainPage.curPage = 1
-    Store:Set('explorer/selectSortIndex', index)
+    Mod.WorldShare.Store:Set('explorer/selectSortIndex', index)
     self:ClosePage()
     MainPage:UpdateSort()
 end

@@ -17,5 +17,12 @@ function ExplorerStore:Action()
 end
 
 function ExplorerStore:Getter()
-    return {}
+    return {
+        GetSortValue = function()
+            return self.sortList[self.selectSortIndex].value
+        end,
+        GetSortKey = function()
+            return self.sortList[self.selectSortIndex].key
+        end
+    }
 end

@@ -16,7 +16,7 @@ local Toast = NPL.export()
 Toast.msg = ''
 Toast.allPreviousMsg = {}
 
-function Toast:ShowPage(msg)
+function Toast:ShowPage(msg, nTimes)
     local index = #self.allPreviousMsg + 1
     local ToastPage = Store:Get("page/Toast")
 
@@ -31,7 +31,7 @@ function Toast:ShowPage(msg)
     self.allPreviousMsg[index] = true
     self.msg = msg
 
-    local params = Utils:ShowWindow(180, 32, "Mod/ExplorerApp/components/Toast/Toast.html", "Mod.ExplorerApp.Toast", nil, nil, "_ct", false, 3)
+    local params = Utils:ShowWindow(300, 32, "Mod/ExplorerApp/components/Toast/Toast.html", "Mod.ExplorerApp.Toast", nil, nil, "_ct", false, 3)
 
     Utils.SetTimeOut(
         function()
@@ -40,7 +40,7 @@ function Toast:ShowPage(msg)
                 self.allPreviousMsg = {}
             end
         end,
-        3000
+        nTimes or 5000
     )
 end
 

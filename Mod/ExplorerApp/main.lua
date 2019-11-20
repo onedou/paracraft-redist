@@ -22,7 +22,6 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Common/Translation.lua")
 local ExplorerTask = commonlib.gettable("Mod.ExplorerApp.tasks.ExplorerTask")
 local ExplorerStore = commonlib.gettable('Mod.ExplorerApp.store.Explorer')
 
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 local GameOver = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
@@ -30,17 +29,23 @@ local ProactiveEnd = NPL.load("(gl)Mod/ExplorerApp/components/GameProcess/Proact
 
 local ExplorerApp = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.ExplorerApp"))
 
+ExplorerApp:Property({"Name", "ExplorerApp", "GetName", "SetName", { auto = true }})
+ExplorerApp:Property({"Desc", "This is explorer app", "GetDesc", "SetDesc", { auto = true }})
+ExplorerApp.version = '0.0.1'
 
-function ExplorerApp:GetName()
-	return "ExplorerApp"
-end
+LOG.std(nil, "info", "ExplorerApp", "explorer app version %s", ExplorerApp.version)
 
-function ExplorerApp:GetDesc()
-	return "This is explorer app"
+function ExplorerApp:init()
 end
 
 function ExplorerApp:Init(callback)
-    Store.storeList.explorer = ExplorerStore
+    if not Mod.WorldShare then
+        _guihelper.MessageBox(L"ExplorerApp 依赖 WorldShare Mod")
+        return false
+    end
+
+    -- register explorer store to store list
+    Mod.WorldShare.Store.storeList.explorer = ExplorerStore
 
     MainPage:ShowPage(callback)
 end
@@ -49,7 +54,7 @@ function ExplorerApp:OnLogin()
 end
 
 function ExplorerApp:OnWorldLoad()
-    local mode = Store:Get('explorer/mode')
+    local mode = Mod.WorldShare.Store:Get('explorer/mode')
 
     if not mode or mode ~= 'recommend' then
         return false
