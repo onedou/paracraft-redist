@@ -31,7 +31,7 @@ local ExplorerApp = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonl
 
 ExplorerApp:Property({"Name", "ExplorerApp", "GetName", "SetName", { auto = true }})
 ExplorerApp:Property({"Desc", "This is explorer app", "GetDesc", "SetDesc", { auto = true }})
-ExplorerApp.version = '0.0.1'
+ExplorerApp.version = '0.0.3'
 
 LOG.std(nil, "info", "ExplorerApp", "explorer app version %s", ExplorerApp.version)
 

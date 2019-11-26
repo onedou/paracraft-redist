@@ -74,26 +74,11 @@ end
 -- param: x-per-page number
 -- param: classifyTags-like string
 -- return object
-function Projects:GetProjectById(projectIds, sort, pages, callback)
-    local headers = KeepworkService:GetHeaders()
-    local params = {
-        ["$and"] = {
-            { classifyTags = { ["$like"] = '%paracraft专用%' } },
-            { id = { ["$in"] = projectIds } },
-        },
-        ["x-page"] = pages and pages.page and pages.page or 1,
-        ["x-per-page"] = pages and pages.perPage and pages.perPage or 10
-    }
-
-    if type(sort) == 'string' then
-        params['x-order'] = sort
-    end
-
-    KeepworkService:Request(
-        format("/projects/search", filterUrl),
-        "POST",
-        params,
-        headers,
+function Projects:GetProjectByIds(mainId, projectIds, pages, callback)
+    KeepworkProjectsApi:SearchForParacraft(
+        pages and pages.perPage and pages.perPage or 10,
+        pages and pages.page and pages.page or 1,
+        { tagIds = { mainId }, projectIds = projectIds },
         function(data, err)
             if type(callback) ~= 'function' then
                 return false

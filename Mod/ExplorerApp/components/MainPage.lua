@@ -38,7 +38,7 @@ local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 
 local MainPage = NPL.export()
 
-MainPage.categorySelected = L"收藏"
+MainPage.categorySelected = {value = L"收藏"}
 MainPage.categoryTree = {
     {value = L"收藏"}
 }
@@ -200,20 +200,12 @@ function MainPage:SetWorksTree(categoryItem, sort)
         return false
     end
 
-    if not sort then
-        return false
-    end
-
     if categoryItem.value == L"收藏" then
-        if sort == 'recommend' or sort == 'synthesize' then
-            sort = nil
-        end
-
         local allFavoriteProjects = ProjectsDatabase:GetAllFavoriteProjects()
 
-        KeepworkServiceProjects:GetProjectById(
+        KeepworkServiceProjects:GetProjectByIds(
+            self.mainId,
             allFavoriteProjects,
-            sort,
             { page = self.curPage },
             function(data, err)
                 if not data or not data.rows then
@@ -222,23 +214,24 @@ function MainPage:SetWorksTree(categoryItem, sort)
 
                 self.categorySelected = categoryItem
 
-                -- map to es data format
-                for key, item in ipairs(data.rows) do
-                    if item.extra and item.extra.imageUrl then
-                        item.cover = item.extra.imageUrl
-                    end
+                local mapData = {}
 
-                    if item.user and item.user.username then
-                        item.username = item.user.username
-                    end
+                -- map data struct
+                for key, item in ipairs(data.rows) do
+                    mapData[#mapData + 1] = {
+                        id = item.id,
+                        name = item.extra and type(item.extra.worldTagName) == 'string' and item.extra.worldTagName or item.name or "",
+                        cover = item.extra and type(item.extra.imageUrl) == 'string' and item.extra.imageUrl or "",
+                        username = item.user and type(item.user.username) == 'string' and item.user.username or ""
+                    }
                 end
 
                 local rows = {}
 
                 if self.downloadedGame == "all" then
-                    rows = data.rows
+                    rows = mapData
                 elseif self.downloadedGame == "local" then
-                    for key, item in ipairs(data.rows) do
+                    for key, item in ipairs(mapData) do
                         if ProjectsDatabase:IsProjectDownloaded(item.id) then
                             rows[#rows + 1] = item
                         end
@@ -265,6 +258,10 @@ function MainPage:SetWorksTree(categoryItem, sort)
         return true
     end
 
+    if not sort then
+        return false
+    end
+
     if sort == 'recommend' then
         KeepworkServiceProjects:GetRecommandProjects(
             categoryItem.id,
@@ -283,7 +280,7 @@ function MainPage:SetWorksTree(categoryItem, sort)
                 for key, item in ipairs(data.rows) do
                     mapData[#mapData + 1] = {
                         id = item.id,
-                        name = item.name,
+                        name = item.extra and type(item.extra.worldTagName) == 'string' and item.extra.worldTagName or item.name or "",
                         cover = item.extra and type(item.extra.imageUrl) == 'string' and item.extra.imageUrl or "",
                         username = item.user and type(item.user.username) == 'string' and item.user.username or ""
                     }
@@ -332,14 +329,20 @@ function MainPage:SetWorksTree(categoryItem, sort)
         sort,
         { page = self.curPage },
         function(data, err)
-            if not data or err ~= 200 then
+            if type(data) ~= 'table' or type(data.hits) ~= 'table' or err ~= 200 then
                 return false
             end
-    
+
             self.categorySelected = categoryItem
-    
+
+            for key, item in pairs(data.hits) do
+                if item and item.world_tag_name then
+                    item.name = item.world_tag_name
+                end
+            end
+
             local rows = {}
-    
+
             if self.downloadedGame == "all" then
                 rows = data.hits
             elseif self.downloadedGame == "local" then
@@ -351,24 +354,24 @@ function MainPage:SetWorksTree(categoryItem, sort)
             else
                 return false
             end
-    
+
             if self.curPage ~= 1 then
                 rows = self:HandleWorldsTree(rows)
-    
+
                 for key, item in ipairs(rows) do
                     self.worksTree[#self.worksTree + 1] = item
                 end
             else
                 self.worksTree = self:HandleWorldsTree(rows)
             end
-    
+
             MainPage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
             self:Refresh()
         end
     )
 end
 
-function MainPage:Search(sort)
+function MainPage:Search()
     local MainPage = Mod.WorldShare.Store:Get("page/MainPage")
 
     if not MainPage then
@@ -381,9 +384,10 @@ function MainPage:Search(sort)
         return false
     end
 
-    KeepworkServiceProjects:GetProjectById(
-        {projectId},
-        sort,
+    KeepworkServiceProjects:GetProjectByIds(
+        self.mainId,
+        { projectId },
+        {},
         function(data, err)
             if not data or not data.rows then
                 return false
@@ -400,7 +404,7 @@ function MainPage:Search(sort)
                 end
             end
 
-            self.categorySelected = 0
+            self.categorySelected = {}
             self.worksTree = self:HandleWorldsTree(data.rows)
             MainPage:GetNode("worksTree"):SetAttribute("DataSource", data.rows)
             self:Refresh()
