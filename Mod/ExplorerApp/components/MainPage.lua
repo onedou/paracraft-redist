@@ -200,6 +200,8 @@ function MainPage:SetWorksTree(categoryItem, sort)
         return false
     end
 
+    Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 10)
+
     if categoryItem.value == L"收藏" then
         local allFavoriteProjects = ProjectsDatabase:GetAllFavoriteProjects()
 
@@ -208,6 +210,8 @@ function MainPage:SetWorksTree(categoryItem, sort)
             allFavoriteProjects,
             { page = self.curPage },
             function(data, err)
+                Mod.WorldShare.MsgBox:Close()
+
                 if not data or not data.rows then
                     return false
                 end
@@ -268,6 +272,8 @@ function MainPage:SetWorksTree(categoryItem, sort)
             self.mainId,
             { page = self.curPage },
             function(data, err)
+                Mod.WorldShare.MsgBox:Close()
+
                 if not data or err ~= 200 then
                     return false
                 end
@@ -329,6 +335,8 @@ function MainPage:SetWorksTree(categoryItem, sort)
         sort,
         { page = self.curPage },
         function(data, err)
+            Mod.WorldShare.MsgBox:Close()
+
             if type(data) ~= 'table' or type(data.hits) ~= 'table' or err ~= 200 then
                 return false
             end

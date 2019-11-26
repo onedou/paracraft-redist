@@ -15,7 +15,7 @@ MsgBox.msgIdCount = 0
 MsgBox.allMsg = {}
 MsgBox.allMsgBox = commonlib.Array:new()
 
-function MsgBox:Show(msg, sec, overtimeMsg, witdh, height)
+function MsgBox:Show(msg, sec, overtimeMsg, witdh, height, index)
     self.msgIdCount = self.msgIdCount + 1
 
     local msgId = self.msgIdCount
@@ -31,7 +31,8 @@ function MsgBox:Show(msg, sec, overtimeMsg, witdh, height)
         0,
         0,
         "_fi",
-        false
+        false,
+        index
     )
 
     params._page.OnClose = function()
