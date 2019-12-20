@@ -23,7 +23,7 @@ function MsgBox:Show(msg, sec, overtimeMsg, witdh, height, index)
     self.allMsgBox:push_back(msgId)
     self.allMsg[msgId] = msg
 
-    local params = Mod.WorldShare.Utils:ShowWindow(
+    local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
         "Mod/WorldShare/cellar/Common/MsgBox.html?msgId=" .. msgId .. "&width=" .. (witdh or 0) .. "&height=" .. (height or 0),

@@ -50,25 +50,15 @@
                     local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
 
                     if isEnterWorld then
-                        SyncMain.callback = nil
                         SyncMain:CloseStartSyncPage()
                         return true
-                    end
-
-                    if type(SyncMain.callback) == 'function' then
-                        SyncMain.callback()
-                        SyncMain.callback = nil
                     end
 
                     SyncMain:CloseStartSyncPage()
                 end
 
                 function enter_offline_world()
-                    if type(SyncMain.callback) == 'function' then
-                        SyncMain.callback()
-                        SyncMain.callback = nil
-                        SyncMain:CloseStartSyncPage()
-                    end
+                    SyncMain:CloseStartSyncPage()
                 end
 
                 function get_current_world_name()

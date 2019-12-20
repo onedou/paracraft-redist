@@ -8,11 +8,12 @@ use the lib:
 local ParacraftDevices = NPL.load("(gl)Mod/ExplorerApp/service/KeepworkService/ParacraftDevices.lua")
 ------------------------------------------------------------
 ]]
-local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
+local ParacraftDevicesApi = NPL.load('(gl)Mod/ExplorerApp/api/ParacraftDevices.lua')
+local ParacraftGameCoinKeysApi = NPL.load('(gl)Mod/ExplorerApp/api/ParacraftGameCoinKeys.lua')
 
 local ParacraftDevices = NPL.export()
 
-function ParacraftDevices:PwdVerfify(password, callback)
+function ParacraftDevices:PwdVerify(password, callback)
     if not password then
         return false
     end
@@ -22,22 +23,17 @@ function ParacraftDevices:PwdVerfify(password, callback)
         password = password
     }
 
-    KeepworkService:Request(
-        "/paracraftDevices/pwdVerify",
-        "GET",
+    ParacraftGameCoinKeysApi:PwdVerify(
         params,
-        headers,
         function(data, err)
-            if type(callback) ~= 'function' then
-                return false
+            if type(callback) == 'function' then
+                callback(data, err)
             end
-
-            if err ~= 200 or not data then
+        end,
+        function(data, err)
+            if type(callback) == 'function' then
                 callback()
-                return false
             end
-
-            callback(data, err)
         end
     )
 end
@@ -51,18 +47,5 @@ function ParacraftDevices:Recharge(code, callback)
         key = code
     }
 
-    KeepworkService:Request(
-        "/paracraftGameCoinKeys/active",
-        "POST",
-        params,
-        headers,
-        function(data, err)
-            if type(callback) ~= 'function' then
-                return false
-            end
-
-            callback(data, err)
-        end,
-        400
-    )
+    ParacraftGameCoinKeysApi:Active(params, callback, nil , 400)
 end

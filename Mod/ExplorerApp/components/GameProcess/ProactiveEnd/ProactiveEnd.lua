@@ -16,7 +16,7 @@ local AudioEngine = commonlib.gettable("AudioEngine")
 local ProactiveEnd = NPL.export()
 
 function ProactiveEnd:ShowPage()
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/ProactiveEnd/ProactiveEnd.html", "Mod.ExplorerApp.GameProcess.ProactiveEnd", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/ProactiveEnd/ProactiveEnd.html", "Mod.ExplorerApp.GameProcess.ProactiveEnd", 0, 0, "_fi", false)
 end
 
 function ProactiveEnd:ExitIcon()

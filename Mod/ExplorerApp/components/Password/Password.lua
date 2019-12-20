@@ -26,7 +26,7 @@ function Password:ShowPage()
         Password.mode = 'set'
     end
 
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/Password.html", "Mod.ExplorerApp.Password", 0, 0, "_fi", false, 3)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/Password.html", "Mod.ExplorerApp.Password", 0, 0, "_fi", false, 3)
 
     local PasswordPage = Store:Get('page/Password')
 

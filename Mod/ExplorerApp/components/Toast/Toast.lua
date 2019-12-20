@@ -31,7 +31,7 @@ function Toast:ShowPage(msg, nTimes)
     self.allPreviousMsg[index] = true
     self.msg = msg
 
-    local params = Utils:ShowWindow(300, 32, "Mod/ExplorerApp/components/Toast/Toast.html", "Mod.ExplorerApp.Toast", nil, nil, "_ct", false, 3)
+    local params = Mod.WorldShare.Utils.ShowWindow(300, 32, "Mod/ExplorerApp/components/Toast/Toast.html", "Mod.ExplorerApp.Toast", nil, nil, "_ct", false, 3)
 
     Utils.SetTimeOut(
         function()

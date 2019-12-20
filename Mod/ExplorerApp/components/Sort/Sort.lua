@@ -23,7 +23,7 @@ function Sort:ShowPage(x, y)
     self.position.x = x
     self.position.y = y
 
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/Sort/Sort.html", "Mod.ExplorerApp.Sort", 0, 0, "_fi", false, 3)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/ExplorerApp/components/Sort/Sort.html", "Mod.ExplorerApp.Sort", 0, 0, "_fi", false, 3)
 end
 
 function Sort:SetPage()

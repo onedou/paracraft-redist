@@ -29,7 +29,7 @@ function GameOver:ShowPage(mode)
         ExplorerApp.curTask:EnableAutoCamera(false)
     end
 
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.html", "Mod.ExplorerApp.GameProcess.GameOver", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/GameOver/GameOver.html", "Mod.ExplorerApp.GameProcess.GameOver", 0, 0, "_fi", false)
 end
 
 function GameOver:SetPage()

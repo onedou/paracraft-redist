@@ -22,7 +22,7 @@ function Result:ShowPage(coins)
     self.balance = Wallet:GetUserBalance()
     self.getCoins = coins
 
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/Result/Result.html", "Mod.ExplorerApp.PurchasingCode.Result", 0, 0, "_fi", false, 3)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/ExplorerApp/components/PurchasingCode/Result/Result.html", "Mod.ExplorerApp.PurchasingCode.Result", 0, 0, "_fi", false, 3)
 end
 
 function Result:SetPage()

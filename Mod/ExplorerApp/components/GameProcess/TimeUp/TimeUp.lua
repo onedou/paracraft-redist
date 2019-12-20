@@ -16,7 +16,7 @@ local TimeUp = NPL.export()
 
 function TimeUp:ShowPage()
     self.playerBalance = Wallet:GetPlayerBalance()
-    local params = Utils:ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/TimeUp/TimeUp.html", "Mod.ExplorerApp.GameProcess.TimeUp", 0, 0, "_fi", false)
+    local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/ExplorerApp/components/GameProcess/TimeUp/TimeUp.html", "Mod.ExplorerApp.GameProcess.TimeUp", 0, 0, "_fi", false)
 end
 
 function TimeUp:SetPage()

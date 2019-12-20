@@ -60,7 +60,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.9'
+WorldShare.version = '0.0.10'
 
 -- register mod global variable
 WorldShare.Store = Store
@@ -70,6 +70,33 @@ WorldShare.Utils = Utils
 LOG.std(nil, "info", "WorldShare", "world share version %s", WorldShare.version)
 
 function WorldShare:init()
+    -- replace load world page
+    GameLogic.GetFilters():add_filter(
+        "ShowLoginModePage",
+        function()
+
+            echo("@big, please create a brand new login mcml page here. and return false to replace old one")
+
+            System.App.Commands.Call("File.MCMLWindowFrame", {
+                url = "script/apps/Aries/Creator/Game/Login/SelectLoginModePage.html", 
+                name = "ShowLoginModePage", 
+                isShowTitleBar = false,
+                DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
+                style = CommonCtrl.WindowFrame.ContainerStyle,
+                zorder = -1,
+                allowDrag = false,
+                directPosition = true,
+                    align = "_fi",
+                    x = 0,
+                    y = 0,
+                    width = 0,
+                    height = 0,
+                cancelShowAnimation = true,
+            });
+            return false
+        end
+    )
+
     -- replace load world page
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
@@ -163,5 +190,4 @@ end
 
 function WorldShare:OnLeaveWorld()
     Store:Remove("world/currentWorld")
-    Store:Remove("world/foldername")
 end
