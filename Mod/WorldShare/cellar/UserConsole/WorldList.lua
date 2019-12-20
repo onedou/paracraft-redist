@@ -464,28 +464,26 @@ end
 function WorldList:Sync()
     Mod.WorldShare.MsgBox:Show(L"请稍后...")
 
-    CreateWorld:CheckRevision(function()
-        Compare:Init(function(result)
-            if not result then
-                GameLogic.AddBBS(nil, L"同步失败", 3000, "255 0 0")
-                Mod.WorldShare.MsgBox:Close()
-                return false
-            end
-
-            if result == Compare.JUSTLOCAL then
-                SyncMain:SyncToDataSource()
-            end
-
-            if result == Compare.JUSTREMOTE then
-                SyncMain:SyncToLocal()
-            end
-
-            if result == Compare.REMOTEBIGGER or result == Compare.LOCALBIGGER or result == Compare.EQUAL then
-                SyncMain:ShowStartSyncPage()
-            end
-
+    Compare:Init(function(result)
+        if not result then
+            GameLogic.AddBBS(nil, L"同步失败", 3000, "255 0 0")
             Mod.WorldShare.MsgBox:Close()
-        end)
+            return false
+        end
+
+        if result == Compare.JUSTLOCAL then
+            SyncMain:SyncToDataSource()
+        end
+
+        if result == Compare.JUSTREMOTE then
+            SyncMain:SyncToLocal()
+        end
+
+        if result == Compare.REMOTEBIGGER or result == Compare.LOCALBIGGER or result == Compare.EQUAL then
+            SyncMain:ShowStartSyncPage()
+        end
+
+        Mod.WorldShare.MsgBox:Close()
     end)
 end
 
