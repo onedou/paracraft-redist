@@ -251,7 +251,7 @@ function Compare:GetCurrentWorldInfo(callback)
                     break
                 end
             end
-    
+
             if searchCurrentWorld then
                 currentWorld = searchCurrentWorld
     

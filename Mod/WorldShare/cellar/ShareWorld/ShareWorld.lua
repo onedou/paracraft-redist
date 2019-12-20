@@ -92,8 +92,8 @@ function ShareWorld:ShowPage()
 end
 
 function ShareWorld:GetPreviewImagePath()
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-    return format("%s/preview.jpg", currentWorld and currentWorld.worldpath)
+    local worldpath = ParaWorld.GetWorldDirectory() or ""
+    return format("%s/preview.jpg", worldpath)
 end
 
 function ShareWorld:SetPage()
@@ -117,8 +117,13 @@ function ShareWorld:Refresh(times)
 end
 
 function ShareWorld:GetWorldSize()
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-    local filesTotal = LocalService:GetWorldSize(currentWorld.worldpath)
+    local worldpath = ParaWorld.GetWorldDirectory()
+
+    if not worldpath then
+        return false
+    end
+
+    local filesTotal = LocalService:GetWorldSize(worldpath)
 
     return Mod.WorldShare.Utils.FormatFileSize(filesTotal)
 end

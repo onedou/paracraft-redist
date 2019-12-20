@@ -8,6 +8,8 @@
             <![CDATA[
                 page_ctrl = document:GetPageCtrl()
                 use_offline = page_ctrl:GetRequestParam("useOffline")
+                local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
+                local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 
                 SyncMain = NPL.load("../Main.lua")
                 Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
@@ -58,6 +60,8 @@
                 end
 
                 function enter_offline_world()
+                    InternetLoadWorld.EnterWorld()
+                    UserConsole:ClosePage()
                     SyncMain:CloseStartSyncPage()
                 end
 

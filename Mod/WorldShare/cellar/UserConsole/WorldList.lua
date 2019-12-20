@@ -607,8 +607,7 @@ function WorldList:EnterWorld(index)
     
             Compare:Init(function(result)
                 if result == Compare.REMOTEBIGGER then
-                    SyncMain:ShowStartSyncPage()
-                    UserConsole:ClosePage()
+                    SyncMain:ShowStartSyncPage(true)
                 else
                     InternetLoadWorld.EnterWorld()	
                     UserConsole:ClosePage()	

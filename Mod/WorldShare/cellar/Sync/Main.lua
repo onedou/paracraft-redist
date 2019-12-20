@@ -34,8 +34,7 @@ function SyncMain:OnWorldLoad()
     end)
 end
 
-function SyncMain:ShowStartSyncPage(callback, useOffline)
-    self.callback = callback
+function SyncMain:ShowStartSyncPage(useOffline)
     local params = SyncMain:ShowDialog("Mod/WorldShare/cellar/Sync/Templates/StartSync.html?useOffline=" .. (useOffline and "true" or "false"), "StartSync")
 
     params._page.OnClose = function()
