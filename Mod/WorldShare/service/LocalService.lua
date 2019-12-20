@@ -151,8 +151,8 @@ function LocalService:Delete(foldername, filename)
     local deletePath = format(
                         "%s/%s/%s",
                         Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                        Encoding.Utf8ToDefault(foldername or ''),
-                        Encoding.Utf8ToDefault(filename or '')
+                        CommonlibEncoding.Utf8ToDefault(foldername or ''),
+                        CommonlibEncoding.Utf8ToDefault(filename or '')
                        )
 
     ParaIO.DeleteFile(deletePath)

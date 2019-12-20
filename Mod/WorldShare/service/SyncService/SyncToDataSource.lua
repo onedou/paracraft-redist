@@ -598,15 +598,12 @@ function SyncToDataSource:UpdateRecord(callback)
                 KeepworkService:SetCurrentCommitId()
             end
 
-            echo('from request storage files api token!!!!!!', true)
             StorageFilesApi:Token('preview.jpg', function(data, err)
-                echo(data, true)
                 if not data.token or not data.key then
                     return false
                 end
 
                 local targetDir = format("%s/%s/preview.jpg", Mod.WorldShare.Utils.GetWorldFolderFullPath(), commonlib.Encoding.Utf8ToDefault(self.currentWorld.foldername))
-                echo(targetDir, true)
                 local content = LocalService:GetFileContent(targetDir)
 
                 if not content then

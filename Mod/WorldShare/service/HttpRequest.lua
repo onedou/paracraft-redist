@@ -259,7 +259,6 @@ end
 function HttpRequest:PostFields(url, headers, content, success, error)
     System.os.GetUrl({ url = url, headers = headers, postfields = content }, function(err, msg, data)
         LOG.std("HttpRequest", "debug", "Request", "Status Code: %s, Method: %s, URL: %s", err, "POST", url)
-        echo(msg, true)
 
         if err == 200 then
             if type(success) == 'function' then

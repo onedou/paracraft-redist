@@ -23,7 +23,6 @@
                         if SyncMain.GetCurrentRevision() < SyncMain.GetRemoteRevision() then
                             SyncMain:ShowStartSyncUseLocalPage()
                         elseif SyncMain.GetCurrentRevision() >= SyncMain.GetRemoteRevision() then
-                            Mod.WorldShare.MsgBox:Show(L"正在处理中，请勿操作...")
                             SyncMain:SyncToDataSource()
                         end
                     end)
@@ -35,7 +34,6 @@
                     if SyncMain.GetRemoteRevision() < SyncMain.GetCurrentRevision() then
                         SyncMain:ShowStartSyncUseDataSourcePage();
                     elseif SyncMain.GetRemoteRevision() >= SyncMain.GetCurrentRevision() then
-                        Mod.WorldShare.MsgBox:Show(L"正在处理中，请勿操作...")
                         SyncMain:SyncToLocal()
                     end
                 end

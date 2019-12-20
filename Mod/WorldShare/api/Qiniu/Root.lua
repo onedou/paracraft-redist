@@ -22,7 +22,6 @@ function QiniuRootApi:Upload(token, key, filename, content, success, error)
     local boundary = QiniuRootApi.boundary
     local boundaryLine = "--WebKitFormBoundary" .. boundary .. "\n"
 
-
     local postFieldsString = boundaryLine ..
                              "Content-Disposition: form-data; name=\"file\"; filename=\"" .. filename .. "\"\n" ..
                              "Content-Type: application/octet-stream\n" ..

@@ -93,7 +93,7 @@ end
 
 function ShareWorld:GetPreviewImagePath()
     local worldpath = ParaWorld.GetWorldDirectory() or ""
-    return format("%s/preview.jpg", worldpath)
+    return format("%spreview.jpg", worldpath)
 end
 
 function ShareWorld:SetPage()
