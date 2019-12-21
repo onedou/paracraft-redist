@@ -40,6 +40,10 @@ function SyncToLocal:Init(callback)
     self.finish = false
     self.callback = callback
 
+    -- //TODO: Move to UI file
+    -- 加载进度UI界面
+    Progress:Init(self)
+
     -- we build a world folder path if worldpath is not exit
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
         self.currentWorld.worldpath = Encoding.Utf8ToDefault(format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), self.currentWorld.foldername))
@@ -83,9 +87,6 @@ function SyncToLocal:Start()
             return false
         end
 
-        -- //TODO: Move to UI file
-        -- 加载进度UI界面
-        Progress:Init(self)
         Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
 
         self.localFiles = LocalService:LoadFiles(self.currentWorld.worldpath)
