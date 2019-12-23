@@ -72,6 +72,7 @@ function Compare:GetCompareResult()
     end
 
     if currentWorld.status == 1 then
+        CreateWorld:CheckRevision()
         local currentRevision = WorldRevision:new():init(currentWorld.worldpath):Checkout()
         Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
 
@@ -169,9 +170,8 @@ function Compare:CompareRevision()
             return false
         end
 
-        CreateWorld:CheckRevision(function()
-            self:CompareRevision(callback)
-        end)
+        CreateWorld:CheckRevision()
+        self:CompareRevision(callback)
     end
 end
 

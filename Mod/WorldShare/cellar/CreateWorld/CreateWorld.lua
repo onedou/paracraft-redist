@@ -40,14 +40,6 @@ function CreateWorld:CheckRevision(callback)
         Mod.WorldShare.MsgBox:Show(L"正在初始化世界...")
         self:CreateRevisionXml()
         Mod.WorldShare.MsgBox:Close()
-
-        if type(callback) == "function" then
-            callback()
-        end
-    else
-        if type(callback) == "function" then
-            callback()
-        end
     end
 end
 
