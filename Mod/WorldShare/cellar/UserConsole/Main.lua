@@ -428,7 +428,6 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
     end
 
     if tempModifyWorldname == "" then
-        echo(33333, true)
         return false
     end
 
