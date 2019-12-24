@@ -97,6 +97,7 @@ function GitKeepworkService:DownloadZIP(foldername, commitId, callback)
     KeepworkReposApi:Download(foldername, commitId, callback, callback)
 end
 
+local recursiveData = {}
 function GitKeepworkService:GetTree(foldername, commitId, callback)
     KeepworkReposApi:Tree(foldername, commitId, function(data, err)
         if type(data) ~= 'table' then
@@ -109,12 +110,41 @@ function GitKeepworkService:GetTree(foldername, commitId, callback)
             if item.isBlob then
                 _data[#_data + 1] = item
             end
+
+            if item.isTree and item.children then
+                recursiveData = {}
+                self:GetRecursive(item.children)
+
+                for RKey, RItem in ipairs(recursiveData) do
+                    if RItem.isBlob then
+                        _data[#_data + 1] = RItem
+                    end
+                end
+
+                recursiveData = {}
+            end
         end
 
         if type(callback) == 'function' then
             callback(_data, err)
         end
     end, callback)
+end
+
+function GitKeepworkService:GetRecursive(children)
+    if type(children) ~= 'table' then
+        return false
+    end
+
+    for key, item in ipairs(children) do
+        if item.isBlob then
+            recursiveData[#recursiveData + 1] = item
+        end
+
+        if item.isTree and item.children then
+            self:GetRecursive(item.children)
+        end
+    end
 end
 
 function GitKeepworkService:GetCommits(foldername, callback)

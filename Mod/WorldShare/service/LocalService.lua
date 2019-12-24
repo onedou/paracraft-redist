@@ -230,9 +230,11 @@ function LocalService:MoveZipToFolder(foldername, zipPath)
                 -- remove file path
                 folderArray[#folderArray] = nil
 
-                -- create folder
-                for _, folderItem in pairs(folderArray) do
-                    ParaIO.CreateDirectory(format('%s/%s', worldpath, folderItem))
+                if #folderArray >= 1 then
+                    -- create folder
+                    for _, folderItem in pairs(folderArray) do
+                        ParaIO.CreateDirectory(format('%s/%s/', worldpath, folderItem))
+                    end
                 end
 
                 -- create file

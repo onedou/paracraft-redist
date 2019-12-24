@@ -32,7 +32,7 @@ end
 -- params:
 --[[
     repoPath string 必须 仓库路径	
-    ref string 必须 commitId
+    ref string 必须 ref
 ]]
 -- return: object
 function KeepworkReposApi:Download(foldername, commitId, success, error)
@@ -63,7 +63,8 @@ end
 -- method: GET
 -- params:
 --[[
-    repoPath string 必须 仓库路径	
+    repoPath string 必须 仓库路径
+    recursive string 选填 是否递归获取文件
     ref string 必须 commitId
 ]]
 -- return: object
@@ -71,9 +72,9 @@ function KeepworkReposApi:Tree(foldername, commitId, success, error)
     local url = ''
 
     if type(foldername) ~= 'string' or type(commitId) ~= 'string' or commitId == 'master' then
-        url = format('/repos/%s/tree', self:GetRepoPath(foldername))
+        url = format('/repos/%s/tree?recursive=true', self:GetRepoPath(foldername))
     else
-        url = format('/repos/%s/tree?commitId=%s', self:GetRepoPath(foldername), commitId)
+        url = format('/repos/%s/tree?recursive=true&commitId=%s', self:GetRepoPath(foldername), commitId)
     end
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)

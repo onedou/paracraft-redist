@@ -64,10 +64,10 @@ function SyncToLocal:Init(callback)
 end
 
 function SyncToLocal:Start()
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-
     self.compareListIndex = 1
     self.compareListTotal = 0
+
+    Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
 
     local function Handle(data, err)
         if type(data) ~= 'table' then
@@ -77,7 +77,7 @@ function SyncToLocal:Start()
             return false
         end
 
-        if currentWorld.status == 2 and #data ~= 0 then
+        if self.currentWorld.status == 2 and #data ~= 0 then
             self:DownloadZIP()
             return false
         end
@@ -87,11 +87,8 @@ function SyncToLocal:Start()
             return false
         end
 
-        Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
-
         self.localFiles = LocalService:LoadFiles(self.currentWorld.worldpath)
         self.dataSourceFiles = data
-
 
         self:GetCompareList()
         self:HandleCompareList()
@@ -319,6 +316,13 @@ function SyncToLocal:DownloadZIP()
                 self.callback = nil
             end
 
+            self:SetFinish(true)
+            Progress:UpdateDataBar(
+                1,
+                1,
+                format(L"处理完成"),
+                self.finish
+            )
             Progress:SetFinish(true)
             Progress:Refresh()
 
