@@ -84,6 +84,8 @@ function SyncToLocal:Start()
 
         if #data == 0 then
             self.callback(false, 'NEWWORLD')
+            self:SetFinish(true)
+            Progress:ClosePage()
             return false
         end
 
