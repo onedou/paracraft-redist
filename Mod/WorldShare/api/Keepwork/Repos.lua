@@ -13,6 +13,7 @@ local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader
 
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 local GitEncoding = NPL.load('(gl)Mod/WorldShare/helper/GitEncoding.lua')
+local Encoding = commonlib.gettable("System.Encoding")
 
 local KeepworkReposApi = NPL.export()
 
@@ -153,7 +154,12 @@ function KeepworkReposApi:UpdateFile(foldername, filePath, content, success, err
 
     local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername), Mod.WorldShare.Utils.UrlEncode(filePath))
 
-    KeepworkBaseApi:Put(url, { encoding = 'binary', content = content }, nil, success, error)
+    local write = ParaIO.open("/temp/t/" .. filePath, "w")
+
+    write:write(content, #content)
+    write:close()
+
+    KeepworkBaseApi:Put(url, { encoding = 'base64', content = Encoding.base64(content) }, nil, success, error)
 end
 
 -- url: /repos/:repoPath/files/:filePath
@@ -172,7 +178,7 @@ function KeepworkReposApi:CreateFile(foldername, filePath, content, success, err
 
     local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername), Mod.WorldShare.Utils.UrlEncode(filePath))
 
-    KeepworkBaseApi:Post(url, { encoding = 'binary', content = content }, nil, success, error)
+    KeepworkBaseApi:Post(url, { encoding = 'base64', content = Encoding.base64(content) }, nil, success, error)
 end
 
 -- url: /repos/:repoPath/files/:filePath

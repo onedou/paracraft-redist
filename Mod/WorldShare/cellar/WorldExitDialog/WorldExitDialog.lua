@@ -37,7 +37,11 @@ function WorldExitDialog.ShowPage(callback)
         return false
     end
 
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+
     local function Handle()
+        Mod.WorldShare.MsgBox:Close()
+
         local params = Mod.WorldShare.Utils.ShowWindow({
             url = "Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.html",
             name = "WorldExitDialog",
