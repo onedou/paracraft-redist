@@ -204,7 +204,7 @@ function UserConsole:HandleWorldId(pid)
                                 function(bSucceed, localWorldPath)
                                     DownloadWorld.Close()
                                 end
-                            );
+                            )
                         end
                     }
                 );
@@ -299,6 +299,7 @@ function UserConsole:HandleWorldId(pid)
         local worldInfo = cacheWorldInfo.worldInfo
         local url = cacheWorldInfo.worldInfo.archiveUrl
         local world = RemoteWorld.LoadFromHref(url, "self")
+        -- world.worldpath = world.local
         local fileUrl = world:GetLocalFileName()   
         local localRevision = tonumber(LocalService:GetZipRevision(fileUrl)) or 0
 
@@ -314,6 +315,7 @@ function UserConsole:HandleWorldId(pid)
             if world then
                 local url = world:GetLocalFileName()
                 DownloadWorld.ShowPage(url)
+
                 local mytimer = commonlib.Timer:new(
                     {
                         callbackFunc = function(timer)
@@ -323,6 +325,7 @@ function UserConsole:HandleWorldId(pid)
                                 refreshMode or "auto",
                                 function(bSucceed, localWorldPath)
                                     DownloadWorld.Close()
+                                    return true
                                 end
                             )
                         end
