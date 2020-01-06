@@ -31,11 +31,11 @@ function Utils.ShowWindow(option, height, url, name, x, y, align, allowDrag, zor
     else
         local width = option
     
-        if (not x) then
+        if not x then
             x = width
         end
     
-        if (not y) then
+        if not y then
             y = height
         end
     

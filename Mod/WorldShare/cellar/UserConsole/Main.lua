@@ -13,6 +13,7 @@ local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalL
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
 local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
 local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
+local GameMainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin")
 
 local WorldShare = commonlib.gettable("Mod.WorldShare")
 local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
@@ -57,19 +58,11 @@ function UserConsole:ShowPage()
 
     local params = Mod.WorldShare.Utils.ShowWindow(850, 470, "Mod/WorldShare/cellar/UserConsole/UserConsole.html", "UserConsole")
 
-    params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/UserConsole')
-    end
-
     -- load last selected avatar if world is not loaded before.
     UserInfo:OnChangeAvatar()
 
-    local notFirstTimeShown = Mod.WorldShare.Store:Get('user/notFirstTimeShown')
-
-    if notFirstTimeShown then
-        Mod.WorldShare.Store:Set('user/ignoreAutoLogin', true)
-    else
-        Mod.WorldShare.Store:Set('user/notFirstTimeShown', true)
+    if not self.notFirstTimeShown then
+        self.notFirstTimeShown = true
 
         KeepworkServiceSession:GetUserTokenFromUrlProtocol()
 
@@ -79,22 +72,18 @@ function UserConsole:ShowPage()
             return false
         end
 
-        local ignoreAutoLogin = Mod.WorldShare.Store:Get('user/ignoreAutoLogin')
-
-        if not ignoreAutoLogin then
-            -- auto sign in here
-            UserInfo:CheckDoAutoSignin()
-        end
+        -- auto sign in here
+        UserInfo:CheckDoAutoSignin()
     end
 
     WorldList:RefreshCurrentServerList()
 end
 
-function UserConsole:ClosePage()
-    if UserConsole.IsMCVersion() then
-        InternetLoadWorld.ReturnLastStep()
-    end
+function UserConsole:EnterMainLogin()
+    GameMainLogin:next_step({IsLoginModeSelected = false})
+end
 
+function UserConsole:ClosePage()
     local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
 
     if UserConsolePage then

@@ -56,6 +56,7 @@ function SyncToLocal:Init(callback)
 
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
         self.callback(false, L"下载失败，原因：下载目录为空")
+        self.callback = nil
         return false
     end
 
@@ -72,6 +73,7 @@ function SyncToLocal:Start()
     local function Handle(data, err)
         if type(data) ~= 'table' then
             self.callback(false, L"获取列表失败")
+            self.callback = nil
             self:SetFinish(true)
             Progress:ClosePage()
             return false
@@ -84,6 +86,7 @@ function SyncToLocal:Start()
 
         if #data == 0 then
             self.callback(false, 'NEWWORLD')
+            self.callback = nil
             self:SetFinish(true)
             Progress:ClosePage()
             return false

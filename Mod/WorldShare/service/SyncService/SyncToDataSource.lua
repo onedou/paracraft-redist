@@ -70,8 +70,10 @@ function SyncToDataSource:Init(callback)
                 KeepworkServiceProject:CreateProject(
                     self.currentWorld.foldername,
                     function(data, err)
-                        if err == 400 and data and data.code == 14 then
+                        if err == 400 and data and data.code == 17 then
                             callback(false, L"您创建的帕拉卡(Paracraft)在线项目数量过多。请删除不需要的项目后再试。")
+                            self:SetFinish(true)
+                            Progress:ClosePage()
                             return false
                         end
 
@@ -129,6 +131,7 @@ function SyncToDataSource:Start()
     local function Handle(data, err)
         if type(data) ~= 'table' then
             self.callback(false, L"获取列表失败")
+            self.callback = nil
             self:SetFinish(true)
             Progress:ClosePage()
             return false
@@ -358,6 +361,7 @@ function SyncToDataSource:UploadOne(file, callback)
                 end
             else
                 self.callback(false, format(L"%s上传失败", currentLocalItem.filename))
+                self.callback = nil
                 self:SetBroke(true)
 
                 Progress:UpdateDataBar(
@@ -421,6 +425,7 @@ function SyncToDataSource:UpdateOne(file, callback)
                 end
             else
                 self.callback(false, L"更新失败")
+                self.callback = nil
                 self:SetBroke(true)
 
                 Progress:UpdateDataBar(
@@ -458,6 +463,7 @@ function SyncToDataSource:DeleteOne(file, callback)
                 end
             else
                 self.callback(false, L"删除失败")
+                self.callback = nil
                 self:SetBroke(true)
 
                 Progress:UpdateDataBar(
@@ -481,6 +487,7 @@ function SyncToDataSource:UpdateRecord(callback)
            not data.commitId or
            not data.message then
             self.callback(false, L"获取Commit列表失败")
+            self.callback = nil
             self:SetFinish(true)
             Progress:ClosePage()
             return false
@@ -493,6 +500,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
         if string.lower(lastCommitFile) ~= "revision.xml" then
             self.callback(false, L"上一次同步到数据源同步失败，请重新同步世界到数据源")
+            self.callback = nil
             return false
         end
 
@@ -547,6 +555,7 @@ function SyncToDataSource:UpdateRecord(callback)
                     function(data, err)
                         if (err ~= 200) then
                             self.callback(false, L"更新服务器列表失败")
+                            self.callback = nil
                             return false
                         end
         

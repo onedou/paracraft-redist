@@ -66,7 +66,9 @@ function ShareWorld:Init()
         return false
     end
 
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
     Compare:Init(function(result)
+        Mod.WorldShare.MsgBox:Close()
         if result then
             self:ShowPage()
         end

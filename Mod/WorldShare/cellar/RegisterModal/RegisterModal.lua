@@ -18,8 +18,9 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 
 local RegisterModal = NPL.export()
 
-function RegisterModal:ShowPage()
+function RegisterModal:ShowPage(callback)
     Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "RegisterModal")
+    self.callback = callback
 end
 
 function RegisterModal:ShowUserAgreementPage()
@@ -102,12 +103,19 @@ function RegisterModal:Register()
 
             RegisterModalPage:CloseWindow()
             Mod.WorldShare.MsgBox:Close()
+
+            if type(self.callback) == 'function' then
+                self.callback()
+                self.callback = nil
+            end
+
             WorldList:RefreshCurrentServerList()
             return true
         end
 
         GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message, state.code), 5000, "255 0 0")
         Mod.WorldShare.MsgBox:Close()
+        self.callback = nil
     end)
 end
 

@@ -220,7 +220,6 @@ function UserInfo:CheckDoAutoSignin(callback)
 end
 
 function UserInfo:OnClickLogin()
-    Mod.WorldShare.Store:Set("user/ignoreAutoLogin", true)
     Mod.WorldShare.Store:Set("user/loginText", L"请先登录")
     LoginModal:Init(function()
         WorldList:RefreshCurrentServerList()
