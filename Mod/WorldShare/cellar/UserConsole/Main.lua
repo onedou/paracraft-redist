@@ -397,8 +397,6 @@ function UserConsole:HandleWorldId(pid)
                 return false
             end
 
-            echo(worldInfo, true)
-
             if worldInfo and worldInfo.archiveUrl and #worldInfo.archiveUrl > 0 then
                 Mod.WorldShare.Store:Set('world/openKpProjectId', pid)
                 HandleLoadWorld(worldInfo.archiveUrl, worldInfo)
