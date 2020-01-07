@@ -218,9 +218,12 @@ function UserConsole:HandleWorldId(pid)
 
         if url:match("^https?://") then
             world = RemoteWorld.LoadFromHref(url, "self")
+            local token = Mod.WorldShare.Store:Get("user/token")
             if token then
                 world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
             end
+            world:SetProjectId(pid)
+
             local fileUrl = world:GetLocalFileName()
 
             if ParaIO.DoesFileExist(fileUrl) then
@@ -302,6 +305,7 @@ function UserConsole:HandleWorldId(pid)
         local worldInfo = cacheWorldInfo.worldInfo
         local url = cacheWorldInfo.worldInfo.archiveUrl
         local world = RemoteWorld.LoadFromHref(url, "self")
+        world:SetProjectId(pid)
         local fileUrl = world:GetLocalFileName()   
         local localRevision = tonumber(LocalService:GetZipRevision(fileUrl)) or 0
 
