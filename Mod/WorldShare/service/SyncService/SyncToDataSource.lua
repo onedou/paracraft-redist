@@ -614,6 +614,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
             StorageFilesApi:Token('preview.jpg', function(data, err)
                 if not data.token or not data.key then
+                    AfterHandlePreview()
                     return false
                 end
 
@@ -621,6 +622,7 @@ function SyncToDataSource:UpdateRecord(callback)
                 local content = LocalService:GetFileContent(targetDir)
 
                 if not content then
+                    AfterHandlePreview()
                     return false
                 end
 
@@ -629,7 +631,12 @@ function SyncToDataSource:UpdateRecord(callback)
                     data.key,
                     self.currentWorld.kpProjectId .. '-preview-' .. lastCommitSha .. '.jpg',
                     content,
-                    function()
+                    function( _, err)
+                        if err ~= 200 then
+                            AfterHandlePreview()
+                            return false
+                        end
+
                         StorageFilesApi:List(function(listData, err)
                             if listData and type(listData.data) ~= 'table' then
                                 AfterHandlePreview()
@@ -640,9 +647,12 @@ function SyncToDataSource:UpdateRecord(callback)
                                 if item.key == data.key then
                                     if item.downloadUrl then
                                         AfterHandlePreview(item.downloadUrl)
+                                        return true
                                     end
                                 end
                             end
+
+                            AfterHandlePreview()
                         end)
                     end
                 )
