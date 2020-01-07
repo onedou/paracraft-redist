@@ -218,12 +218,11 @@ function UserConsole:HandleWorldId(pid)
 
         if url:match("^https?://") then
             world = RemoteWorld.LoadFromHref(url, "self")
-            local token = Mod.WorldShare.Store:Get("user/token")
+            world:SetProjectId(pid)
             if token then
                 world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
             end
-            world:SetProjectId(pid)
-
+            
             local fileUrl = world:GetLocalFileName()
 
             if ParaIO.DoesFileExist(fileUrl) then
