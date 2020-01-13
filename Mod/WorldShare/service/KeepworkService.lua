@@ -8,8 +8,6 @@ use the lib:
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 ------------------------------------------------------------
 ]]
-local Encoding = commonlib.gettable("commonlib.Encoding")
-
 local GitService = NPL.load("./GitService.lua")
 local GitGatewayService = NPL.load("./GitGatewayService.lua")
 local LocalService = NPL.load("./LocalService.lua")
@@ -93,6 +91,12 @@ function KeepworkService:SetCurrentCommitId()
        not currentWorld.worldpath or
        not currentWorld.lastCommitId then
         return false
+    end
+
+    if currentWorld.worldpath == "" then
+        -- first download world
+        currentWorld.worldpath = Mod.WorldShare.Utils.GetWorldFolderFullPath() .. "/" .. commonlib.Encoding.Utf8ToDefault(currentWorld.foldername) .. "/"
+        Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
 
     Mod.WorldShare.worldData = nil
