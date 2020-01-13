@@ -50,8 +50,6 @@ function SyncToLocal:Init(callback)
         self.currentWorld.remotefile = "local://" .. self.currentWorld.worldpath
 
         InternetLoadWorld.cur_ds[InternetLoadWorld.selected_world_index] = self.currentWorld
-
-        Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
     end
 
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
@@ -61,7 +59,22 @@ function SyncToLocal:Init(callback)
     end
 
     self:SetFinish(false)
-    self:Start()
+
+    -- get latest commidId
+    KeepworkServiceProject:GetProject(
+        self.currentWorld.kpProjectId,
+        function(data, err)
+            if data and data.world and data.world.commitId then
+                self.currentWorld.lastCommitId = data.world.commitId
+            end
+
+            self:Start()
+        end,
+        function()
+            self.callback(false, L"获取porject信息失败")
+            self.callback = nil
+            return false
+        end)
 end
 
 function SyncToLocal:Start()
@@ -148,6 +161,7 @@ end
 
 function SyncToLocal:HandleCompareList()
     if self.compareListTotal < self.compareListIndex then
+        Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
         KeepworkService:SetCurrentCommitId()
 
         self.compareListIndex = 1
@@ -253,6 +267,10 @@ end
 function SyncToLocal:UpdateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
+
+    echo(currentRemoteItem.path, true)
+    echo(currentLocalItem.sha1, true)
+    echo(currentRemoteItem.id, true)
 
     if currentLocalItem.sha1 == currentRemoteItem.id then
         if type(callback) == "function" then
