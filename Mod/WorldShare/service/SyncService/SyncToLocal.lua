@@ -268,10 +268,6 @@ function SyncToLocal:UpdateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    echo(currentRemoteItem.path, true)
-    echo(currentLocalItem.sha1, true)
-    echo(currentRemoteItem.id, true)
-
     if currentLocalItem.sha1 == currentRemoteItem.id then
         if type(callback) == "function" then
             Mod.WorldShare.Utils.SetTimeOut(callback)
