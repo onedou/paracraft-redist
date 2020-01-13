@@ -77,17 +77,13 @@ end
 
 -- get keepwork project url
 function KeepworkService:GetShareUrl()
-    local env = self:GetEnv()
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if not currentWorld or not currentWorld.kpProjectId then
         return ''
     end
 
-    local baseUrl = Config.keepworkList[env]
-    local username = Mod.WorldShare.Store:Get("user/username")
-
-    return format("%s/pbl/project/%d/", baseUrl, currentWorld.kpProjectId)
+    return format("%s/pbl/project/%d/", self:GetKeepworkUrl(), currentWorld.kpProjectId)
 end
 
 function KeepworkService:SetCurrentCommitId()
