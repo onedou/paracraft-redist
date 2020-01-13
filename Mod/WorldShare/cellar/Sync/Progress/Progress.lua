@@ -18,7 +18,7 @@ function Progress:Init(instance)
     local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Sync/Progress/Progress.html", "Progress", 0, 0, "_fi", false)
 
     params._page.OnClose = function()
-        Mod.Store:Remove("page/Progress")
+        Mod.WorldShare.Store:Remove("page/Progress")
     end
 
     local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
