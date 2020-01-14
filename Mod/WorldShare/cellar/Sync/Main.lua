@@ -165,7 +165,7 @@ function SyncMain:SyncToLocal(callback)
             end)
         end,
         function()
-            self.callback(false, L"获取porject信息失败")
+            self.callback(false, L"获取项目信息失败")
             self.callback = nil
             return false
         end
