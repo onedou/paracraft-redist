@@ -60,21 +60,13 @@ function SyncToLocal:Init(callback)
 
     self:SetFinish(false)
 
-    -- get latest commidId
-    KeepworkServiceProject:GetProject(
-        self.currentWorld.kpProjectId,
-        function(data, err)
-            if data and data.world and data.world.commitId then
-                self.currentWorld.lastCommitId = data.world.commitId
-            end
+    if not self.currentWorld.lastCommitId then
+        self.callback(false, L"commitId不存在")
+        self.callback = nil
+        return false
+    end
 
-            self:Start()
-        end,
-        function()
-            self.callback(false, L"获取porject信息失败")
-            self.callback = nil
-            return false
-        end)
+    self:Start()
 end
 
 function SyncToLocal:Start()
@@ -248,6 +240,15 @@ function SyncToLocal:DownloadOne(file, callback)
         currentRemoteItem.path,
         self.currentWorld.lastCommitId,
         function(content, size)
+            if not content then
+                self.compareListIndex = 1
+                self:SetFinish(true)
+                self.callback(false, format(L'同步失败，原因： %s 下载失败', currentRemoteItem.path))
+                self.callback = nil
+                Progress:ClosePage()
+                return false
+            end
+
             Progress:UpdateDataBar(
                 self.compareListIndex,
                 self.compareListTotal,
@@ -277,6 +278,15 @@ function SyncToLocal:UpdateOne(file, callback)
     end
 
     local function Handle(content, size)
+        if not content then
+            self.compareListIndex = 1
+            self:SetFinish(true)
+            self.callback(false, format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path))
+            self.callback = nil
+            Progress:ClosePage()
+            return false
+        end
+
         Progress:UpdateDataBar(
             self.compareListIndex,
             self.compareListTotal,
