@@ -271,7 +271,6 @@ end
 
 function WorldList:SyncWorldsList(callback)
     local function HandleWorldList(data, err)
-        echo(data, true)
         if type(data) ~= "table" then
             _guihelper.MessageBox(L"获取服务器世界列表错误")
             self:SetRefreshing(false)
