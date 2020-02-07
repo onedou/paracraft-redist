@@ -151,10 +151,21 @@ function SyncToDataSource:Start()
 end
 
 function SyncToDataSource:IgnoreFiles()
-    local fileList = { "mod/" }
+    local filePath = format("%s/.paraignore", self.currentWorld.worldpath)
+    local file = ParaIO.open(filePath, "r")
+    local content = file:GetText(0, -1)
+    file:close()
 
+    local ignoreFiles = { "mod/" }
+
+    if #content > 0 then
+        for item in string.gmatch(content, "[^\r\n]+") do
+            ignoreFiles[#ignoreFiles + 1] = item
+        end
+    end
+    
     for LKey, LItem in ipairs(self.localFiles) do
-        for FKey, FItem in ipairs(fileList) do
+        for FKey, FItem in ipairs(ignoreFiles) do
             if string.find(LItem.filename, FItem) then
                 self.localFiles:remove(LKey)
             end
