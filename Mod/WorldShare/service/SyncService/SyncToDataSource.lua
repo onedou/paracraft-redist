@@ -139,7 +139,7 @@ function SyncToDataSource:Start()
 
         self.dataSourceFiles = data
         self.localFiles = commonlib.vector:new()
-        self.localFiles:AddAll(LocalService:LoadFiles(self.currentWorld.worldpath)) --再次获取本地文件，保证上传的内容为最新
+        self.localFiles:AddAll(LocalService:LoadFiles(self.currentWorld.worldpath)) --get latest files content
 
         self:IgnoreFiles()
         self:CheckReadmeFile()
@@ -163,7 +163,7 @@ function SyncToDataSource:IgnoreFiles()
             ignoreFiles[#ignoreFiles + 1] = item
         end
     end
-    
+
     for LKey, LItem in ipairs(self.localFiles) do
         for FKey, FItem in ipairs(ignoreFiles) do
             if string.find(LItem.filename, FItem) then

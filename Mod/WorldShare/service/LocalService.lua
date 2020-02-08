@@ -27,6 +27,10 @@ function LocalService:LoadFiles(worldDir)
         return {}
     end
 
+    if string.sub(worldDir, #worldDir, #worldDir) == "/" then
+        worldDir = string.sub(worldDir, 0, #worldDir - 1)
+    end
+
     self.output = {}
     self.worldDir = worldDir
 

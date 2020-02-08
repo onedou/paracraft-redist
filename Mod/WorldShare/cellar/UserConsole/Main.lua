@@ -223,7 +223,7 @@ function UserConsole:HandleWorldId(pid)
             if token then
                 world:SetHttpHeaders({Authorization = format("Bearer %s", token)})
             end
-            
+
             local fileUrl = world:GetLocalFileName()
 
             if ParaIO.DoesFileExist(fileUrl) then
@@ -278,7 +278,7 @@ function UserConsole:HandleWorldId(pid)
                         if data == 'local' then
                             LoadWorld(world, "never")
                         elseif data == 'remote' then
-                            LoadWorld(world, "auto")
+                            LoadWorld(world, "force")
                         end
                     end
                 end)
