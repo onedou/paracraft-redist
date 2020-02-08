@@ -260,6 +260,12 @@ end
 function SyncToLocal:DownloadOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
+    Progress:UpdateDataBar(
+        self.compareListIndex,
+        self.compareListTotal,
+        format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+    )
+
     GitService:GetContentWithRaw(
         self.currentWorld.foldername,
         currentRemoteItem.path,
@@ -273,12 +279,6 @@ function SyncToLocal:DownloadOne(file, callback)
                 Progress:ClosePage()
                 return false
             end
-
-            Progress:UpdateDataBar(
-                self.compareListIndex,
-                self.compareListTotal,
-                format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
-            )
 
             LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
 
@@ -302,6 +302,12 @@ function SyncToLocal:UpdateOne(file, callback)
         return false
     end
 
+    Progress:UpdateDataBar(
+        self.compareListIndex,
+        self.compareListTotal,
+        format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+    )
+
     local function Handle(content, size)
         if content == false then
             self.compareListIndex = 1
@@ -311,12 +317,6 @@ function SyncToLocal:UpdateOne(file, callback)
             Progress:ClosePage()
             return false
         end
-
-        Progress:UpdateDataBar(
-            self.compareListIndex,
-            self.compareListTotal,
-            format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
-        )
 
         LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
 
