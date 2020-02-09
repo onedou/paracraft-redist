@@ -345,6 +345,7 @@ function WorldList:SyncWorldsList(callback)
                 lastCommitId = DItem["commitId"], 
                 worldpath = worldpath,
                 status = status,
+                project = DItem["project"] or {},
                 kpProjectId = DItem["projectId"],
                 local_tagname = localTagname,
                 remote_tagname = remoteTagname,
