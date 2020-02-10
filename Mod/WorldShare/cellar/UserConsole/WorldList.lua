@@ -9,12 +9,12 @@ use the lib:
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 ------------------------------------------------------------
 
-status代码含义:
-1:仅本地
-2:仅网络
-3:本地网络一致
-4:网络更新
-5:本地更新
+status meaning:
+1:local only
+2:network only
+3:both
+4:network newest
+5:local newest
 
 ]]
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
@@ -39,6 +39,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
 
 local WorldList = NPL.export()
 
@@ -48,11 +49,11 @@ function WorldList.GetCurWorldInfo(infoType, worldIndex)
     local index = tonumber(worldIndex)
     local selectedWorld = WorldList:GetSelectWorld(index)
 
-    if (selectedWorld) then
-        if (infoType == "mode") then
+    if selectedWorld then
+        if infoType == "mode" then
             local mode = selectedWorld["world_mode"]
 
-            if (mode == "edit") then
+            if mode == "edit" then
                 return L"创作"
             else
                 return L"参观"
@@ -605,12 +606,24 @@ function WorldList:EnterWorld(index)
             end
     
             Compare:Init(function(result)
-                if result == Compare.REMOTEBIGGER then
-                    SyncMain:ShowStartSyncPage(true)
-                else
-                    InternetLoadWorld.EnterWorld()	
-                    UserConsole:ClosePage()	
-                end	
+                echo(currentWorld, true)
+                KeepworkWorldLocksApi:UpdateWorldLockRecord(
+                    kpProjectId,
+                    "exclusive",
+                    function(data, err)
+                        echo(data, true)
+                        echo(err, true)
+                    end,
+                    function(data, err)
+                        echo(data, true)
+                        echo(err, true)
+                    end)
+                -- if result == Compare.REMOTEBIGGER then
+                --     SyncMain:ShowStartSyncPage(true)
+                -- else
+                --     InternetLoadWorld.EnterWorld()	
+                --     UserConsole:ClosePage()	
+                -- end	
             end)
         end
 

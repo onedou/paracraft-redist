@@ -5,13 +5,13 @@ Date:  2020.2.10
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
+local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
 ------------------------------------------------------------
 ]]
 
 local KeepworkBaseApi = NPL.load('./BaseApi.lua')
 
-local KeepworkWorldLockApi = NPL.export()
+local KeepworkWorldLocksApi = NPL.export()
 
 -- url: /worldlock
 -- method: POST
@@ -24,13 +24,13 @@ local KeepworkWorldLockApi = NPL.export()
   revision integer not necessary revision number when server opened
 ]]
 -- return: object
-function KeepworkWorldLockApi:UpdateWorldLockRecord(pid, mode, success, error)
+function KeepworkWorldLocksApi:UpdateWorldLockRecord(pid, mode, success, error)
   local parmas = {
     pid = pid,
     mode = mode
   }
 
-  KeepworkBaseApi:Post("/worldlock", params, nil, success, error)
+  KeepworkBaseApi:Post("/worldlocks", params, nil, success, error)
 end
 
 -- url: /worldlock
@@ -40,6 +40,6 @@ end
   pid	integer	necessary
 ]]
 -- return: object
-function KeepworkWorldLockApi:RemoveWorldLockRecord(pid, success, error)
-  KeepworkBaseApi:Delete("/worldlock", { pid = pid }, nil, success, error)
+function KeepworkWorldLocksApi:RemoveWorldLockRecord(pid, success, error)
+  KeepworkBaseApi:Delete("/worldlocks", { pid = pid }, nil, success, error)
 end
