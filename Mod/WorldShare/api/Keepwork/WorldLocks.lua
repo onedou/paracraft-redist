@@ -24,10 +24,11 @@ local KeepworkWorldLocksApi = NPL.export()
   revision integer not necessary revision number when server opened
 ]]
 -- return: object
-function KeepworkWorldLocksApi:UpdateWorldLockRecord(pid, mode, success, error)
-  local parmas = {
+function KeepworkWorldLocksApi:UpdateWorldLockRecord(pid, mode, revision, success, error)
+  local params = {
     pid = pid,
-    mode = mode
+    mode = mode,
+    revision = revision,
   }
 
   KeepworkBaseApi:Post("/worldlocks", params, nil, success, error)

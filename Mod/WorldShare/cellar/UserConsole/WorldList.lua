@@ -39,7 +39,6 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
-local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
 
 local WorldList = NPL.export()
 
@@ -628,21 +627,20 @@ function WorldList:EnterWorld(index)
                         )
                     end
 
+                    KeepworkServiceWorld:UpdateLock(
+                        currentWorld.kpProjectId,
+                        "exclusive",
+                        currentWorld.revision,
+                        function(bSucceed)
+                            if bSucceed then
+                                InternetLoadWorld.EnterWorld()	
+                                UserConsole:ClosePage()	
+                            end
+                        end
+                    )
+
                     return true
                 end
-
-                -- KeepworkWorldLocksApi:UpdateWorldLockRecord(
-                --     kpProjectId,
-                --     "exclusive",
-                --     function(data, err)
-                --         echo(data, true)
-                --         echo(err, true)
-                --     end,
-                --     function(data, err)
-                --         echo(data, true)
-                --         echo(err, true)
-                --     end
-                -- )
 
                 if result == Compare.REMOTEBIGGER then
                     SyncMain:ShowStartSyncPage(true)

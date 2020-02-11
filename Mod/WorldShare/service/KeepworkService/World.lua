@@ -12,6 +12,7 @@ local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkServic
 local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
 local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
+local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
 
 local KeepworkServiceWorld = NPL.export()
 
@@ -79,4 +80,23 @@ function KeepworkServiceWorld:GetWorldByProjectId(kpProjectId, callback)
 
         callback(data.world, err)
     end)
+end
+
+-- update project lock info
+function KeepworkServiceWorld:UpdateLock(pid, mode, revision, callback)
+    KeepworkWorldLocksApi:UpdateWorldLockRecord(
+        pid,
+        mode,
+        revision,
+        function(data, err)
+            if type(callback) == 'function' then
+                callback(true)
+            end
+        end,
+        function()
+            if type(callback) == 'function' then
+                callback(false)
+            end
+        end
+    )
 end
