@@ -605,25 +605,51 @@ function WorldList:EnterWorld(index)
                 return true
             end
     
+            Mod.WorldShare.MsgBox:Show(L"请稍后...")
             Compare:Init(function(result)
-                echo(currentWorld, true)
-                KeepworkWorldLocksApi:UpdateWorldLockRecord(
-                    kpProjectId,
-                    "exclusive",
-                    function(data, err)
-                        echo(data, true)
-                        echo(err, true)
-                    end,
-                    function(data, err)
-                        echo(data, true)
-                        echo(err, true)
-                    end)
-                -- if result == Compare.REMOTEBIGGER then
-                --     SyncMain:ShowStartSyncPage(true)
-                -- else
-                --     InternetLoadWorld.EnterWorld()	
-                --     UserConsole:ClosePage()	
-                -- end	
+                Mod.WorldShare.MsgBox:Close()
+
+                if currentWorld.project and currentWorld.project.memberCount > 0 then
+                    if result ~= Compare.EQUAL then
+                        Mod.WorldShare.MsgBox:Dialog(
+                            L"本地版本与远程版本不一致，是否同步后再进入？",
+                            {
+                                Title = L"多人世界",
+                                Yes = L"同步",
+                                No = L"只读模式打开"
+                            },
+                            function(res)
+                                echo(res, true)
+                                if res and res == _guihelper.DialogResult.OK then
+                                    -- pressed OK
+                                end
+                            end,
+                            _guihelper.MessageBoxButtons.YesNo
+                        )
+                    end
+
+                    return true
+                end
+
+                -- KeepworkWorldLocksApi:UpdateWorldLockRecord(
+                --     kpProjectId,
+                --     "exclusive",
+                --     function(data, err)
+                --         echo(data, true)
+                --         echo(err, true)
+                --     end,
+                --     function(data, err)
+                --         echo(data, true)
+                --         echo(err, true)
+                --     end
+                -- )
+
+                if result == Compare.REMOTEBIGGER then
+                    SyncMain:ShowStartSyncPage(true)
+                else
+                    InternetLoadWorld.EnterWorld()	
+                    UserConsole:ClosePage()	
+                end
             end)
         end
 
