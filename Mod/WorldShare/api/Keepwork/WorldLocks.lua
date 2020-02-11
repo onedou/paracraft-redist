@@ -19,9 +19,9 @@ local KeepworkWorldLocksApi = NPL.export()
 --[[
   pid	integer	necessary project id	
   mode string necessary edit mode(share,exclusive)
+  revision integer necessary revision number when server opened
   server string not necessary server address
   password string not necessary server password
-  revision integer not necessary revision number when server opened
 ]]
 -- return: object
 function KeepworkWorldLocksApi:UpdateWorldLockRecord(pid, mode, revision, success, error)
