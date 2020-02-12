@@ -106,7 +106,14 @@ function SyncToLocal:Start()
         self:HandleCompareList()
     end
 
-    GitService:GetTree(self.currentWorld.foldername, self.currentWorld.lastCommitId, Handle)
+    echo(self.currentWorld, true)
+
+    GitService:GetTree(
+        self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
+        self.currentWorld.lastCommitId,
+        Handle
+    )
 end
 
 function SyncToLocal:IgnoreFiles()
@@ -361,6 +368,7 @@ function SyncToLocal:DownloadZIP()
 
     GitService:DownloadZIP(
         self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
         self.currentWorld.lastCommitId,
         function(bSuccess, downloadPath)
             LocalService:MoveZipToFolder(self.currentWorld.foldername, downloadPath)

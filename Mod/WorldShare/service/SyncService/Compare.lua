@@ -153,7 +153,7 @@ function Compare:CompareRevision()
             currentRevision = tonumber(currentRevision) or 0
             remoteRevision = tonumber(data) or 0
 
-            self:UpdateSelectWorldInRemoteWorldsList(currentWorld.foldername, remoteRevision)
+            self:UpdateSelectWorldInCurrentWorldList(currentWorld.foldername, remoteRevision)
 
             Mod.WorldShare.Store:Set("world/currentRevision", currentRevision)
             Mod.WorldShare.Store:Set("world/remoteRevision", remoteRevision)
@@ -178,20 +178,20 @@ function Compare:CompareRevision()
     end
 end
 
-function Compare:UpdateSelectWorldInRemoteWorldsList(worldName, remoteRevision)
-    local remoteWorldsList = Mod.WorldShare.Store:Get('world/remoteWorldsList')
+function Compare:UpdateSelectWorldInCurrentWorldList(worldName, remoteRevision)
+    local currentWorldList = Mod.WorldShare.Store:Get('world/compareWorldList')
 
-    if not remoteWorldsList or not worldName then
+    if not currentWorldList or not worldName then
         return false
     end
 
-    for key, item in ipairs(remoteWorldsList) do
+    for key, item in ipairs(currentWorldList) do
         if item.worldName == worldName then
             item.revision = remoteRevision
         end
     end
 
-    Mod.WorldShare.Store:Set('world/remoteWorldsList', remoteWorldsList)
+    Mod.WorldShare.Store:Set('world/compareWorldList', currentWorldList)
 end
 
 function Compare:HasRevision()

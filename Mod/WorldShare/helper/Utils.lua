@@ -227,3 +227,49 @@ function Utils:GetFolderName()
 
     return foldername
 end
+
+function Utils:UnifiedTimestampFormat(data)
+    if not data then
+        return 0
+    end
+
+    local years = 0
+    local months = 0
+    local days = 0
+    local hours = 0
+    local minutes = 0
+
+    if string.find(data, "T") then
+        local date = string.match(data or "", "^%d+-%d+-%d+")
+        local time = string.match(data or "", "%d+:%d+")
+
+        years = string.match(date or "", "^(%d+)-")
+        months = string.match(date or "", "-(%d+)-")
+        days = string.match(date or "", "-(%d+)$")
+
+        hours = string.match(time or "", "^(%d+):")
+        minutes = string.match(time or "", ":(%d+)")
+
+        local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes }
+
+        if timestamp then
+            return timestamp + 8 * 3600
+        else
+            return 0
+        end
+    else
+        local date = string.match(data or "", "^%d+-%d+-%d+")
+        local time = string.match(data or "", "%d+-%d+$")
+
+        years = string.match(date or "", "^(%d+)-")
+        months = string.match(date or "", "-(%d+)-")
+        days = string.match(date or "", "-(%d+)$")
+
+        hours = string.match(time or "", "^(%d+)-")
+        minutes = string.match(time or "", "-(%d+)$")
+
+        local timestamp = os.time{ year = years, month = months, day = days, hour = hours, min = minutes }
+
+        return timestamp or 0
+    end
+end

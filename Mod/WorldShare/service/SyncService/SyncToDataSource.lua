@@ -147,7 +147,12 @@ function SyncToDataSource:Start()
         self:HandleCompareList()
     end
 
-    GitService:GetTree(self.currentWorld.foldername, self.currentWorld.lastCommitId, Handle)
+    GitService:GetTree(
+        self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
+        self.currentWorld.lastCommitId,
+        Handle
+    )
 end
 
 function SyncToDataSource:IgnoreFiles()

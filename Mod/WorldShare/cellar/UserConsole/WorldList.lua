@@ -18,8 +18,6 @@ status meaning:
 
 ]]
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
-local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
-local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -30,7 +28,6 @@ local UserInfo = NPL.load("./UserInfo.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local DeleteWorld = NPL.load("(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua")
 local VersionChange = NPL.load("(gl)Mod/WorldShare/cellar/VersionChange/VersionChange.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -39,6 +36,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/World.lua")
 
 local WorldList = NPL.export()
 
@@ -83,74 +81,6 @@ function WorldList:GetWorldIndexByFoldername(foldername, is_zip)
     end
 end
 
-function WorldList:UpdateWorldListFromInternetLoadWorld(callbackFunc)
-    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList") or {}
-
-    self:GetInternetWorldList(
-        function(InternetWorldList)
-            for CKey, CItem in ipairs(compareWorldList) do
-                for IKey, IItem in ipairs(InternetWorldList) do
-                    if IItem.foldername == CItem.foldername then
-                        if IItem.is_zip == CItem.is_zip then 
-                            for key, value in pairs(IItem) do
-                                if(key ~= "revision") then
-                                    CItem[key] = value
-                                end
-                            end
-                            break
-                        end
-                    end
-                end
-            end
-
-            InternetLoadWorld.cur_ds = compareWorldList
-            Store:Set("world/compareWorldList", compareWorldList)
-
-            local UserConsolePage = Store:Get('page/UserConsole')
-
-            if UserConsolePage then
-                UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", compareWorldList)
-                WorldList:OnSwitchWorld(1)
-            end
-
-            if(callbackFunc) then
-                callbackFunc();
-            end
-        end
-    )
-end
-
-function WorldList:GetInternetWorldList(callback)
-    local ServerPage = InternetLoadWorld.GetCurrentServerPage()
-
-    RemoteServerList:new():Init(
-        "local",
-        "localworld",
-        function(bSucceed, serverlist)
-            if (not serverlist:IsValid()) then
-                BroadcastHelper.PushLabel(
-                    {
-                        id = "userworlddownload",
-                        label = L"无法下载服务器列表, 请检查网络连接",
-                        max_duration = 10000,
-                        color = "255 0 0",
-                        scaling = 1.1,
-                        bold = true,
-                        shadow = true
-                    }
-                )
-            end
-
-            ServerPage.ds = serverlist.worlds or {}
-            InternetLoadWorld.OnChangeServerPage()
-
-            if type(callback) == 'function' then
-                callback(ServerPage.ds)
-            end
-        end
-    )
-end
-
 function WorldList:RefreshCurrentServerList(callback, isForce)
     local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
 
@@ -164,104 +94,38 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
 
     self:SetRefreshing(true)
 
+    local localWorlds = LocalServiceWorld:GetWorldList()
+
     if not KeepworkService:IsSignedIn() then
-        self:GetLocalWorldList(
-            function()
-                self:UpdateRevision(
-                    function()
-                        local localWorlds = Mod.WorldShare.Store:Get("world/localWorlds")
-                        Mod.WorldShare.Store:Set("world/compareWorldList", localWorlds)
+        local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
+        self.SortWorldList(currentWorldList)
+        Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
 
-                        self:SetRefreshing(false)
-                        self:UpdateWorldListFromInternetLoadWorld(callback)
-                    end
-                )
+        self:SetRefreshing(false)
+
+        UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
+        WorldList:OnSwitchWorld(1)
+    else
+        KeepworkServiceWorld:MergeRemoteWorldList(
+            localWorlds,
+            function(currentWorldList)
+                local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+                self.SortWorldList(currentWorldList)
+                Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+
+                self:SetRefreshing(false)
+
+                UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
+                WorldList:OnSwitchWorld(1)
             end
         )
-    end
-
-    if KeepworkService:IsSignedIn() then
-        self:GetLocalWorldList(
-            function()
-                self:UpdateRevision(
-                    function()
-                        self:SyncWorldsList(
-                            function()
-                                self:SetRefreshing(false)
-                                self:UpdateWorldListFromInternetLoadWorld(callback)
-                            end
-                        )
-                    end
-                )
-            end
-        )
-    end
-end
-
-function WorldList:GetLocalWorldList(callback)
-    local localWorldList = LocalLoadWorld.BuildLocalWorldList(true)
-    Mod.WorldShare.Store:Set("world/localWorlds", localWorldList)
-
-    if type(callback) == 'function' then
-        callback()
-    end
-end
-
-function WorldList:UpdateRevision(callback)
-    local localWorlds = Mod.WorldShare.Store:Get("world/localWorlds")
-
-    if not localWorlds then
-        return false
-    end
-
-    for key, value in ipairs(localWorlds) do
-        if value.IsFolder then
-            value.worldpath = value.worldpath .. '/'
-
-            local worldRevision = WorldRevision:new():init(value.worldpath)
-            value.revision = worldRevision:GetDiskRevision()
-
-            local tag = SaveWorldHandler:new():Init(value.worldpath):LoadWorldInfo()
-
-            if type(tag) ~= 'table' then
-                return false
-            end
-
-            if tag.kpProjectId then
-                value.kpProjectId = tag.kpProjectId
-            end
-
-            if tag.size then
-                value.size = tag.size
-            else
-                value.size = 0
-            end
-
-            value.local_tagname = tag.name
-            value.is_zip = false
-        else
-            value.foldername = value.Title
-            value.text = value.Title
-            value.is_zip = true
-            value.remotefile = format("local://%s", value.worldpath)
-        end
-
-        value.modifyTime = self:UnifiedTimestampFormat(value.writedate)
-    end
-
-    Mod.WorldShare.Store:Set("world/localWorlds", localWorlds)
-    
-    UserConsole:Refresh()
-
-    if type(callback) == 'function' then
-        callback()
     end
 end
 
 function WorldList:SelectVersion(index)
     local selectedWorld = self:GetSelectWorld(index)
 
-    if(selectedWorld and selectedWorld.status == 1) then
+    if selectedWorld and selectedWorld.status == 1 then
         _guihelper.MessageBox(L"此世界仅在本地，无需切换版本")
         return false
     end
@@ -269,196 +133,30 @@ function WorldList:SelectVersion(index)
     VersionChange:Init(selectedWorld and selectedWorld.foldername)
 end
 
-function WorldList:SyncWorldsList(callback)
-    local function HandleWorldList(data, err)
-        if type(data) ~= "table" then
-            _guihelper.MessageBox(L"获取服务器世界列表错误")
-            self:SetRefreshing(false)
-            UserConsole:Refresh()
-            return false
-        end
+function WorldList:SortWorldList(currentWorldList)
+    if type(currentWorldList) == 'table' and #currentWorldList > 0 then
+        local tmp = 0
 
-        local localWorlds = Mod.WorldShare.Store:Get("world/localWorlds") or {}
-        local remoteWorldsList = data
-        local compareWorldList = commonlib.vector:new()
-        local currentWorld
+        for i = 1, #currentWorldList - 1 do
+            for j = 1, #currentWorldList - i do
+                local curItemModifyTime = 0
+                local nextItemModifyTime = 0
 
-        -- 处理 本地网络同时存在/本地不存在/网络存在 的世界
-        for DKey, DItem in ipairs(remoteWorldsList) do
-            local isExist = false
-            local worldpath = ""
-            local localTagname = ""
-            local remoteTagname = ""
-            local revision = 0
-            local commitId = ""
-            local status
-
-            for LKey, LItem in ipairs(localWorlds) do
-                if DItem["worldName"] == LItem["foldername"] and not LItem.is_zip then
-                    if tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0) then
-                        status = 3 --本地网络一致
-                        revision = LItem['revision']
-                    elseif tonumber(LItem["revision"] or 0) > tonumber(DItem["revision"] or 0) then
-                        status = 4 --网络更新
-                        revision = DItem['revision'] -- use remote revision beacause remote is newest
-                    elseif tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0) then
-                        status = 5 --本地更新
-                        revision = LItem['revision'] or 0
-                    end
-
-                    isExist = true
-                    worldpath = LItem["worldpath"]
-
-                    localTagname = LItem["local_tagname"] or LItem["foldername"]
-                    remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
-
-                    if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
-                        local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
-
-                        tag.kpProjectId = DItem['projectId']
-                        LocalService:SetTag(worldpath, tag)
-                    end
-
-                    break
+                if currentWorldList[j] and currentWorldList[j].modifyTime then
+                    curItemModifyTime = currentWorldList[j].modifyTime
                 end
-            end
 
-            local text = DItem["worldName"] or ""
-
-            if not isExist then
-                --仅网络
-                status = 2
-                revision = DItem['revision']
-                remoteTagname = DItem['extra'] and DItem['extra']['worldTagName'] or text
-
-                if remoteTagname ~= "" and text ~= remoteTagname then
-                    text = remoteTagname .. '(' .. text .. ')'
+                if currentWorldList[j + 1] and currentWorldList[j + 1].modifyTime then
+                    nextItemModifyTime = currentWorldList[j + 1].modifyTime
                 end
-            end
 
-            currentWorld = {
-                text = text,
-                foldername = DItem["worldName"],
-                revision = revision,
-                size = DItem["fileSize"],
-                modifyTime = self:UnifiedTimestampFormat(DItem["updatedAt"]),
-                lastCommitId = DItem["commitId"], 
-                worldpath = worldpath,
-                status = status,
-                project = DItem["project"] or {},
-                kpProjectId = DItem["projectId"],
-                local_tagname = localTagname,
-                remote_tagname = remoteTagname,
-                is_zip = false,
-            }
-
-            compareWorldList:push_back(currentWorld)
-        end
-
-        -- 处理 本地存在/网络不存在 的世界
-        for LKey, LItem in ipairs(localWorlds) do
-            local isExist = false
-
-            for DKey, DItem in ipairs(remoteWorldsList) do
-                if LItem["foldername"] == DItem["worldName"] and not LItem.is_zip then
-                    isExist = true
-                    break
-                end
-            end
-
-            if not isExist then
-                currentWorld = LItem
-                currentWorld.modifyTime = self:UnifiedTimestampFormat(currentWorld.writedate)
-                currentWorld.text = currentWorld.foldername
-                currentWorld.local_tagname = LItem['local_tagname']
-                currentWorld.status = 1 --仅本地
-                currentWorld.is_zip = LItem['is_zip'] or false
-                compareWorldList:push_back(currentWorld)
-            end
-        end
-
-        -- 排序
-        if (#compareWorldList > 0) then
-            local tmp = 0
-
-            for i = 1, #compareWorldList - 1 do
-                for j = 1, #compareWorldList - i do
-                    local curItemModifyTime = 0
-                    local nextItemModifyTime = 0
-
-                    if (compareWorldList[j] and compareWorldList[j].modifyTime) then
-                        curItemModifyTime = compareWorldList[j].modifyTime
-                    end
-
-                    if (compareWorldList[j + 1] and compareWorldList[j + 1].modifyTime) then
-                        nextItemModifyTime = compareWorldList[j + 1].modifyTime
-                    end
-
-                    if curItemModifyTime < nextItemModifyTime then
-                        tmp = compareWorldList[j]
-                        compareWorldList[j] = compareWorldList[j + 1]
-                        compareWorldList[j + 1] = tmp
-                    end
+                if curItemModifyTime < nextItemModifyTime then
+                    tmp = currentWorldList[j]
+                    currentWorldList[j] = currentWorldList[j + 1]
+                    currentWorldList[j + 1] = tmp
                 end
             end
         end
-
-        Mod.WorldShare.Store:Set("world/remoteWorldsList", remoteWorldsList)
-        Mod.WorldShare.Store:Set("world/compareWorldList", compareWorldList)
-
-        UserConsole:Refresh()
-
-        if (type(callback) == "function") then
-            callback()
-        end
-    end
-
-    KeepworkServiceWorld:GetWorldsList(HandleWorldList)
-end
-
-function WorldList:UnifiedTimestampFormat(data)
-    if (not data) then
-        return 0
-    end
-
-    local years = 0
-    local months = 0
-    local days = 0
-    local hours = 0
-    local minutes = 0
-
-    if string.find(data, "T") then
-        local date = string.match(data or "", "^%d+-%d+-%d+")
-        local time = string.match(data or "", "%d+:%d+")
-
-        years = string.match(date or "", "^(%d+)-")
-        months = string.match(date or "", "-(%d+)-")
-        days = string.match(date or "", "-(%d+)$")
-
-        hours = string.match(time or "", "^(%d+):")
-        minutes = string.match(time or "", ":(%d+)")
-
-        local timestamp = os.time{year = years, month = months, day = days, hour = hours, min = minutes}
-
-        if timestamp then
-            return timestamp + 8 * 3600
-        else
-            return 0
-        end
-    else
-        local date = string.match(data or "", "^%d+-%d+-%d+")
-        local time = string.match(data or "", "%d+-%d+$")
-
-        years = string.match(date or "", "^(%d+)-")
-        months = string.match(date or "", "-(%d+)-")
-        days = string.match(date or "", "-(%d+)$")
-
-        hours = string.match(time or "", "^(%d+)-")
-        minutes = string.match(time or "", "-(%d+)$")
-
-        local timestamp = os.time{year = years, month = months, day = days, hour = hours, min = minutes}
-
-        return timestamp or 0
     end
 end
 
@@ -539,7 +237,7 @@ function WorldList:UpdateWorldInfo(worldIndex)
 end
 
 function WorldList.GetLatestSize(index)
-    local compareWorldList = Store:Get("world/compareWorldList")
+    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
 
     if (not compareWorldList or type(index) ~= 'number' or  not compareWorldList[index]) then
         return 0
@@ -690,9 +388,9 @@ function WorldList.FormatDatetime(datetime)
 end
 
 function WorldList:SetRefreshing(status)
-    UserConsolePage = Store:Get('page/UserConsole')
+    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
 
-    if (not UserConsolePage) then
+    if not UserConsolePage then
         return false
     end
 
@@ -701,7 +399,7 @@ function WorldList:SetRefreshing(status)
 end
 
 function WorldList:IsRefreshing()
-    UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
+    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
 
     if UserConsolePage and UserConsolePage.refreshing then
         return true
