@@ -42,6 +42,48 @@ local WorldList = NPL.export()
 
 WorldList.zipDownloadFinished = true
 
+function WorldList:RefreshCurrentServerList(callback, isForce)
+    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
+
+    if not UserConsolePage and not isForce then
+        if type(callback) == 'function' then
+            callback()
+        end
+
+        return false
+    end
+
+    self:SetRefreshing(true)
+
+    local localWorlds = LocalServiceWorld:GetWorldList()
+
+    if not KeepworkService:IsSignedIn() then
+        local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
+
+        self.SortWorldList(currentWorldList)
+        Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+
+        self:SetRefreshing(false)
+
+        UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
+        WorldList:OnSwitchWorld(1)
+    else
+        KeepworkServiceWorld:MergeRemoteWorldList(
+            localWorlds,
+            function(currentWorldList)
+                local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+                self.SortWorldList(currentWorldList)
+                Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+
+                self:SetRefreshing(false)
+
+                UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
+                WorldList:OnSwitchWorld(1)
+            end
+        )
+    end
+end
+
 function WorldList.GetCurWorldInfo(infoType, worldIndex)
     local index = tonumber(worldIndex)
     local selectedWorld = WorldList:GetSelectWorld(index)
@@ -78,47 +120,6 @@ function WorldList:GetWorldIndexByFoldername(foldername, is_zip)
         if foldername == item.foldername and is_zip == item.is_zip then
             return index
         end
-    end
-end
-
-function WorldList:RefreshCurrentServerList(callback, isForce)
-    local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
-
-    if not UserConsolePage and not isForce then
-        if type(callback) == 'function' then
-            callback()
-        end
-
-        return false
-    end
-
-    self:SetRefreshing(true)
-
-    local localWorlds = LocalServiceWorld:GetWorldList()
-
-    if not KeepworkService:IsSignedIn() then
-        local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
-        self.SortWorldList(currentWorldList)
-        Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
-
-        self:SetRefreshing(false)
-
-        UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
-        WorldList:OnSwitchWorld(1)
-    else
-        KeepworkServiceWorld:MergeRemoteWorldList(
-            localWorlds,
-            function(currentWorldList)
-                local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
-                self.SortWorldList(currentWorldList)
-                Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
-
-                self:SetRefreshing(false)
-
-                UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
-                WorldList:OnSwitchWorld(1)
-            end
-        )
     end
 end
 

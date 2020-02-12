@@ -91,7 +91,6 @@ function KeepworkServiceWorld:UpdateLock(pid, mode, revision, callback)
         mode,
         revision,
         function(data, err)
-            echo(data, true)
             if type(callback) == 'function' then
                 callback(true)
             end
@@ -194,6 +193,15 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 if remoteTagname ~= "" and text ~= remoteTagname then
                     text = remoteTagname .. '(' .. text .. ')'
                 end
+            end
+
+            -- shared world text
+            local userId = Mod.WorldShare.Store:Get('user/userId')
+
+            if DItem["user"] and
+               DItem["user"]["id"] and
+               tonumber(DItem["user"]["id"]) ~= tonumber(userId) then
+                text = DItem['user']['username'] .. '/' .. text
             end
 
             currentWorld = {
