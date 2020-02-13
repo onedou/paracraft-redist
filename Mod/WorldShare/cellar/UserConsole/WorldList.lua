@@ -222,7 +222,6 @@ function WorldList:EnterWorld(index)
 
         if not KeepworkService:IsSignedIn() then
             self:OnSwitchWorld(index)
-
             InternetLoadWorld.EnterWorld()
             return false
         end

@@ -99,12 +99,14 @@ function LocalServiceWorld:GetSharedWorldList()
                                 end
 
                                 local worldpath = folderPath .. "/" .. item.filename
+                                local remotefile = "local://" .. worldpath
                                 local username = Mod.WorldShare:GetWorldData("username", worldpath .. "/") or ""
 
                                 -- only add world with the same nid
                                 AddWorldToDS(
                                     {
-                                        worldpath = worldpath, 
+                                        worldpath = worldpath,
+                                        remotefile = remotefile,
                                         foldername = filenameUTF8,
                                         Title = display_name,
                                         writedate = item.writedate, filesize=item.filesize,
