@@ -97,11 +97,14 @@ function LocalServiceWorld:GetSharedWorldList()
                                     -- show dir name if differs from world name
                                     display_name = format("%s(%s)", node.attr.name or "", filenameUTF8)
                                 end
-        
+
+                                local worldpath = folderPath .. "/" .. item.filename
+                                local username = Mod.WorldShare:GetWorldData("username", worldpath .. "/") or ""
+
                                 -- only add world with the same nid
                                 AddWorldToDS(
                                     {
-                                        worldpath = folderPath .. "/" .. item.filename, 
+                                        worldpath = worldpath, 
                                         foldername = filenameUTF8,
                                         Title = display_name,
                                         writedate = item.writedate, filesize=item.filesize,
@@ -118,7 +121,8 @@ function LocalServiceWorld:GetSharedWorldList()
                                         ip = item.ip or "127.0.0.1",
                                         order = item.order,
                                         IsFolder=true, time_text=item.time_text,
-                                        text = 'TODO',
+                                        text = username .. "/" .. filenameUTF8,
+                                        shared = true,
                                     }
                                 )
         
@@ -179,7 +183,7 @@ end
 function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
     for CKey, CItem in ipairs(currentWorldList) do
         for IKey, IItem in ipairs(self:GetInternetLocalWorldList()) do
-            if IItem.foldername == CItem.foldername then
+            if not CItem.shared and IItem.foldername == CItem.foldername then
                 if IItem.is_zip == CItem.is_zip then 
                     for key, value in pairs(IItem) do
                         if(key ~= "revision") then

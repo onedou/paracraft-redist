@@ -189,8 +189,8 @@ function LocalService:IsZip(path)
     end
 end
 
-function LocalService:MoveZipToFolder(foldername, zipPath)
-    if not ParaAsset.OpenArchive(zipPath, true) then
+function LocalService:MoveZipToFolder(worldpath, zipPath)
+    if not worldpath or not ParaAsset.OpenArchive(zipPath, true) then
         return false
     end
 
@@ -207,8 +207,6 @@ function LocalService:MoveZipToFolder(foldername, zipPath)
             break
         end
     end
-
-    local worldpath = format("%s/%s", Mod.WorldShare.Utils.GetWorldFolderFullPath(), CommonlibEncoding.Utf8ToDefault(foldername))
 
     for _, item in ipairs(fileList) do
         if item.filesize > 0 then

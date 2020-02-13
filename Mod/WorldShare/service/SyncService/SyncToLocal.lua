@@ -46,7 +46,20 @@ function SyncToLocal:Init(callback)
 
     -- we build a world folder path if worldpath is not exit
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
-        self.currentWorld.worldpath = Encoding.Utf8ToDefault(format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), self.currentWorld.foldername))
+        local userId = Mod.WorldShare.Store:Get("user/userId")
+        -- update shared world path
+        if self.currentWorld.user and self.currentWorld.user.id and tonumber(self.currentWorld.user.id) ~= tonumber(userId) then
+            self.currentWorld.worldpath = Encoding.Utf8ToDefault(
+                format(
+                    "%s/_shared/%s/%s/",
+                    Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                    self.currentWorld.user.username,
+                    self.currentWorld.foldername
+                )
+            )
+        else
+            self.currentWorld.worldpath = Encoding.Utf8ToDefault(format("%s/%s/", Mod.WorldShare.Utils.GetWorldFolderFullPath(), self.currentWorld.foldername))
+        end
         self.currentWorld.remotefile = "local://" .. self.currentWorld.worldpath
 
         InternetLoadWorld.cur_ds[InternetLoadWorld.selected_world_index] = self.currentWorld
@@ -371,7 +384,7 @@ function SyncToLocal:DownloadZIP()
         self.currentWorld.user and self.currentWorld.user.username or nil,
         self.currentWorld.lastCommitId,
         function(bSuccess, downloadPath)
-            LocalService:MoveZipToFolder(self.currentWorld.foldername, downloadPath)
+            LocalService:MoveZipToFolder(self.currentWorld.worldpath, downloadPath)
 
             if type(self.callback) == 'function' then
                 self.callback(true, 'success')

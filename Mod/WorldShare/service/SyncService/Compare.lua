@@ -19,8 +19,10 @@ local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua"
 local GitEncoding = NPL.load("(gl)Mod/WorldShare/helper/GitEncoding.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+local LocalServiceWorld = NPL.load("../LocalService/World.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local Compare = NPL.export()
@@ -311,5 +313,60 @@ function Compare:GetCurrentWorldInfo(callback)
 
     if type(callback) == 'function' then
         callback()
+    end
+end
+
+function Compare:RefreshWorldList(callback)
+    local localWorlds = LocalServiceWorld:GetWorldList()
+
+    if not KeepworkService:IsSignedIn() then
+        local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
+
+        self.SortWorldList(currentWorldList)
+        Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+
+        if type(callback) == 'function' then
+            callback(currentWorldList)
+        end
+    else
+        KeepworkServiceWorld:MergeRemoteWorldList(
+            localWorlds,
+            function(currentWorldList)
+                currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+                self.SortWorldList(currentWorldList)
+                Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
+
+                if type(callback) == 'function' then
+                    callback(currentWorldList)
+                end
+            end
+        )
+    end
+end
+
+function Compare.SortWorldList(currentWorldList)
+    if type(currentWorldList) == 'table' and #currentWorldList > 0 then
+        local tmp = 0
+
+        for i = 1, #currentWorldList - 1 do
+            for j = 1, #currentWorldList - i do
+                local curItemModifyTime = 0
+                local nextItemModifyTime = 0
+
+                if currentWorldList[j] and currentWorldList[j].modifyTime then
+                    curItemModifyTime = currentWorldList[j].modifyTime
+                end
+
+                if currentWorldList[j + 1] and currentWorldList[j + 1].modifyTime then
+                    nextItemModifyTime = currentWorldList[j + 1].modifyTime
+                end
+
+                if curItemModifyTime < nextItemModifyTime then
+                    tmp = currentWorldList[j]
+                    currentWorldList[j] = currentWorldList[j + 1]
+                    currentWorldList[j + 1] = tmp
+                end
+            end
+        end
     end
 end

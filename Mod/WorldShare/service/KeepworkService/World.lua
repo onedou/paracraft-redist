@@ -132,6 +132,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
     end
 
     localWorlds = localWorlds or {}
+    local userId = Mod.WorldShare.Store:Get('user/userId')
 
     self:GetWorldsList(function(data, err)
         if type(data) ~= "table" then
@@ -146,6 +147,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
         for DKey, DItem in ipairs(remoteWorldsList) do
             local isExist = false
             local worldpath = ""
+            local remotefile = ""
             local localTagname = ""
             local remoteTagname = ""
             local revision = 0
@@ -167,6 +169,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
                     isExist = true
                     worldpath = LItem["worldpath"]
+                    remotefile = "local://" .. worldpath
 
                     localTagname = LItem["local_tagname"] or LItem["foldername"]
                     remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
@@ -193,11 +196,33 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 if remoteTagname ~= "" and text ~= remoteTagname then
                     text = remoteTagname .. '(' .. text .. ')'
                 end
+
+                -- shared world path
+                if DItem["user"] and
+                   DItem["user"]["id"] and
+                   tonumber(DItem["user"]["id"]) ~= tonumber(userId) then
+                    worldpath = commonlib.Encoding.Utf8ToDefault(
+                        format(
+                            "%s/_shared/%s/%s/",
+                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                            DItem["user"]["username"],
+                            DItem["worldName"]
+                        )
+                    )
+                else
+                    worldpath = commonlib.Encoding.Utf8ToDefault(
+                        format(
+                            "%s/%s/",
+                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                            DItem["worldName"]
+                        )
+                    )
+                end
+
+                remotefile = "local://" .. worldpath
             end
 
             -- shared world text
-            local userId = Mod.WorldShare.Store:Get('user/userId')
-
             if DItem["user"] and
                DItem["user"]["id"] and
                tonumber(DItem["user"]["id"]) ~= tonumber(userId) then
@@ -212,6 +237,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(DItem["updatedAt"]),
                 lastCommitId = DItem["commitId"], 
                 worldpath = worldpath,
+                remotepath = remotepath,
                 status = status,
                 project = DItem["project"] or {},
                 user = DItem["user"] or {},

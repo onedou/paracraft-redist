@@ -55,33 +55,14 @@ function WorldList:RefreshCurrentServerList(callback, isForce)
 
     self:SetRefreshing(true)
 
-    local localWorlds = LocalServiceWorld:GetWorldList()
-
-    if not KeepworkService:IsSignedIn() then
-        local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
-
-        self.SortWorldList(currentWorldList)
-        Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
-
+    Compare:RefreshWorldList(function(currentWorldList)
         self:SetRefreshing(false)
 
-        UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
-        WorldList:OnSwitchWorld(1)
-    else
-        KeepworkServiceWorld:MergeRemoteWorldList(
-            localWorlds,
-            function(currentWorldList)
-                local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
-                self.SortWorldList(currentWorldList)
-                Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
-
-                self:SetRefreshing(false)
-
-                UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
-                WorldList:OnSwitchWorld(1)
-            end
-        )
-    end
+        if UserConsolePage then
+            UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
+            WorldList:OnSwitchWorld(1)
+        end
+    end)
 end
 
 function WorldList.GetCurWorldInfo(infoType, worldIndex)
@@ -132,33 +113,6 @@ function WorldList:SelectVersion(index)
     end
 
     VersionChange:Init(selectedWorld and selectedWorld.foldername)
-end
-
-function WorldList:SortWorldList(currentWorldList)
-    if type(currentWorldList) == 'table' and #currentWorldList > 0 then
-        local tmp = 0
-
-        for i = 1, #currentWorldList - 1 do
-            for j = 1, #currentWorldList - i do
-                local curItemModifyTime = 0
-                local nextItemModifyTime = 0
-
-                if currentWorldList[j] and currentWorldList[j].modifyTime then
-                    curItemModifyTime = currentWorldList[j].modifyTime
-                end
-
-                if currentWorldList[j + 1] and currentWorldList[j + 1].modifyTime then
-                    nextItemModifyTime = currentWorldList[j + 1].modifyTime
-                end
-
-                if curItemModifyTime < nextItemModifyTime then
-                    tmp = currentWorldList[j]
-                    currentWorldList[j] = currentWorldList[j + 1]
-                    currentWorldList[j + 1] = tmp
-                end
-            end
-        end
-    end
 end
 
 function WorldList:Sync()
@@ -355,9 +309,7 @@ function WorldList:EnterWorld(index)
 
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
         LoginModal:Init(function(result)
-            self:RefreshCurrentServerList(function()
-                Handle(result)
-            end)
+            Handle(result)
         end)
     else
         Handle()
