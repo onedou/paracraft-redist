@@ -7,6 +7,14 @@ use the lib:
 ------------------------------------------------------------
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 ------------------------------------------------------------
+
+status meaning:
+1:local only
+2:network only
+3:both
+4:network newest
+5:local newest
+
 ]]
 local Encoding = commonlib.gettable("commonlib.Encoding")
 local WorldRevision = commonlib.gettable("MyCompany.Aries.Creator.Game.WorldRevision")
@@ -247,13 +255,17 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
         Mod.WorldShare.Store:Set("world/currentRevision", GameLogic.options:GetRevision())
     else
-        local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+        local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
     
-        if compareWorldList then
+        if currentWorldList then
             local searchCurrentWorld = nil
-    
-            for key, item in ipairs(compareWorldList) do
-                if item.foldername == foldername and not item.is_zip then
+            local worldpath = ParaWorld.GetWorldDirectory()
+            local shared = string.match(worldpath, "shared") == "shared" and true or nil
+
+            for key, item in ipairs(currentWorldList) do
+                if item.foldername == foldername and
+                   item.shared == shared and 
+                   not item.is_zip then
                     searchCurrentWorld = item
                     break
                 end
@@ -266,7 +278,7 @@ function Compare:GetCurrentWorldInfo(callback)
 
                 if currentWorld.status == 2 then
                     currentWorld.status = 3
-                    currentWorld.worldpath = ParaWorld.GetWorldDirectory()
+                    currentWorld.worldpath = worldpath
                     currentWorld.local_tagname = currentWorld.remote_tagname
                 end
 
@@ -332,10 +344,10 @@ function Compare:RefreshWorldList(callback)
         KeepworkServiceWorld:MergeRemoteWorldList(
             localWorlds,
             function(currentWorldList)
+                echo(currentWorldList, true)
                 currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
                 self.SortWorldList(currentWorldList)
                 Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
-
                 if type(callback) == 'function' then
                     callback(currentWorldList)
                 end

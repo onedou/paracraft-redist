@@ -481,7 +481,7 @@ function UserConsole:WorldRename(currentItemIndex, tempModifyWorldname, callback
             end)
         else
             -- just remote world exist
-            KeepworkServiceWorld:GetWorld(currentWorld.foldername, function(data)
+            KeepworkServiceWorld:GetWorld(currentWorld.foldername, currentWorld.shared, function(data)
                 local extra = data and data.extra or {}
 
                 extra.worldTagName = tempModifyWorldname

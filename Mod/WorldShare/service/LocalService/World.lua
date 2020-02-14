@@ -66,6 +66,7 @@ end
 function LocalServiceWorld:GetSharedWorldList()
     local dsWorlds = {}
     local SelectedWorld_Index = nil
+    local username = Mod.WorldShare.Store:Get("user/username")
 
     local function AddWorldToDS(worldInfo)
         if LocalLoadWorld.AutoCompleteWorldInfo(worldInfo) then
@@ -77,7 +78,7 @@ function LocalServiceWorld:GetSharedWorldList()
     local sharedFiles = LocalService:Find(sharedWorldPath)
 
     for key, item in ipairs(sharedFiles) do
-        if item and item.filesize == 0 then
+        if item and item.filesize == 0 and item.filename ~= username then
             local folderPath = sharedWorldPath .. item.filename 
 
             local output = LocalLoadWorld.SearchFiles(nil, folderPath, LocalLoadWorld.MaxItemPerFolder)
@@ -100,7 +101,7 @@ function LocalServiceWorld:GetSharedWorldList()
 
                                 local worldpath = folderPath .. "/" .. item.filename
                                 local remotefile = "local://" .. worldpath
-                                local username = Mod.WorldShare:GetWorldData("username", worldpath .. "/") or ""
+                                local worldUsername = Mod.WorldShare:GetWorldData("username", worldpath .. "/") or ""
 
                                 -- only add world with the same nid
                                 AddWorldToDS(
@@ -123,7 +124,7 @@ function LocalServiceWorld:GetSharedWorldList()
                                         ip = item.ip or "127.0.0.1",
                                         order = item.order,
                                         IsFolder=true, time_text=item.time_text,
-                                        text = username .. "/" .. filenameUTF8,
+                                        text = worldUsername .. "/" .. filenameUTF8,
                                         shared = true,
                                     }
                                 )

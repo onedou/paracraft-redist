@@ -114,7 +114,25 @@ function SyncToDataSource:IsProjectExist(callback)
             end
 
             if type(data) == 'table' then
-                callback(true)
+                local bIsExisted = false
+
+                for key, item in ipairs(data) do
+                    if item.user and item.user.id == userId then
+                        -- find info mine
+                        if not self.currentWorld.shared then
+                            bIsExisted = true
+                            break;
+                        end
+                    else
+                        -- find info shared
+                        if self.currentWorld.shared then
+                            bIsExisted = true
+                            break;
+                        end
+                    end
+                end
+
+                callback(bIsExisted)
             else
                 callback(false)
             end
@@ -524,6 +542,12 @@ function SyncToDataSource:UpdateRecord(callback)
         local filesTotals = self.currentWorld.size or 0
 
         local function HandleGetWorld(data)
+            echo(data, true)
+
+            if true then
+                return false
+            end
+
             local oldWorldInfo = data or false
 
             if not oldWorldInfo then
@@ -568,6 +592,7 @@ function SyncToDataSource:UpdateRecord(callback)
 
                 KeepworkServiceWorld:PushWorld(
                     worldInfo,
+                    self.currentWorld.shared,
                     function(data, err)
                         if (err ~= 200) then
                             self.callback(false, L"更新服务器列表失败")
@@ -662,7 +687,7 @@ function SyncToDataSource:UpdateRecord(callback)
             end)
         end
 
-        KeepworkServiceWorld:GetWorld(self.currentWorld.foldername, HandleGetWorld)
+        KeepworkServiceWorld:GetWorld(self.currentWorld.foldername, self.currentWorld.shared, HandleGetWorld)
     end
 
     GitService:GetCommits(self.currentWorld.foldername, Handle)

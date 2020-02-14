@@ -8,14 +8,6 @@ use the lib:
 ------------------------------------------------------------
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 ------------------------------------------------------------
-
-status meaning:
-1:local only
-2:network only
-3:both
-4:network newest
-5:local newest
-
 ]]
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")

@@ -28,17 +28,22 @@ function KeepworkServiceWorld:GetWorldsList(callback)
 end
 
 -- get world by worldname
-function KeepworkServiceWorld:GetWorld(foldername, callback)
+function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
     if type(foldername) ~= 'string' or not KeepworkService:IsSignedIn() then
         return false
     end
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
-        if type(callback) ~= 'function' or not data or not data[1] then
+        if type(data) ~= 'table' then
             return false
         end
 
-        callback(data[1])
+        for key, item in ipairs(data) do
+            if item.shared == shared then
+                callback(item)
+                break
+            end
+        end
     end)
 end
 
@@ -52,6 +57,7 @@ function KeepworkServiceWorld:PushWorld(params, callback)
 
     self:GetWorld(
         params.worldName or '',
+        params.shared,
         function(world)
             local worldId = world and world.id or false
 
@@ -173,6 +179,11 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     elseif tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0) then
                         status = 5 -- local newest
                         revision = LItem['revision'] or 0
+                    end
+
+                    if DItem["worldName"] == '默认名字2' then
+                        echo(DItem, true)
+                        echo(revision, true)
                     end
 
                     isExist = true

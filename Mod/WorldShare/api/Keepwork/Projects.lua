@@ -78,7 +78,7 @@ function KeepworkProjectsApi:GetProjectByWorldName(foldername, success, error)
         nil,
         nil,
         function(data, err)
-            if type(data) == 'table' and #data == 1 then
+            if type(data) == 'table' then
                 if type(success) == 'function' then
                     success(data, err)
                 end
