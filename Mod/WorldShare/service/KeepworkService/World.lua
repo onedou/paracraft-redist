@@ -152,10 +152,18 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local remoteTagname = ""
             local revision = 0
             local commitId = ""
+            local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
             local status
+            local remoteShared
+
+            if tonumber(remoteWorldUserId) ~= (userId) then
+                remoteShared = true
+            end
 
             for LKey, LItem in ipairs(localWorlds) do
-                if DItem["worldName"] == LItem["foldername"] and not LItem.is_zip then
+                if DItem["worldName"] == LItem["foldername"] and
+                   remoteShared == LItem["shared"] and
+                   not LItem.is_zip then
                     if tonumber(LItem["revision"] or 0) == tonumber(DItem["revision"] or 0) then
                         status = 3 -- both
                         revision = LItem['revision']
@@ -198,9 +206,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 end
 
                 -- shared world path
-                if DItem["user"] and
-                   DItem["user"]["id"] and
-                   tonumber(DItem["user"]["id"]) ~= tonumber(userId) then
+                if remoteWorldUserId ~= tonumber(userId) then
                     worldpath = commonlib.Encoding.Utf8ToDefault(
                         format(
                             "%s/_shared/%s/%s/",
@@ -223,9 +229,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             end
 
             -- shared world text
-            if DItem["user"] and
-               DItem["user"]["id"] and
-               tonumber(DItem["user"]["id"]) ~= tonumber(userId) then
+            if remoteShared then
                 text = DItem['user']['username'] .. '/' .. text
             end
 
@@ -237,7 +241,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(DItem["updatedAt"]),
                 lastCommitId = DItem["commitId"], 
                 worldpath = worldpath,
-                remotepath = remotepath,
+                remotefile = remotefile,
                 status = status,
                 project = DItem["project"] or {},
                 user = DItem["user"] or {},
@@ -245,6 +249,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 local_tagname = localTagname,
                 remote_tagname = remoteTagname,
                 is_zip = false,
+                shared = remoteShared
             }
 
             currentWorldList:push_back(currentWorld)
@@ -255,7 +260,16 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local isExist = false
 
             for DKey, DItem in ipairs(remoteWorldsList) do
-                if LItem["foldername"] == DItem["worldName"] and not LItem.is_zip then
+                local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
+                local remoteShared
+
+                if tonumber(remoteWorldUserId) ~= (userId) then
+                    remoteShared = true
+                end
+
+                if LItem["foldername"] == DItem["worldName"] and
+                   LItem["shared"] == remoteShared and
+                   not LItem.is_zip then
                     isExist = true
                     break
                 end

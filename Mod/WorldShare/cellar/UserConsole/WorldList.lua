@@ -285,6 +285,7 @@ function WorldList:EnterWorld(index)
                         currentWorld.revision,
                         function(bSucceed)
                             if bSucceed then
+                                echo(currentWorld, true)
                                 InternetLoadWorld.EnterWorld()	
                                 UserConsole:ClosePage()	
                             end

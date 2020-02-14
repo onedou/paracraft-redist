@@ -43,7 +43,7 @@ function ShareWorld:Init()
             KeepworkServiceProject:GetProjectIdByWorldName(
                 currentWorld.foldername,
                 function()
-                    WorldList:RefreshCurrentServerList(function()
+                    Compare:RefreshWorldList(function()
                         Compare:GetCurrentWorldInfo(
                             function()
                                 Compare:Init(function(result)
@@ -53,7 +53,7 @@ function ShareWorld:Init()
                                 end)
                             end
                         )
-                    end, true)
+                    end)
                 end
             )
         end
