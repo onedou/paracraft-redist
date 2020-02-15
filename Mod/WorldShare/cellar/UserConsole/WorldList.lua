@@ -285,7 +285,8 @@ function WorldList:EnterWorld(index)
                                                     InternetLoadWorld.EnterWorld()
                                                     UserConsole:ClosePage()
                                                 end
-                                            end
+                                            end,
+                                            _guihelper.MessageBoxButtons.YesNo
                                         )
                                     end
                                 end

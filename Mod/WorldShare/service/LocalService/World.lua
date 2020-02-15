@@ -162,6 +162,7 @@ function LocalServiceWorld:GetSharedWorldList()
         return dsWorlds
     end
 
+    return {}
 end
 
 function LocalServiceWorld:GetInternetLocalWorldList()
