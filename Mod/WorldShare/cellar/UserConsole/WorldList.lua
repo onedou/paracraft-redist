@@ -266,9 +266,28 @@ function WorldList:EnterWorld(index)
                                     if data and data.owner and data.owner.userId == userId then
                                         InternetLoadWorld.EnterWorld()	
                                         UserConsole:ClosePage()
+                                    else
+                                        Mod.WorldShare.MsgBox:Dialog(
+                                            format(
+                                                L"%s正在以独占模式编辑世界%s，请联系%s退出编辑或者以只读模式打开世界",
+                                                data.owner.username,
+                                                currentWorld.foldername,
+                                                data.owner.username
+                                            ),
+                                            {
+                                                Title = L"世界被占用",
+                                                Yes = L"知道了",
+                                                No = L"只读模式打开"
+                                            },
+                                            function(res)
+                                                if res and res == _guihelper.DialogResult.No then
+                                                    Mod.WorldShare.Store:Set("world/readonly", true)
+                                                    InternetLoadWorld.EnterWorld()
+                                                    UserConsole:ClosePage()
+                                                end
+                                            end
+                                        )
                                     end
-                                else
-                                    -- false
                                 end
                             end
                         )
@@ -289,7 +308,9 @@ function WorldList:EnterWorld(index)
                                         Mod.WorldShare.MsgBox:Close()
                                         lockAndEnter()
                                     end)
-                                else
+                                end
+
+                                if res and res == _guihelper.DialogResult.No then
                                     Mod.WorldShare.Store:Set("world/readonly", true)
                                     InternetLoadWorld.EnterWorld()
                                     UserConsole:ClosePage()
