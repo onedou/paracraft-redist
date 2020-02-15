@@ -29,9 +29,15 @@ end
 
 -- get world by worldname
 function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
+    if type(callback) ~= 'function' then
+        return false
+    end
+
     if type(foldername) ~= 'string' or not KeepworkService:IsSignedIn() then
         return false
     end
+
+    local userId = tonumber(Mod.WorldShare.Store:Get("user/userId"))
 
     KeepworkWorldsApi:GetWorldByName(foldername, function(data, err)
         if type(data) ~= 'table' then
@@ -39,16 +45,27 @@ function KeepworkServiceWorld:GetWorld(foldername, shared, callback)
         end
 
         for key, item in ipairs(data) do
-            if item.shared == shared then
-                callback(item)
-                break
+            if item.user and item.user.id == userId then
+                -- remote world info mine
+                if not shared then
+                    callback(item)
+                    return true
+                end
+            else
+                -- remote world info shared
+                if shared then
+                    callback(item)
+                    return true
+                end
             end
         end
+
+        callback()
     end)
 end
 
 -- updat world info
-function KeepworkServiceWorld:PushWorld(params, callback)
+function KeepworkServiceWorld:PushWorld(params, shared, callback)
     if type(params) ~= 'table' or
        not params.worldName or
        not KeepworkService:IsSignedIn() then
@@ -57,7 +74,7 @@ function KeepworkServiceWorld:PushWorld(params, callback)
 
     self:GetWorld(
         params.worldName or '',
-        params.shared,
+        shared,
         function(world)
             local worldId = world and world.id or false
 
@@ -65,7 +82,7 @@ function KeepworkServiceWorld:PushWorld(params, callback)
                 return false
             end
 
-            KeepworkWorldsApi:UpdateWorldinfo(worldId, params, callback)
+            KeepworkWorldsApi:UpdateWorldInfo(worldId, params, callback)
         end
     )
 end
@@ -179,11 +196,6 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     elseif tonumber(LItem["revision"] or 0) < tonumber(DItem["revision"] or 0) then
                         status = 5 -- local newest
                         revision = LItem['revision'] or 0
-                    end
-
-                    if DItem["worldName"] == '默认名字2' then
-                        echo(DItem, true)
-                        echo(revision, true)
                     end
 
                     isExist = true

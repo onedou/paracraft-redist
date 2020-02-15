@@ -42,6 +42,7 @@ function ShareWorld:Init()
         function Handle()
             KeepworkServiceProject:GetProjectIdByWorldName(
                 currentWorld.foldername,
+                currentWorld.shared,
                 function()
                     Compare:RefreshWorldList(function()
                         Compare:GetCurrentWorldInfo(

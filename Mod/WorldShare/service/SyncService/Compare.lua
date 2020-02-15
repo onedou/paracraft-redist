@@ -344,7 +344,6 @@ function Compare:RefreshWorldList(callback)
         KeepworkServiceWorld:MergeRemoteWorldList(
             localWorlds,
             function(currentWorldList)
-                echo(currentWorldList, true)
                 currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
                 self.SortWorldList(currentWorldList)
                 Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)

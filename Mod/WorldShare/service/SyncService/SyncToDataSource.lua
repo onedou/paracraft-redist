@@ -52,7 +52,7 @@ function SyncToDataSource:Init(callback)
         function(beExisted)
             if beExisted then
                 -- update world
-                KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, function()
+                KeepworkServiceProject:GetProjectIdByWorldName(self.currentWorld.foldername, self.currentWorld.shared, function(pid)
                     currentWorld = Mod.WorldShare.Store:Get('world/currentWorld') 
 
                     if currentWorld and currentWorld.kpProjectId then
@@ -106,33 +106,16 @@ function SyncToDataSource:Init(callback)
 end
 
 function SyncToDataSource:IsProjectExist(callback)
-    KeepworkServiceProject:GetProjectByWorldName(
+    if type(callback) ~= "function" then
+        return false
+    end
+
+    KeepworkServiceWorld:GetWorld(
         self.currentWorld.foldername,
+        self.currentWorld.shared,
         function(data)
-            if type(callback) ~= "function" then
-                return false
-            end
-
             if type(data) == 'table' then
-                local bIsExisted = false
-
-                for key, item in ipairs(data) do
-                    if item.user and item.user.id == userId then
-                        -- find info mine
-                        if not self.currentWorld.shared then
-                            bIsExisted = true
-                            break;
-                        end
-                    else
-                        -- find info shared
-                        if self.currentWorld.shared then
-                            bIsExisted = true
-                            break;
-                        end
-                    end
-                end
-
-                callback(bIsExisted)
+                callback(true)
             else
                 callback(false)
             end
@@ -542,12 +525,6 @@ function SyncToDataSource:UpdateRecord(callback)
         local filesTotals = self.currentWorld.size or 0
 
         local function HandleGetWorld(data)
-            echo(data, true)
-
-            if true then
-                return false
-            end
-
             local oldWorldInfo = data or false
 
             if not oldWorldInfo then

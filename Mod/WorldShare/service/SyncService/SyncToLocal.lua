@@ -119,8 +119,6 @@ function SyncToLocal:Start()
         self:HandleCompareList()
     end
 
-    echo(self.currentWorld, true)
-
     GitService:GetTree(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,
