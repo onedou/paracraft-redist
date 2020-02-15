@@ -27,8 +27,8 @@ local ShareWorld = NPL.export()
 
 function ShareWorld:Init()
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
-    echo(currentWorld, true)
-    if not currentWorld or currentWorld.is_zip then
+
+    if GameLogic.IsReadOnly() or not currentWorld or currentWorld.is_zip then
         _guihelper.MessageBox(L"此世界不支持分享")
         return false
     end

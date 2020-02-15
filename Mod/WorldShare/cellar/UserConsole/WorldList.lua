@@ -251,7 +251,29 @@ function WorldList:EnterWorld(index)
             Compare:Init(function(result)
                 Mod.WorldShare.MsgBox:Close()
 
-                if currentWorld.project and currentWorld.project.memberCount > 0 then
+                if currentWorld.project and currentWorld.project.memberCount > 1 then
+                    local function lockAndEnter()
+                        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                        KeepworkServiceWorld:UpdateLock(
+                            currentWorld.kpProjectId,
+                            "exclusive",
+                            currentWorld.revision,
+                            function(data)
+                                Mod.WorldShare.MsgBox:Close()
+                                if data then
+                                    local userId = Mod.WorldShare.Store:Get("user/userId")
+
+                                    if data and data.owner and data.owner.userId == userId then
+                                        InternetLoadWorld.EnterWorld()	
+                                        UserConsole:ClosePage()
+                                    end
+                                else
+                                    -- false
+                                end
+                            end
+                        )
+                    end
+
                     if result ~= Compare.EQUAL then
                         Mod.WorldShare.MsgBox:Dialog(
                             L"本地版本与远程版本不一致，是否同步后再进入？",
@@ -261,26 +283,25 @@ function WorldList:EnterWorld(index)
                                 No = L"只读模式打开"
                             },
                             function(res)
-                                echo(res, true)
-                                if res and res == _guihelper.DialogResult.OK then
-                                    -- pressed OK
+                                if res and res == _guihelper.DialogResult.Yes then
+                                    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                                    SyncMain:SyncToLocal(function()
+                                        Mod.WorldShare.MsgBox:Close()
+                                        lockAndEnter()
+                                    end)
+                                else
+                                    Mod.WorldShare.Store:Set("world/readonly", true)
+                                    InternetLoadWorld.EnterWorld()
+                                    UserConsole:ClosePage()
                                 end
                             end,
                             _guihelper.MessageBoxButtons.YesNo
                         )
+
+                        return false
                     end
 
-                    KeepworkServiceWorld:UpdateLock(
-                        currentWorld.kpProjectId,
-                        "exclusive",
-                        currentWorld.revision,
-                        function(bSucceed)
-                            if bSucceed then
-                                InternetLoadWorld.EnterWorld()	
-                                UserConsole:ClosePage()	
-                            end
-                        end
-                    )
+                    lockAndEnter()
 
                     return true
                 end

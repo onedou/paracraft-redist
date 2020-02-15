@@ -118,7 +118,7 @@ function KeepworkServiceWorld:UpdateLock(pid, mode, revision, callback)
         revision,
         function(data, err)
             if type(callback) == 'function' then
-                callback(true)
+                callback(data)
             end
         end,
         function()

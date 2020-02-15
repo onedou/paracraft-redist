@@ -224,6 +224,12 @@ function Compare:GetCurrentWorldInfo(callback)
     local foldername = Mod.WorldShare.Utils:GetFolderName() or ''
     local currentWorld
 
+    if Mod.WorldShare.Store:Get("world/readonly") then
+        System.World.readonly = true
+        GameLogic.options:ResetWindowTitle()
+        Mod.WorldShare.Store:Remove("world/readonly")
+    end
+
     if GameLogic.IsReadOnly() then
         local originWorldPath = ParaWorld.GetWorldDirectory()
         local worldTag = WorldCommon.GetWorldInfo() or {}
