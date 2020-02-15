@@ -13,7 +13,6 @@ local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.Create
 local RemoteServerList = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteServerList")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local Encoding = commonlib.gettable("commonlib.Encoding")
-local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local UserConsole = NPL.load("./Main.lua")
 local UserInfo = NPL.load("./UserInfo.lua")
@@ -86,11 +85,11 @@ function WorldList:GetSelectWorld(index)
     end
 end
 
-function WorldList:GetWorldIndexByFoldername(foldername, is_zip)
-    local compareWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
+function WorldList:GetWorldIndexByFoldername(foldername, share, iszip)
+    local currentWorldList = Mod.WorldShare.Store:Get("world/compareWorldList")
 
-    for index, item in ipairs(compareWorldList) do
-        if foldername == item.foldername and is_zip == item.is_zip then
+    for index, item in ipairs(currentWorldList) do
+        if foldername == item.foldername and share == item.share and iszip == item.is_zip then
             return index
         end
     end
@@ -219,7 +218,7 @@ function WorldList:EnterWorld(index)
         end
 
         -- compare list is not the same before login
-        local index = self:GetWorldIndexByFoldername(currentWorld.foldername, currentWorld.is_zip)
+        local index = self:GetWorldIndexByFoldername(currentWorld.foldername, currentWorld.shared, currentWorld.is_zip)
 
         self:OnSwitchWorld(index)
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
@@ -277,7 +276,6 @@ function WorldList:EnterWorld(index)
                         currentWorld.revision,
                         function(bSucceed)
                             if bSucceed then
-                                echo(currentWorld, true)
                                 InternetLoadWorld.EnterWorld()	
                                 UserConsole:ClosePage()	
                             end

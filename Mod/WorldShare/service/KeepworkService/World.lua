@@ -13,6 +13,9 @@ local KeepworkService = NPL.load('../KeepworkService.lua')
 local KeepworkWorldsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Worlds.lua")
 local KeepworkProjectsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Projects.lua")
 local KeepworkWorldLocksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/WorldLocks.lua")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+
+local SaveWorldHandler = commonlib.gettable("MyCompany.Aries.Game.SaveWorldHandler")
 
 local KeepworkServiceWorld = NPL.export()
 
@@ -206,6 +209,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
+                        echo(worldpath, true)
                         local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
 
                         tag.kpProjectId = DItem['projectId']
