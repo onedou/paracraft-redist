@@ -329,6 +329,10 @@ function Compare:GetCurrentWorldInfo(callback)
         Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)
     end
 
+    if not GameLogic.IsReadOnly() and currentWorld.project and currentWorld.project.memberCount > 1 then
+        KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision)
+    end
+
     if type(callback) == 'function' then
         callback()
     end
