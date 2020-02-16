@@ -209,7 +209,6 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                     remoteTagname = DItem["extra"] and DItem["extra"]["worldTagName"] or DItem["worldName"]
 
                     if tonumber(LItem["kpProjectId"]) ~= tonumber(DItem["projectId"]) then
-                        echo(worldpath, true)
                         local tag = SaveWorldHandler:new():Init(worldpath):LoadWorldInfo()
 
                         tag.kpProjectId = DItem['projectId']
