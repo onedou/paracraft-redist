@@ -182,7 +182,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
             local status
             local remoteShared
 
-            if tonumber(remoteWorldUserId) ~= (userId) then
+            if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                 remoteShared = true
             end
 
@@ -232,7 +232,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 end
 
                 -- shared world path
-                if remoteWorldUserId ~= tonumber(userId) then
+                if remoteWorldUserId ~= 0 and remoteWorldUserId ~= tonumber(userId) then
                     worldpath = commonlib.Encoding.Utf8ToDefault(
                         format(
                             "%s/_shared/%s/%s/",
@@ -256,7 +256,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
             -- shared world text
             if remoteShared then
-                text = DItem['user']['username'] .. '/' .. text
+                text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. text
             end
 
             currentWorld = {
@@ -289,7 +289,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 local remoteWorldUserId = DItem["user"] and DItem["user"]["id"] and tonumber(DItem["user"]["id"]) or 0
                 local remoteShared
 
-                if tonumber(remoteWorldUserId) ~= (userId) then
+                if remoteWorldUserId ~= 0 and tonumber(remoteWorldUserId) ~= (userId) then
                     remoteShared = true
                 end
 
