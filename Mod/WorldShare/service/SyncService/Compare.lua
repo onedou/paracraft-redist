@@ -333,6 +333,8 @@ function Compare:GetCurrentWorldInfo(callback)
         KeepworkServiceWorld:UpdateLockHeartbeatStart(currentWorld.kpProjectId, "exclusive", currentWorld.revision)
     end
 
+    Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
+
     if type(callback) == 'function' then
         callback()
     end
