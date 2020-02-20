@@ -286,6 +286,7 @@ function SyncToLocal:DownloadOne(file, callback)
 
     GitService:GetContentWithRaw(
         self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
         currentRemoteItem.path,
         self.currentWorld.lastCommitId,
         function(content, size)
@@ -326,24 +327,28 @@ function SyncToLocal:UpdateOne(file, callback)
         format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
     )
 
-    local function Handle(content, size)
-        if content == false then
-            self.compareListIndex = 1
-            self:SetFinish(true)
-            self.callback(false, format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path))
-            self.callback = nil
-            Progress:ClosePage()
-            return false
+    GitService:GetContentWithRaw(
+        self.currentWorld.foldername,
+        self.currentWorld.user and self.currentWorld.user.username or nil,
+        currentRemoteItem.path,
+        self.currentWorld.lastCommitId,
+        function(content, size)
+            if content == false then
+                self.compareListIndex = 1
+                self:SetFinish(true)
+                self.callback(false, format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path))
+                self.callback = nil
+                Progress:ClosePage()
+                return false
+            end
+    
+            LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
+    
+            if type(callback) == "function" then
+                callback()
+            end
         end
-
-        LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
-
-        if type(callback) == "function" then
-            callback()
-        end
-    end
-
-    GitService:GetContentWithRaw(self.currentWorld.foldername, currentRemoteItem.path, self.currentWorld.lastCommitId, Handle)
+    )
 end
 
 -- 删除文件

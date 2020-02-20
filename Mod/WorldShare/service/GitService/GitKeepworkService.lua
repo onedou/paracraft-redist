@@ -22,10 +22,10 @@ function GitKeepworkService:GetContent(foldername, path, commitId, callback)
     
 end
 
-function GitKeepworkService:GetContentWithRaw(foldername, path, commitId, callback)
+function GitKeepworkService:GetContentWithRaw(foldername, username, path, commitId, callback)
     KeepworkReposApi:Raw(
-        nil,
         foldername,
+        username,
         path,
         commitId,
         function(data, err)
@@ -171,8 +171,8 @@ function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)
             end
 
             KeepworkReposApi:Raw(
-                data.username,
                 data.name,
+                data.username,
                 'revision.xml',
                 data.world.commitId,
                 function(data, err)

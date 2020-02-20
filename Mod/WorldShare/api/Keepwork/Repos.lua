@@ -113,7 +113,7 @@ end
     filePath string 必须 文件路径
 ]]
 -- return: object
-function KeepworkReposApi:Raw(username, foldername, filePath, commitId, success, error)
+function KeepworkReposApi:Raw(foldername, username, filePath, commitId, success, error)
     if type(filePath) ~= 'string' then
         return false
     end
@@ -124,15 +124,7 @@ function KeepworkReposApi:Raw(username, foldername, filePath, commitId, success,
         commitIdUrl = format('?commitId=%s', commitId)
     end
 
-    local repoPath
-
-    if username then
-        repoPath = Mod.WorldShare.Utils.UrlEncode(username .. '/' .. GitEncoding.Base32(foldername))
-    else
-        repoPath = self:GetRepoPath(foldername)
-    end
-
-    local url = format('/repos/%s/files/%s/raw%s', repoPath, Mod.WorldShare.Utils.UrlEncode(filePath), commitIdUrl)
+    local url = format('/repos/%s/files/%s/raw%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath), commitIdUrl)
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end
