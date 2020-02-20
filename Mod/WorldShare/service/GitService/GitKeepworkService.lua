@@ -59,9 +59,10 @@ function GitKeepworkService:Upload(foldername, path, content, callback)
     )
 end
 
-function GitKeepworkService:Update(foldername, path, content, callback)
+function GitKeepworkService:Update(foldername, username, path, content, callback)
     KeepworkReposApi:UpdateFile(
         foldername,
+        username,
         path,
         content,
         function()
@@ -148,8 +149,8 @@ function GitKeepworkService:GetRecursive(children)
     end
 end
 
-function GitKeepworkService:GetCommits(foldername, callback)
-    KeepworkReposApi:CommitInfo(foldername, callback)
+function GitKeepworkService:GetCommits(foldername, username, callback)
+    KeepworkReposApi:CommitInfo(foldername, username, callback)
 end
 
 function GitKeepworkService:GetWorldRevision(kpProjectId, isGetMine, callback)

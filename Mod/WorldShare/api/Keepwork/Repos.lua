@@ -84,12 +84,12 @@ end
 -- method: GET
 -- params: [[]]
 -- return: object
-function KeepworkReposApi:CommitInfo(foldername, success, error)
+function KeepworkReposApi:CommitInfo(foldername, username, success, error)
     if type(foldername) ~= 'string' then
         return false
     end
 
-    local url = format('/repos/%s/commitInfo', self:GetRepoPath(foldername))
+    local url = format('/repos/%s/commitInfo', self:GetRepoPath(foldername, username))
 
     KeepworkBaseApi:Get(url, nil, nil, success, error)
 end
@@ -156,12 +156,12 @@ end
     filePath string 必须 文件路径
 ]]
 -- return: object
-function KeepworkReposApi:UpdateFile(foldername, filePath, content, success, error)
+function KeepworkReposApi:UpdateFile(foldername, username, filePath, content, success, error)
     if type(foldername) ~= 'string' or type(filePath) ~= 'string' then
         return false
     end
 
-    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername), Mod.WorldShare.Utils.UrlEncode(filePath))
+    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath))
 
     local write = ParaIO.open("/temp/t/" .. filePath, "w")
 
@@ -180,12 +180,12 @@ end
     content binary 必须 文件内容
 ]]
 -- return: object
-function KeepworkReposApi:CreateFile(foldername, filePath, content, success, error)
+function KeepworkReposApi:CreateFile(foldername, username, filePath, content, success, error)
     if type(foldername) ~= 'string' or type(filePath) ~= 'string' then
         return false
     end
 
-    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername), Mod.WorldShare.Utils.UrlEncode(filePath))
+    local url = format('/repos/%s/files/%s', self:GetRepoPath(foldername, username), Mod.WorldShare.Utils.UrlEncode(filePath))
 
     KeepworkBaseApi:Post(url, { encoding = 'base64', content = Encoding.base64(content) }, nil, success, error)
 end
