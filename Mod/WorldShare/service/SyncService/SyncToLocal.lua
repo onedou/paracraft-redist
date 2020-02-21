@@ -388,11 +388,7 @@ function SyncToLocal:DownloadZIP()
         self.currentWorld.lastCommitId,
         function(bSuccess, downloadPath)
             LocalService:MoveZipToFolder(self.currentWorld.worldpath, downloadPath)
-
-            if type(self.callback) == 'function' then
-                self.callback(true, 'success')
-                self.callback = nil
-            end
+            KeepworkService:SetCurrentCommitId()
 
             self:SetFinish(true)
             Progress:UpdateDataBar(
@@ -404,7 +400,10 @@ function SyncToLocal:DownloadZIP()
             Progress:SetFinish(true)
             Progress:Refresh()
 
-            KeepworkService:SetCurrentCommitId()
+            if type(self.callback) == 'function' then
+                self.callback(true, 'success')
+                self.callback = nil
+            end
         end
     )
 end
