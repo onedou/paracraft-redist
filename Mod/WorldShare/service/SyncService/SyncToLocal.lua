@@ -341,8 +341,8 @@ function SyncToLocal:UpdateOne(file, callback)
                 Progress:ClosePage()
                 return false
             end
-    
-            LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
+
+            LocalService:Write(self.currentWorld.worldpath, currentRemoteItem.path, content)
     
             if type(callback) == "function" then
                 callback()
@@ -361,7 +361,7 @@ function SyncToLocal:DeleteOne(file, callback)
         format(L"%s （%s） 删除中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.size, "KB"))
     )
 
-    LocalService:Delete(self.currentWorld.foldername, currentLocalItem.filename)
+    LocalService:Delete(self.currentWorld.worldpath, currentLocalItem.filename)
 
     if type(callback) == "function" then
         callback()
