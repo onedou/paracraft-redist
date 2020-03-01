@@ -419,6 +419,10 @@
                         return ""
                     end
                 end
+
+                function get_worlds_path()
+                    return WorldList:GetWorldsPath()
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -688,8 +692,12 @@
             <div class="middle_line" />
             <div class="world_area">
                 <div style="height:350px;">
+                    <div style="margin-top: -2px;margin-bottom: 5px;">
+                        <%= L"世界文件储存位置：" %>
+                        <select name="select_worlds_path" class="bbs_text" style="width: 100px;height: 25px;margin-top: -2px;" DataSource="<%= get_worlds_path() %>"></select>
+                    </div>
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= is_list_refreshing() %>">
-                        <%=L"正在刷新, 请稍候 ... " %>
+                        <%= L"正在刷新, 请稍候 ... " %>
                     </pe:if>
                     <pe:if style="margin-top:10px;font-weight:bold;color:#ffffff" condition="<%= not is_list_refreshing() %>">
                         <pe:gridview RememberScrollPos="true" AllowPaging="false" VerticalScrollBarStep="50"

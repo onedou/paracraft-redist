@@ -13,11 +13,9 @@ local CommandManager = commonlib.gettable("MyCompany.Aries.Game.CommandManager")
 local ShareWorldPage = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.Areas.ShareWorldPage")
 local CreateNewWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.CreateNewWorld")
 
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 
 local CreateWorld = NPL.export()
 

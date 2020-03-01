@@ -149,6 +149,13 @@ function WorldShare:init()
         end
     )
 
+    GameLogic.GetFilters():add_filter(
+        "LocalLoadWorld.GetWorldFolderFullPath",
+        function()
+            return LocalService:GetWorldFolderFullPath()
+        end
+    )
+
     -- send udp online msg
     SocketService:StartUDPService()
 end

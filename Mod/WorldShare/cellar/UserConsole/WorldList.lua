@@ -495,3 +495,11 @@ function WorldList:OpenProject(index)
 
     ParaGlobal.ShellExecute("open", format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), compareWorldList[index].kpProjectId or 0), "", "", 1)
 end
+
+function WorldList:GetWorldsPath()
+    local allPath = {
+        { text="临时文件夹", value="DesignHouse", selected=true }
+    }
+
+    return allPath
+end
