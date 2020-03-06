@@ -330,7 +330,11 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
             -- shared world text
             if remoteShared then
-                text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. text
+                if DItem['extra'] and DItem['extra']['worldTagName'] then
+                    text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. (DItem['extra'] and DItem['extra']['worldTagName'] or '') .. '(' .. text .. ')'
+                else
+                    text = (DItem['user'] and DItem['user']['username'] or '') .. '/' .. text
+                end
             end
 
             currentWorld = {
