@@ -307,21 +307,17 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
                 -- shared world path
                 if remoteWorldUserId ~= 0 and remoteWorldUserId ~= tonumber(userId) then
-                    worldpath = commonlib.Encoding.Utf8ToDefault(
-                        format(
-                            "%s/_shared/%s/%s/",
-                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                            DItem["user"]["username"],
-                            DItem["worldName"]
-                        )
+                    worldpath = format(
+                        "%s/_shared/%s/%s/",
+                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        DItem["user"]["username"],
+                        commonlib.Encoding.Utf8ToDefault(DItem["worldName"])
                     )
                 else
-                    worldpath = commonlib.Encoding.Utf8ToDefault(
-                        format(
-                            "%s/%s/",
-                            Mod.WorldShare.Utils.GetWorldFolderFullPath(),
-                            DItem["worldName"]
-                        )
+                    worldpath = format(
+                        "%s/%s/",
+                        Mod.WorldShare.Utils.GetWorldFolderFullPath(),
+                        commonlib.Encoding.Utf8ToDefault(DItem["worldName"])
                     )
                 end
 
