@@ -360,7 +360,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
     end
 
     -- we will not fetch token if token is expire
-    if exp <= (os.time() + 5 * 24 * 3600) then
+    if exp <= (os.time() + 1 * 24 * 3600) then
         ReEntry()
         return true
     end
