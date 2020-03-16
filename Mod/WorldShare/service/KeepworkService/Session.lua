@@ -362,12 +362,17 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
     -- we will not fetch token if token is expire
     if exp <= (os.time() + 1 * 24 * 3600) then
         ReEntry()
-        return true
+        return false
     end
 
     self:Profile(function(data, err)
         if err ~= 200 then
             ReEntry()
+            return false
+        end
+
+        if type(callback) == "function" then
+            callback(true)
         end
     end, token)
 end
