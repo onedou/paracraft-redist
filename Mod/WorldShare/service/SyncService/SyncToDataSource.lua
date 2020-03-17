@@ -239,7 +239,7 @@ function SyncToDataSource:GetCompareList()
         local bIsExisted = false
 
         for IKey, IItem in ipairs(self.dataSourceFiles) do
-            if string.gsub(LItem.filename, ' ', '&nbsp;') == IItem.path then
+            if LItem.filename == IItem.path then
                 bIsExisted = true
                 break
             end
@@ -257,7 +257,7 @@ function SyncToDataSource:GetCompareList()
         local bIsExisted = false
 
         for LKey, LItem in ipairs(self.localFiles) do
-            if IItem.path == string.gsub(LItem.filename, ' ', '&nbsp;') then
+            if IItem.path == LItem.filename then
                 bIsExisted = true
                 break
             end
@@ -387,7 +387,7 @@ function SyncToDataSource:UploadOne(file, callback)
     GitService:Upload(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,
-        string.gsub(currentLocalItem.filename, ' ', '&nbsp;'),
+        currentLocalItem.filename,
         currentLocalItem.file_content_t,
         function(bIsUpload)
             if bIsUpload then
@@ -412,7 +412,7 @@ end
 -- 更新数据源文件
 function SyncToDataSource:UpdateOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
-    local currentRemoteItem = self:GetRemoteFileByPath(string.gsub(file, ' ', '&nbsp;'))
+    local currentRemoteItem = self:GetRemoteFileByPath(file)
 
     Progress:UpdateDataBar(
         self.compareListIndex,
@@ -452,7 +452,7 @@ function SyncToDataSource:UpdateOne(file, callback)
     GitService:Update(
         self.currentWorld.foldername,
         self.currentWorld.user and self.currentWorld.user.username or nil,
-        string.gsub(currentLocalItem.filename, ' ', '&nbsp;'),
+        currentLocalItem.filename,
         currentLocalItem.file_content_t,
         function(bIsUpdate)
             if bIsUpdate then
