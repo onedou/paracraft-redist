@@ -23,6 +23,12 @@ local KeepworkServiceSession = NPL.export()
 
 KeepworkServiceSession.captchaKey = ''
 
+function KeepworkServiceSession:IsSignedIn()
+    local token = Mod.WorldShare.Store:Get("user/token")
+
+    return token ~= nil
+end
+
 function KeepworkServiceSession:Login(account, password, callback)
     KeepworkUsersApi:Login(account, password, callback, callback)
 end
@@ -66,6 +72,16 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
 
     local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
     SetUserinfo(token, userId, username, nickname)
+
+    local userWorldsFolder = 'worlds/' .. username
+
+    if System.os.GetExternalStoragePath() ~= "" then
+        ParaIO.CreateDirectory(System.os.GetExternalStoragePath() .. "paracraft/" .. userWorldsFolder .. '/')
+    else
+        ParaIO.CreateDirectory(ParaIO.GetWritablePath() .. userWorldsFolder .. '/')
+    end
+
+    Mod.WorldShare.Store:Set('world/myWorldsFolder', 'worlds/' .. username)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
@@ -318,5 +334,95 @@ function KeepworkServiceSession:GetUserTokenFromUrlProtocol()
     if usertoken then
         local SetToken = Mod.WorldShare.Store:Action("user/SetToken")
         SetToken(usertoken)
+    end
+end
+
+function KeepworkServiceSession:CheckTokenExpire(callback)
+    if not KeepworkService:IsSignedIn() then
+        return false
+    end
+    
+    local token = Mod.WorldShare.Store:Get('user/token')
+    local tokeninfo = System.Encoding.jwt.decode(token)
+    local exp = tokeninfo.exp and tokeninfo.exp or 0
+
+    local function ReEntry()
+        self:Logout()
+
+        local currentUser = self:LoadSigninInfo()
+
+        if not currentUser.account or not currentUser.password then
+            return false
+        end
+
+        self:Login(
+            currentUser.account,
+            currentUser.password,
+            function(response, err)
+                if err ~= 200 then
+                    if type(callback) == "function" then
+                        callback(false)
+                    end
+                    return false
+                end
+
+                self:LoginResponse(response, err, function()
+                    if type(callback) == "function" then
+                        callback(true)
+                    end
+                end)
+            end
+        )
+    end
+
+    -- we will not fetch token if token is expire
+    if exp <= (os.time() + 1 * 24 * 3600) then
+        ReEntry()
+        return false
+    end
+
+    self:Profile(function(data, err)
+        if err ~= 200 then
+            ReEntry()
+            return false
+        end
+
+        if type(callback) == "function" then
+            callback(true)
+        end
+    end, token)
+end
+
+function KeepworkServiceSession:RenewToken()
+    self:CheckTokenExpire()
+
+    Mod.WorldShare.Utils.SetTimeOut(function()
+        self:RenewToken()
+    end, 3600 * 1000)
+end
+
+function KeepworkServiceSession:IsMyWorldsFolder()
+    local username = Mod.WorldShare.Store:Get('user/username') or ""
+    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
+    local myWorldsFolderUsername = string.match(myWorldsFolder, '^worlds/(.+)') or ""
+
+    if username == "" or myWorldsFolderUsername == "" then
+        return false
+    end
+
+    if username == myWorldsFolderUsername then
+        return true
+    else
+        return false
+    end
+end
+
+function KeepworkServiceSession:IsTempWorldsFolder()
+    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
+
+    if myWorldsFolder == 'worlds/DesignHouse' then
+        return true
+    else
+        return false
     end
 end

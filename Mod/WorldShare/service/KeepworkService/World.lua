@@ -346,6 +346,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
                 project = DItem["project"] or {},
                 user = DItem["user"] or {},
                 kpProjectId = DItem["projectId"],
+                hasPid = true,
                 local_tagname = localTagname,
                 remote_tagname = remoteTagname,
                 is_zip = false,
@@ -377,6 +378,7 @@ function KeepworkServiceWorld:MergeRemoteWorldList(localWorlds, callback)
 
             if not isExist then
                 currentWorld = LItem
+                currentWorld.project = {}
                 currentWorld.modifyTime = Mod.WorldShare.Utils:UnifiedTimestampFormat(currentWorld.writedate)
                 currentWorld.text = currentWorld.text
                 currentWorld.local_tagname = LItem['local_tagname']

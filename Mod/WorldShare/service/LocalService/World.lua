@@ -20,8 +20,9 @@ local LocalServiceWorld = NPL.export()
 
 function LocalServiceWorld:GetWorldList()
     local localWorlds = LocalLoadWorld.BuildLocalWorldList(true)
+    local sharedWorldList = self:GetSharedWorldList()
 
-    for key, item in ipairs(self:GetSharedWorldList()) do
+    for key, item in ipairs(sharedWorldList) do
         localWorlds[#localWorlds + 1] = item
     end
 
@@ -40,6 +41,9 @@ function LocalServiceWorld:GetWorldList()
 
             if tag.kpProjectId then
                 value.kpProjectId = tag.kpProjectId
+                value.hasPid = true
+            else
+                value.hasPid = false
             end
 
             if tag.size then
@@ -50,6 +54,7 @@ function LocalServiceWorld:GetWorldList()
 
             value.local_tagname = tag.name
             value.is_zip = false
+            value.status = 1
         else
             value.foldername = value.Title
             value.text = value.Title
@@ -164,27 +169,29 @@ function LocalServiceWorld:GetSharedWorldList()
 end
 
 function LocalServiceWorld:GetInternetLocalWorldList()
-  local ServerPage = InternetLoadWorld.GetCurrentServerPage()
+    local ServerPage = InternetLoadWorld.GetCurrentServerPage()
 
-  RemoteServerList:new():Init(
-      "local",
-      "localworld",
-      function(bSucceed, serverlist)
-          if not serverlist:IsValid() then
-              return false
-          end
+    RemoteServerList:new():Init(
+        "local",
+        "localworld",
+        function(bSucceed, serverlist)
+            if not serverlist:IsValid() then
+                return false
+            end
 
-          ServerPage.ds = serverlist.worlds or {}
-          InternetLoadWorld.OnChangeServerPage()
-      end
-  )
+            ServerPage.ds = serverlist.worlds or {}
+            InternetLoadWorld.OnChangeServerPage()
+        end
+    )
 
-  return ServerPage.ds or {}
+    return ServerPage.ds or {}
 end
 
 function LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+    local internetLocalWorldList = self:GetInternetLocalWorldList()
+
     for CKey, CItem in ipairs(currentWorldList) do
-        for IKey, IItem in ipairs(self:GetInternetLocalWorldList()) do
+        for IKey, IItem in ipairs(internetLocalWorldList) do
             if not CItem.shared and IItem.foldername == CItem.foldername then
                 if IItem.is_zip == CItem.is_zip then 
                     for key, value in pairs(IItem) do

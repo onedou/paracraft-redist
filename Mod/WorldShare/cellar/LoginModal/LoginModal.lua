@@ -7,6 +7,9 @@ Desc:
 use the lib:
 ------------------------------------------------------------
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+LoginModal:Init(function(result)
+    -- after login execute
+end)
 LoginModal:ShowPage()
 ------------------------------------------------------------
 ]]
@@ -143,7 +146,12 @@ function LoginModal:LoginAction()
         self:ClosePage()
 
         if not Mod.WorldShare.Store:Get('user/isVerified') then
-            RegisterModal:ShowBindingPage()
+            local UserConsolePage = Mod.WorldShare.Store:Get('page/UserConsole')
+
+            -- we only show binding page when user console page opened
+            if UserConsolePage then
+                RegisterModal:ShowBindingPage()
+            end
         end
 
         local AfterLogined = Mod.WorldShare.Store:Get('user/AfterLogined')

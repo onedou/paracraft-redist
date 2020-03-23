@@ -30,6 +30,7 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local LocalServiceWorld = NPL.load("../LocalService/World.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
@@ -349,7 +350,7 @@ end
 function Compare:RefreshWorldList(callback)
     local localWorlds = LocalServiceWorld:GetWorldList()
 
-    if not KeepworkService:IsSignedIn() then
+    if not KeepworkService:IsSignedIn() or not KeepworkServiceSession:IsMyWorldsFolder() then
         local currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(localWorlds)
 
         self.SortWorldList(currentWorldList)

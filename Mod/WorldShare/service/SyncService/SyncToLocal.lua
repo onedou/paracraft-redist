@@ -175,7 +175,7 @@ function SyncToLocal:GetCompareList()
         local bIsExisted = false
 
         for DKey, DItem in ipairs(self.dataSourceFiles) do
-            if (LItem.filename == DItem.path) then
+            if LItem.filename == DItem.path then
                 bIsExisted = true
                 break
             end
@@ -299,7 +299,7 @@ function SyncToLocal:DownloadOne(file, callback)
                 return false
             end
 
-            LocalService:Write(self.currentWorld.foldername, currentRemoteItem.path, content)
+            LocalService:Write(self.currentWorld.worldpath, currentRemoteItem.path, content)
 
             if type(callback) == "function" then
                 callback()

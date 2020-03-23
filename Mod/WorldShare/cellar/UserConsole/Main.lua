@@ -36,10 +36,6 @@ local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua
 
 local UserConsole = NPL.export()
 
-function UserConsole.IsSignedIn()
-   return KeepworkService:IsSignedIn()
-end
-
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
     if System.options.showUserWorldsOnce then
@@ -66,21 +62,45 @@ function UserConsole:ShowPage()
 
         KeepworkServiceSession:GetUserTokenFromUrlProtocol()
 
-        -- for restart game
-        if KeepworkServiceSession:GetCurrentUserToken() then
+        -- for restart and protocol
+        if not KeepworkService:IsSignedIn() and KeepworkServiceSession:GetCurrentUserToken() then
             UserInfo:LoginWithToken()
             return false
         end
 
         -- auto sign in here
-        UserInfo:CheckDoAutoSignin()
+        if not KeepworkService:IsSignedIn() then
+            UserInfo:CheckDoAutoSignin()
+        end
+
+        -- show login notice
+        if not KeepworkService:IsSignedIn() then
+            Mod.WorldShare.MsgBox:Dialog(
+                "ShowLoginNotice",
+                L"当前未登录状态下世界文件列表默认显示临时文件夹中的世界条目，登陆后世界文件列表将默认显示您的个人世界。",
+                {
+                    Yes = L"暂不登录",
+                    No = L"现在登录"
+                },
+                function(res)
+                    if res == 4 then
+                        LoginModal:Init(function(result)
+                            WorldList:RefreshCurrentServerList()
+                        end)
+                    end
+                end,
+                _guihelper.MessageBoxButtons.YesNo
+            )
+        end
     end
 
     WorldList:RefreshCurrentServerList()
 end
 
 function UserConsole:EnterMainLogin()
-    GameMainLogin:next_step({IsLoginModeSelected = false})
+    if System.options.mc == true then
+        GameMainLogin:next_step({IsLoginModeSelected = false})
+    end
 end
 
 function UserConsole:ClosePage()
@@ -148,8 +168,9 @@ function UserConsole.OnClickOfficialWorlds(callback)
 end
 
 function UserConsole:CreateNewWorld()
-    self:ClosePage()
-    CreateWorld:CreateNewWorld()
+    CreateWorld:CreateNewWorld(nil, function()
+        self:ClosePage()
+    end)
 end
 
 function UserConsole:ShowHistoryManager()
