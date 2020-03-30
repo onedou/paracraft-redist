@@ -8,8 +8,6 @@ use the lib:
 local Password = NPL.load("(gl)Mod/ExplorerApp/components/Password/Password.lua")
 ------------------------------------------------------------
 ]]
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local SetCoins = NPL.load("../SetCoins/SetCoins.lua")
 local Wallet = NPL.load('(gl)Mod/ExplorerApp/database/Wallet.lua')
 local UpdatePassword = NPL.load("./UpdatePassword/UpdatePassword.lua")
@@ -28,7 +26,7 @@ function Password:ShowPage()
 
     local params = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/ExplorerApp/components/Password/Password.html", "Mod.ExplorerApp.Password", 0, 0, "_fi", false, 3)
 
-    local PasswordPage = Store:Get('page/Password')
+    local PasswordPage = Mod.WorldShare.Store:Get('page/Password')
 
     if PasswordPage then
         self:FocusPassword()
@@ -36,11 +34,11 @@ function Password:ShowPage()
 end
 
 function Password:SetPage()
-    Store:Set("page/Password", document:GetPageCtrl())
+    Mod.WorldShare.Store:Set("page/Password", document:GetPageCtrl())
 end
 
 function Password:ClosePage()
-    local PasswordPage = Store:Get('page/Password')
+    local PasswordPage = Mod.WorldShare.Store:Get('page/Password')
 
     if (PasswordPage) then
         PasswordPage:CloseWindow()
@@ -48,7 +46,7 @@ function Password:ClosePage()
 end
 
 function Password:Refresh(time)
-    local PasswordPage = Store:Get('page/Password')
+    local PasswordPage = Mod.WorldShare.Store:Get('page/Password')
 
     if (PasswordPage) then
         PasswordPage:Refresh(time or 0.01)
@@ -56,7 +54,7 @@ function Password:Refresh(time)
 end
 
 function Password:FocusPassword()
-    local PasswordPage = Store:Get('page/Password')
+    local PasswordPage = Mod.WorldShare.Store:Get('page/Password')
 
     if not PasswordPage then
         return false
@@ -66,7 +64,7 @@ function Password:FocusPassword()
 end
 
 function Password:ClearPassword()
-    local PasswordPage = Store:Get('page/Password')
+    local PasswordPage = Mod.WorldShare.Store:Get('page/Password')
 
     if not PasswordPage then
         return false
@@ -109,7 +107,7 @@ function Password:Confirm()
 end
 
 function Password:UpdateViewPassword()
-    local PasswordPage = Store:Get('page/Password')
+    local PasswordPage = Mod.WorldShare.Store:Get('page/Password')
 
     if not PasswordPage then
         return false

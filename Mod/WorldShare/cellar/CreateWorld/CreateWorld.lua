@@ -31,6 +31,18 @@ function CreateWorld:CreateNewWorld(foldername)
 end
 
 function CreateWorld.OnClickCreateWorld()
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+    if not currentWorld or not currentWorld.foldername then
+        -- that return true to OnClickCreateWorld filter if current world is not correct
+        return true
+    end
+
+    if not CreateWorld:CheckSpecialCharacter(currentWorld.foldername) then
+         -- that return true to OnClickCreateWorld filter if have special charactor
+        return true
+    end
+
     Mod.WorldShare.Store:Remove("world/currentWorld")
 end
 
@@ -58,4 +70,13 @@ function CreateWorld:CreateRevisionXml()
         file:WriteString("1")
         file:close();
     end
+end
+
+function CreateWorld:CheckSpecialCharacter(foldername)
+    if string.match(foldername, "[_`~!@#$%%^&*()+=|{}':;',%[%]%.<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？©]+") then
+        GameLogic.AddBBS(nil, L"世界名称不能含有特殊字符", 3000, "255 0 0")
+        return false
+    end
+
+    return true
 end

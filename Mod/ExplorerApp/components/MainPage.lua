@@ -24,7 +24,7 @@ local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("../service/KeepworkService/Project.lua")
-local KeepworkEsServiceProjects = NPL.load("../service/KeepworkEsService/Projects.lua")
+local KeepworkEsServiceProject = NPL.load("../service/KeepworkEsService/Project.lua")
 local Password = NPL.load("./Password/Password.lua")
 local GameOver = NPL.load("./GameProcess/GameOver/GameOver.lua")
 local TimeUp = NPL.load("./GameProcess/TimeUp/TimeUp.lua")
@@ -329,7 +329,7 @@ function MainPage:SetWorksTree(categoryItem, sort)
 
     local filter = { "paracraft专用", categoryItem.value }
 
-    KeepworkEsServiceProjects:GetEsProjectsByFilter(
+    KeepworkEsServiceProject:GetEsProjectsByFilter(
         filter,
         sort,
         { page = self.curPage },
