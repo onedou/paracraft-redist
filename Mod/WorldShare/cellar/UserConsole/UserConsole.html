@@ -140,7 +140,7 @@
                 end
 
                 function get_world_status(index)
-                    return UserInfo.IsSignedIn() and not WorldList.GetCurWorldInfo("is_zip", Eval("index")) and WorldList.GetCurWorldInfo("status", Eval("index")) == index;
+                    return can_be_sync() and not WorldList.GetCurWorldInfo("is_zip", Eval("index")) and WorldList.GetCurWorldInfo("status", Eval("index")) == index;
                 end
 
                 function get_world_status_icon(index)
@@ -768,8 +768,7 @@
             <div class="world_area">
                 <div style="height:350px;">
                     <div style="margin-top: -2px;margin-bottom: 5px;">
-                        <%= L"世界文件储存位置：" %>
-                        <select name="select_worlds_path" class="bbs_text" style="width: 100px;height: 25px;margin-top: -2px;" onselect="<%= select_my_worlds_path %>" DataSource="<%= get_worlds_path() %>"></select>
+                        <select name="select_worlds_path" class="bbs_text" style="width: 140px;height: 25px;margin-top: -2px;" onselect="<%= select_my_worlds_path %>" DataSource="<%= get_worlds_path() %>"></select>
                         <input class="flat_button mc_light_grey_button_with_fillet"
                                onclick="refresh()"
                                style="height:25px;min-width:40px;margin-top: -2px;margin-left:4px;"

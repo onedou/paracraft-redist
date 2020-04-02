@@ -285,9 +285,11 @@ function Compare:GetCurrentWorldInfo(callback)
 
                 if currentWorld.status == 2 then
                     currentWorld.status = 3
-                    currentWorld.worldpath = worldpath
                     currentWorld.local_tagname = currentWorld.remote_tagname
                 end
+
+                -- temporary fixed: always update worldpath
+                currentWorld.worldpath = worldpath
 
                 Mod.WorldShare.Store:Set("world/worldTag", worldTag)
                 Mod.WorldShare.Store:Set("world/currentWorld", currentWorld)

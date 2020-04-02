@@ -523,7 +523,7 @@ function WorldList:GetWorldsPath()
     RemoveFilename('DesignHouse')
 
     for key, item in pairs(list) do
-        allPath[#allPath + 1] = { text = item.filename, value = "worlds/" .. item.filename }
+        allPath[#allPath + 1] = { text = item.filename .. L'的文件夹', value = "worlds/" .. item.filename }
     end
 
     for key, item in pairs(allPath) do

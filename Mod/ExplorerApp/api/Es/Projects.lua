@@ -5,11 +5,11 @@ Date:  2019.11.8
 Place: Foshan
 use the lib:
 ------------------------------------------------------------
-local KeepworkParacraftDevicesApi = NPL.load("(gl)Mod/Explorer/api/Keepwork/ParacraftDevices.lua")
+local KeepworkParacraftDevicesApi = NPL.load("(gl)Mod/ExplorerApp/api/Keepwork/ParacraftDevices.lua")
 ------------------------------------------------------------
 ]]
 
-local EsBaseApi = NPL.load("(gl)Mod/WorldShare/api/Es/BaseApi.lua")
+local EsBaseApi = NPL.load('(gl)Mod/WorldShare/api/Es/BaseApi.lua')
 
 local EsProjectsApi = NPL.export()
 

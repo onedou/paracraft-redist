@@ -351,7 +351,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 
         local currentUser = self:LoadSigninInfo()
 
-        if not currentUser.account or not currentUser.password then
+        if not currentUser or not currentUser.account or not currentUser.password then
             return false
         end
 
@@ -403,8 +403,13 @@ end
 
 function KeepworkServiceSession:IsMyWorldsFolder()
     local username = Mod.WorldShare.Store:Get('user/username') or ""
-    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
-    local myWorldsFolderUsername = string.match(myWorldsFolder, '^worlds/(.+)') or ""
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+
+    local myWorldsFolderUsername = ""
+
+    if currentWorld and currentWorld.worldpath then
+        myWorldsFolderUsername = string.match(currentWorld.worldpath, 'worlds/(%w+)/') or ""
+    end
 
     if username == "" or myWorldsFolderUsername == "" then
         return false
@@ -418,9 +423,16 @@ function KeepworkServiceSession:IsMyWorldsFolder()
 end
 
 function KeepworkServiceSession:IsTempWorldsFolder()
-    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    echo('keepwork service session is temp world folder!!!!!!', true)
+    echo(currentWorld, true)
+    local myWorldsFolderUsername = ""
 
-    if myWorldsFolder == 'worlds/DesignHouse' then
+    if currentWorld and currentWorld.worldpath then
+        myWorldsFolderUsername = string.match(currentWorld.worldpath, 'worlds/(%w+)/') or ""
+    end
+
+    if myWorldsFolderUsername == 'DesignHouse' then
         return true
     else
         return false

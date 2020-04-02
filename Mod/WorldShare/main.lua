@@ -123,8 +123,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "OnClickCreateWorld",
         function()
-            CreateWorld.OnClickCreateWorld()
-            return false
+            return CreateWorld.OnClickCreateWorld()
         end
     )
 
@@ -168,8 +167,8 @@ function WorldShare:init()
 
     -- save world
     GameLogic.GetFilters():add_filter(
-        "SaveWorldPage.OnSaveWorld",
-        function(callback)
+        "SaveWorld",
+        function(bEnable, callback)
             return SaveWorld:Save(callback)
         end
     )
@@ -177,7 +176,7 @@ function WorldShare:init()
     -- save world as
     GameLogic.GetFilters():add_filter(
         "WorldCommon.SaveWorldAs",
-        function(callback)
+        function(bEnable, callback)
             return SaveWorld:SaveAs(callback)
         end
     )

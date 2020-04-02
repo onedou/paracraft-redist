@@ -200,6 +200,7 @@ function LoginModal:SetAutoLogin()
 
     local autoLogin = LoginModalPage:GetValue("autoLogin")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
+    local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
     self.loginServer = KeepworkService:GetEnv()
     self.account = string.lower(LoginModalPage:GetValue("account"))
@@ -209,8 +210,9 @@ function LoginModal:SetAutoLogin()
     else
         LoginModalPage:SetValue("rememberMe", rememberMe)
     end
-    
+
     LoginModalPage:SetValue("autoLogin", autoLogin)
+    LoginModalPage:SetValue("account", account)
     LoginModalPage:SetValue("password", password)
 
     self:Refresh()
@@ -224,6 +226,7 @@ function LoginModal:SetRememberMe()
     end
 
     local loginServer = KeepworkService:GetEnv()
+    local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
     self.loginServer = KeepworkService:GetEnv()
@@ -236,6 +239,7 @@ function LoginModal:SetRememberMe()
     end
 
     LoginModalPage:SetValue("rememberMe", rememberMe)
+    LoginModalPage:SetValue("account", account)
     LoginModalPage:SetValue("password", password)
 
     self:Refresh()
