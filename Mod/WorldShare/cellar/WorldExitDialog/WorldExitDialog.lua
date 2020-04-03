@@ -169,7 +169,7 @@ function WorldExitDialog.OnDialogResult(res)
 
     if res == 8 then -- guihelper.DialogResult.Yes
         if KeepworkServiceSession:IsSignedIn() then
-            if KeepworkServiceSession:IsMyWorldsFolder() then
+            if KeepworkServiceSession:IsCurrentWorldsFolder() then
                 Handle(res)
             else
                 Mod.WorldShare.MsgBox:Dialog(
@@ -252,7 +252,7 @@ function WorldExitDialog.OnDialogResult(res)
                     elseif res == 4 then
                         LoginModal:Init(function(result)
                             if result then
-                                if KeepworkServiceSession:IsMyWorldsFolder() then
+                                if KeepworkServiceSession:IsCurrentWorldsFolder() then
                                     Handle(res)
                                 else
                                     Mod.WorldShare.MsgBox:Dialog(

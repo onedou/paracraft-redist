@@ -78,7 +78,7 @@
                         local myWorldsFolder = Mod.WorldShare.Store:Get("world/myWorldsFolder")
 
                         if KeepworkServiceSession:IsSignedIn() then
-                            if KeepworkServiceSession:IsMyWorldsFolder() then
+                            if KeepworkServiceSession:IsCurrentWorldsFolder() then
                                 handle()
                             else
                                 _guihelper.MessageBox(L"无法重命名他人本地世界文件夹中储存的世界。")
@@ -103,7 +103,7 @@
 
                                                 WorldList:RefreshCurrentServerList()
 
-                                                if KeepworkServiceSession:IsMyWorldsFolder() then
+                                                if KeepworkServiceSession:IsCurrentWorldsFolder() then
                                                     handle()
                                                 else
                                                     _guihelper.MessageBox(L"无法重命名他人本地世界文件夹中储存的世界。")

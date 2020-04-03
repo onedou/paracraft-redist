@@ -403,6 +403,22 @@ end
 
 function KeepworkServiceSession:IsMyWorldsFolder()
     local username = Mod.WorldShare.Store:Get('user/username') or ""
+    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
+    local myWorldsFolderUsername = string.match(myWorldsFolder, '^worlds/(.+)') or ""
+
+    if username == "" or myWorldsFolderUsername == "" then
+        return false
+    end
+
+    if username == myWorldsFolderUsername then
+        return true
+    else
+        return false
+    end
+end
+
+function KeepworkServiceSession:IsCurrentWorldsFolder()
+    local username = Mod.WorldShare.Store:Get('user/username') or ""
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     local myWorldsFolderUsername = ""
@@ -424,8 +440,7 @@ end
 
 function KeepworkServiceSession:IsTempWorldsFolder()
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
-    echo('keepwork service session is temp world folder!!!!!!', true)
-    echo(currentWorld, true)
+
     local myWorldsFolderUsername = ""
 
     if currentWorld and currentWorld.worldpath then

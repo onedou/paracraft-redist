@@ -32,7 +32,7 @@ function DeleteWorld:ShowPage()
     end
 
     local function Handle()
-        if KeepworkServiceSession:IsMyWorldsFolder() then
+        if KeepworkServiceSession:IsCurrentWorldsFolder() then
             Show()
         else
             if myWorldsFolder == 'worlds/DesignHouse' then

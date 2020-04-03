@@ -17,7 +17,7 @@ local SaveWorld = NPL.export()
 
 function SaveWorld:Save(callback)
     if KeepworkServiceSession:IsSignedIn() then
-        if KeepworkServiceSession:IsMyWorldsFolder() then
+        if KeepworkServiceSession:IsCurrentWorldsFolder() then
             if type(callback) == 'function' then
                 callback()
             end
@@ -78,7 +78,7 @@ function SaveWorld:Save(callback)
                 elseif res == 4 then
                     LoginModal:Init(function(result)
                         if result then
-                            if KeepworkServiceSession:IsMyWorldsFolder() then
+                            if KeepworkServiceSession:IsCurrentWorldsFolder() then
                                 if type(callback) == 'function' then
                                     callback()
                                 end
@@ -126,7 +126,7 @@ end
 
 function SaveWorld:SaveAs(callback)
     if KeepworkServiceSession:IsSignedIn() then
-        if KeepworkServiceSession:IsMyWorldsFolder() then
+        if KeepworkServiceSession:IsCurrentWorldsFolder() then
             if type(callback) == 'function' then
                 callback()
             end
@@ -185,7 +185,7 @@ function SaveWorld:SaveAs(callback)
                 if res == 4 then
                     LoginModal:Init(function(result)
                         if result then
-                            if KeepworkServiceSession:IsMyWorldsFolder() then
+                            if KeepworkServiceSession:IsCurrentWorldsFolder() then
                                 if type(callback) == 'function' then
                                     callback()
                                 end
