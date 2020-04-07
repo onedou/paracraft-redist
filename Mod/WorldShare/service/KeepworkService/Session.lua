@@ -106,6 +106,7 @@ function KeepworkServiceSession:Logout()
     if KeepworkService:IsSignedIn() then
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
+        Mod.WorldShare.Store:Set('world/myWorldsFolder', 'worlds/DesignHouse')
     end
 end
 
