@@ -500,6 +500,22 @@
                     Mod.WorldShare.Store:Set('world/myWorldsFolder', value)
                     refresh()
                 end
+
+                function is_show_create_button()
+                    if KeepworkServiceSession:IsTempWorldsFolder() then
+                        return true
+                    else
+                        if KeepworkServiceSession:IsSignedIn() then
+                            if KeepworkServiceSession:IsMyWorldsFolder() then
+                                return true
+                            else
+                                return false
+                            end
+                        else
+                            return false
+                        end
+                    end
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -960,10 +976,12 @@
                     </pe:if>
                 </div>
                 <div style="margin-top:20px">
-                    <input type="button" value='<%=L"创建世界" %>' style="float:left;margin-left:80px;min-width:120px"
-                        onclick="create_new_world()" class="common_button mc_light_grey_button_with_fillet" />
-                    <input type="button" value='<%="..." %>' style="margin-left:10px;height:30px;min-width:30px"
-                        onclick="import_world()" class="flat_button" tooltip='<%=L"导入/导出..." %>' />
+                    <pe:if condition="<%= is_show_create_button() %>">
+                        <input type="button" value='<%=L"创建世界" %>' style="float:left;margin-left:80px;min-width:120px"
+                            onclick="create_new_world()" class="common_button mc_light_grey_button_with_fillet" />
+                        <input type="button" value='<%="..." %>' style="margin-left:10px;height:30px;min-width:30px"
+                            onclick="import_world()" class="flat_button" tooltip='<%=L"导入/导出..." %>' />
+                    </pe:if>
                 </div>
             </div>
             <!--line-->
