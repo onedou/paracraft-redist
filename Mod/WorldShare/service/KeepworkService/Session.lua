@@ -84,12 +84,15 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
             end
         end
     )
+
+    self:ResetIndulge()
 end
 
 function KeepworkServiceSession:Logout()
     if KeepworkService:IsSignedIn() then
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
+        self:ResetIndulge()
     end
 end
 
@@ -383,4 +386,51 @@ function KeepworkServiceSession:RenewToken()
     Mod.WorldShare.Utils.SetTimeOut(function()
         self:RenewToken()
     end, 3600 * 1000)
+end
+
+function KeepworkServiceSession:PreventIndulge(callback)
+    local function Handle()
+        local times = 1000
+        self.gameTime = (self.gameTime or 0) + 1 * 60
+
+        -- 40 minutes
+        if self.gameTime == (40 * 60) then
+            if type(callback) == 'function' then
+                callback('40MINS')
+            end
+        end
+
+        -- 2 hours
+        if self.gameTime == (2 * 60 * 60) then
+            if type(callback) == 'function' then
+                callback('2HOURS')
+            end
+        end
+
+        -- 4 hours
+        if self.gameTime == (4 * 60 * 60) then
+            if type(callback) == 'function' then
+                callback('4HOURS')
+            end
+        end
+
+        -- 22:30
+        if os.date("%H:%M", os.time()) == '22:30' then
+            if type(callback) == 'function' then
+                callback('22:30')
+            end
+
+            times = 60 * 1000
+        end
+
+        Mod.WorldShare.Utils.SetTimeOut(function()
+            Handle()
+        end, times)
+    end
+
+    Handle()
+end
+
+function KeepworkServiceSession:ResetIndulge()
+    self.gameTime = 0
 end

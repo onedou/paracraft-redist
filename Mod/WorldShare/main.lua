@@ -52,6 +52,7 @@ local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
 local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
+local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
@@ -155,6 +156,9 @@ function WorldShare:init()
 
     -- refresh token
     KeepworkServiceSession:RenewToken()
+
+    -- prevent indulage
+    PreventIndulge:Init()
 end
 
 function WorldShare:OnInitDesktop()
