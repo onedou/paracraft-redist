@@ -174,6 +174,7 @@ function SyncMain:SyncToLocal(callback)
                         end
         
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
+                            Progress:UpdateDataBar(1, 1, L"处理完成")
                             Progress:SetFinish(true)
                             Progress:Refresh()
                             Progress:RefreshOperate()

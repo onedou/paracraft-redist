@@ -353,6 +353,14 @@ function WorldList:EnterWorld(index)
 
                 SyncToLocal:Init(function(result, msg)
                     if not result then
+                        if msg == 'NEWWORLD' then
+                            UserConsole:ClosePage()
+                            GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
+                            local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+                            CreateWorld:CreateNewWorld(currentWorld.foldername)
+                            return false
+                        end
+
                         return false
                     end
 
