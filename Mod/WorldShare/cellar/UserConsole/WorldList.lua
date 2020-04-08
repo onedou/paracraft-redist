@@ -27,6 +27,7 @@ local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 local LocalServiceWorld = NPL.load("(gl)Mod/WorldShare/service/LocalService/World.lua")
 local SyncToLocal = NPL.load("(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua")
+local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
 local WorldList = NPL.export()
 
@@ -357,6 +358,7 @@ function WorldList:EnterWorld(index)
                             GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
                             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
                             CreateWorld:CreateNewWorld(currentWorld.foldername)
+                            Mod.WorldShare.MsgBox:Close()
                             return false
                         end
 
