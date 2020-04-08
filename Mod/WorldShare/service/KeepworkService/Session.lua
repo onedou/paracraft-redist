@@ -418,6 +418,21 @@ function KeepworkServiceSession:IsMyWorldsFolder()
     end
 end
 
+function KeepworkServiceSession:IsMyTempWorldsFolder()
+    local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder') or ""
+    local myWorldsFolderUsername = string.match(myWorldsFolder, '^worlds/(.+)') or ""
+
+    if myWorldsFolderUsername == "" then
+        return false
+    end
+
+    if myWorldsFolderUsername == 'DesignHouse' then
+        return true
+    else
+        return false
+    end
+end
+
 function KeepworkServiceSession:IsCurrentWorldsFolder()
     local username = Mod.WorldShare.Store:Get('user/username') or ""
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')

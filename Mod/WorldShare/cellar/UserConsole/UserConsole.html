@@ -502,7 +502,7 @@
                 end
 
                 function is_show_create_button()
-                    if KeepworkServiceSession:IsTempWorldsFolder() then
+                    if KeepworkServiceSession:IsMyTempWorldsFolder() then
                         return true
                     else
                         if KeepworkServiceSession:IsSignedIn() then
