@@ -13,7 +13,6 @@ local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login
 
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local KeepworkServiceProject = NPL.load('../KeepworkService/Project.lua')
-local Progress = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Progress/Progress.lua")
 local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
@@ -29,6 +28,10 @@ local DELETE = "DELETE"
 local DOWNLOAD = "DOWNLOAD"
 
 function SyncToLocal:Init(callback)
+    if type(callback) ~= 'function' then
+        return false
+    end
+
     local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
     if not currentWorld then
@@ -39,10 +42,6 @@ function SyncToLocal:Init(callback)
     self.broke = false
     self.finish = false
     self.callback = callback
-
-    -- //TODO: Move to UI file
-    -- 加载进度UI界面
-    Progress:Init(self)
 
     -- we build a world folder path if worldpath is not exit
     if not self.currentWorld.worldpath or self.currentWorld.worldpath == "" then
@@ -80,20 +79,21 @@ function SyncToLocal:Init(callback)
     end
 
     self:Start()
+
+    return self
 end
 
 function SyncToLocal:Start()
     self.compareListIndex = 1
     self.compareListTotal = 0
 
-    Progress:UpdateDataBar(0, 0, L"正在对比文件列表...")
+    self.callback(false, { method = 'UPDATE-PROGRESS', current = 0, total = 0, msg = L"正在对比文件列表..." })
 
     local function Handle(data, err)
         if type(data) ~= 'table' then
             self.callback(false, L"获取列表失败")
             self.callback = nil
             self:SetFinish(true)
-            Progress:ClosePage()
             return false
         end
 
@@ -106,7 +106,6 @@ function SyncToLocal:Start()
             self.callback(false, 'NEWWORLD')
             self.callback = nil
             self:SetFinish(true)
-            Progress:ClosePage()
             return false
         end
 
@@ -194,25 +193,22 @@ function SyncToLocal:GetCompareList()
     self.compareListTotal = #self.compareList
 end
 
+function SyncToLocal:Close()
+    self.callback(true, 'success')
+    self.callback = nil
+end
+
 function SyncToLocal:HandleCompareList()
     if self.compareListTotal < self.compareListIndex then
         Mod.WorldShare.Store:Set('world/currentWorld', self.currentWorld)
         KeepworkService:SetCurrentCommitId()
+        -- sync finish
+        self:SetFinish(true)
+        self.callback(false, {
+            method = 'UPDATE-PROGRESS-FINISH'
+        })
 
         self.compareListIndex = 1
-        self:SetFinish(true)
-
-        Progress:SetFinish(true)
-        Progress:Refresh()
-
-        Mod.WorldShare.Store:Set(
-            "world/CloseProgress",
-            function()
-                self.callback(true, 'success')
-                self.callback = nil
-            end
-        )
-
         return true
     end
 
@@ -226,12 +222,12 @@ function SyncToLocal:HandleCompareList()
     local currentItem = self.compareList[self.compareListIndex]
 
     local function Retry()
-        Progress:UpdateDataBar(
-            self.compareListIndex,
-            self.compareListTotal,
-            format(L"%s 处理完成", currentItem.file),
-            self.finish
-        )
+        self.callback(false, {
+            method = 'UPDATE-PROGRESS',
+            current = self.compareListIndex,
+            total = self.compareListTotal,
+            msg = format(L"%s 处理完成", currentItem.file)
+        })
 
         self.compareListIndex = self.compareListIndex + 1
         self:HandleCompareList()
@@ -278,11 +274,12 @@ end
 function SyncToLocal:DownloadOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
-    Progress:UpdateDataBar(
-        self.compareListIndex,
-        self.compareListTotal,
-        format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
-    )
+    self.callback(false, {
+        method = 'UPDATE-PROGRESS',
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+    })
 
     GitService:GetContentWithRaw(
         self.currentWorld.foldername,
@@ -292,10 +289,12 @@ function SyncToLocal:DownloadOne(file, callback)
         function(content, size)
             if content == false then
                 self.compareListIndex = 1
-                self:SetFinish(true)
-                self.callback(false, format(L'同步失败，原因： %s 下载失败', currentRemoteItem.path))
+                self.callback(false, {
+                    method = 'UPDATE-PROGRESS-FAIL',
+                    msg = format(L'同步失败，原因： %s 下载失败', currentRemoteItem.path)
+                })
                 self.callback = nil
-                Progress:ClosePage()
+                self:SetBroke(true)
                 return false
             end
 
@@ -321,11 +320,12 @@ function SyncToLocal:UpdateOne(file, callback)
         return false
     end
 
-    Progress:UpdateDataBar(
-        self.compareListIndex,
-        self.compareListTotal,
-        format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
-    )
+    self.callback(false, {
+        method = 'UPDATE-PROGRESS',
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+    })
 
     GitService:GetContentWithRaw(
         self.currentWorld.foldername,
@@ -335,10 +335,12 @@ function SyncToLocal:UpdateOne(file, callback)
         function(content, size)
             if content == false then
                 self.compareListIndex = 1
-                self:SetFinish(true)
-                self.callback(false, format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path))
+                self.callback(false, {
+                    method = 'UPDATE-PROGRESS-FAIL',
+                    msg = format(L'同步失败，原因： %s 更新失败', currentRemoteItem.path)
+                })
                 self.callback = nil
-                Progress:ClosePage()
+                self:SetBroke(true)
                 return false
             end
 
@@ -355,11 +357,12 @@ end
 function SyncToLocal:DeleteOne(file, callback)
     local currentLocalItem = self:GetLocalFileByFilename(file)
 
-    Progress:UpdateDataBar(
-        self.compareListIndex,
-        self.compareListTotal,
-        format(L"%s （%s） 删除中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.size, "KB"))
-    )
+    self.callback(false, {
+        method = 'UPDATE-PROGRESS',
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s （%s） 删除中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.size, "KB"))
+    })
 
     LocalService:Delete(self.currentWorld.worldpath, currentLocalItem.filename)
 
@@ -391,19 +394,9 @@ function SyncToLocal:DownloadZIP()
             KeepworkService:SetCurrentCommitId()
 
             self:SetFinish(true)
-            Progress:UpdateDataBar(
-                1,
-                1,
-                format(L"处理完成"),
-                self.finish
-            )
-            Progress:SetFinish(true)
-            Progress:Refresh()
-
-            if type(self.callback) == 'function' then
-                self.callback(true, 'success')
-                self.callback = nil
-            end
+            self.callback(false, {
+                method = 'UPDATE-PROGRESS-FINISH'
+            })
         end
     )
 end
