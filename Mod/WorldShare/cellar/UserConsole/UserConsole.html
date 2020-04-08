@@ -81,7 +81,11 @@
                             if KeepworkServiceSession:IsCurrentWorldsFolder() then
                                 handle()
                             else
-                                _guihelper.MessageBox(L"无法重命名他人本地世界文件夹中储存的世界。")
+                                if KeepworkServiceSession:IsMyTempWorldsFolder() then
+                                    handle()
+                                else
+                                    _guihelper.MessageBox(L"无法重命名他人本地世界文件夹中储存的世界。")
+                                end
                             end
                         else
                             if myWorldsFolder and myWorldsFolder ~= 'worlds/DesignHouse' then
