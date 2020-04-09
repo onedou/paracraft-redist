@@ -149,6 +149,8 @@ function SyncMain:SyncToLocal(callback)
             local syncInstance = SyncToLocal:Init(function(result, option)
                 if result == false then
                     if type(option) == 'string' then
+                        Progress:ClosePage()
+
                         if option == 'NEWWORLD' then
                             UserConsole:ClosePage()
                             GameLogic.AddBBS(nil, L"服务器未找到世界数据，请新建", 3000, "255 255 0")
