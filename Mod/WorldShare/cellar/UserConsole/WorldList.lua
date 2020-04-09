@@ -205,6 +205,13 @@ function WorldList:EnterWorld(index)
         return false
     end
 
+    local output = commonlib.Files.Find({}, currentWorld.worldpath, 0, 500, "worldconfig.txt")
+
+    if not output or #output == 0 then
+        _guihelper.MessageBox(L"世界文件异常，请重新下载")
+        return false
+    end
+
     local function Handle(result)
         if result == 'REGISTER' or result == 'FORGET' then
             return false

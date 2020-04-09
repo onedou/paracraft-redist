@@ -17,7 +17,6 @@ local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua"
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 
@@ -222,13 +221,6 @@ function SyncToLocal:HandleCompareList()
     local currentItem = self.compareList[self.compareListIndex]
 
     local function Retry()
-        self.callback(false, {
-            method = 'UPDATE-PROGRESS',
-            current = self.compareListIndex,
-            total = self.compareListTotal,
-            msg = format(L"%s 处理完成", currentItem.file)
-        })
-
         self.compareListIndex = self.compareListIndex + 1
         self:HandleCompareList()
     end
@@ -278,7 +270,7 @@ function SyncToLocal:DownloadOne(file, callback)
         method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 下载中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+        msg = format(L"%s 下载中", currentRemoteItem.path)
     })
 
     GitService:GetContentWithRaw(
@@ -300,6 +292,13 @@ function SyncToLocal:DownloadOne(file, callback)
 
             LocalService:Write(self.currentWorld.worldpath, currentRemoteItem.path, content)
 
+            self.callback(false, {
+                method = 'UPDATE-PROGRESS',
+                current = self.compareListIndex,
+                total = self.compareListTotal,
+                msg = format(L"%s （%s） 下载成功", currentRemoteItem.path, Mod.WorldShare.Utils.FormatFileSize(size, "KB"))
+            })
+
             if type(callback) == "function" then
                 callback()
             end
@@ -313,8 +312,15 @@ function SyncToLocal:UpdateOne(file, callback)
     local currentRemoteItem = self:GetRemoteFileByPath(file)
 
     if currentLocalItem.sha1 == currentRemoteItem.id then
+        self.callback(false, {
+            method = 'UPDATE-PROGRESS',
+            current = self.compareListIndex,
+            total = self.compareListTotal,
+            msg = format(L"%s 相等跳过", currentRemoteItem.path)
+        })
+
         if type(callback) == "function" then
-            Mod.WorldShare.Utils.SetTimeOut(callback)
+            Mod.WorldShare.Utils.SetTimeOut(callback, 200)
         end
 
         return false
@@ -324,7 +330,7 @@ function SyncToLocal:UpdateOne(file, callback)
         method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 更新中", currentRemoteItem.path, Utils.FormatFileSize(size, "KB"))
+        msg = format(L"%s 更新中", currentRemoteItem.path)
     })
 
     GitService:GetContentWithRaw(
@@ -345,6 +351,13 @@ function SyncToLocal:UpdateOne(file, callback)
             end
 
             LocalService:Write(self.currentWorld.worldpath, currentRemoteItem.path, content)
+
+            self.callback(false, {
+                method = 'UPDATE-PROGRESS',
+                current = self.compareListIndex,
+                total = self.compareListTotal,
+                msg = format(L"%s （%s） 更新成功", currentRemoteItem.path, Mod.WorldShare.Utils.FormatFileSize(size, "KB"))
+            })
     
             if type(callback) == "function" then
                 callback()
@@ -361,10 +374,17 @@ function SyncToLocal:DeleteOne(file, callback)
         method = 'UPDATE-PROGRESS',
         current = self.compareListIndex,
         total = self.compareListTotal,
-        msg = format(L"%s （%s） 删除中", currentLocalItem.filename, Utils.FormatFileSize(currentLocalItem.size, "KB"))
+        msg = format(L"%s （%s） 删除中", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.size, "KB"))
     })
 
     LocalService:Delete(self.currentWorld.worldpath, currentLocalItem.filename)
+
+    self.callback(false, {
+        method = 'UPDATE-PROGRESS',
+        current = self.compareListIndex,
+        total = self.compareListTotal,
+        msg = format(L"%s （%s） 删除成功", currentLocalItem.filename, Mod.WorldShare.Utils.FormatFileSize(currentLocalItem.size, "KB"))
+    })
 
     if type(callback) == "function" then
         callback()
