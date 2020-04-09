@@ -628,7 +628,7 @@ function MainPage:HandleGameProcess()
         Store:Set("explorer/reduceRemainingTime", 1000 * 60 * 10)
     end
 
-    Utils.SetTimeOut(
+    Mod.WorldShare.Utils.SetTimeOut(
         function()
             local reduceRemainingTime = Store:Get("explorer/reduceRemainingTime")
             local warnReduceRemainingTime = Store:Get("explorer/warnReduceRemainingTime")
@@ -691,7 +691,7 @@ function MainPage:OnWorldLoad()
     local personalMode = Store:Get("world/personalMode")
 
     if not personalMode then
-        Utils.SetTimeOut(
+        Mod.WorldShare.Utils.SetTimeOut(
             function()
                 Toast:ShowPage(L"消耗一个金币")
             end,

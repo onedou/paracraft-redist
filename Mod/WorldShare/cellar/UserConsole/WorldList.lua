@@ -202,6 +202,13 @@ function WorldList:EnterWorld(index)
         return false
     end
 
+    local output = commonlib.Files.Find({}, currentWorld.worldpath, 0, 500, "worldconfig.txt")
+
+    if not output or #output == 0 then
+        _guihelper.MessageBox(L"世界文件异常，请重新下载")
+        return false
+    end
+
     local function Handle(result)
         if result == 'REGISTER' or result == 'FORGET' then
             return false
@@ -432,8 +439,12 @@ function WorldList:EnterWorld(index)
     end
 
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
+        -- get my worlds folder when click enter button
+        local myWorldsFolder = Mod.WorldShare.Store:Get('world/myWorldsFolder')
         LoginModal:Init(function(result)
             if result then
+                -- set my worlds folder back to at click time value
+                Mod.WorldShare.Store:Set('world/myWorldsFolder', myWorldsFolder)
                 -- refresh world list after 
                 self:RefreshCurrentServerList(function()
                     Handle(result)

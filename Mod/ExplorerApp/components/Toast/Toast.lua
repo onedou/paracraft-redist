@@ -33,7 +33,7 @@ function Toast:ShowPage(msg, nTimes)
 
     local params = Mod.WorldShare.Utils.ShowWindow(300, 32, "Mod/ExplorerApp/components/Toast/Toast.html", "Mod.ExplorerApp.Toast", nil, nil, "_ct", false, 3)
 
-    Utils.SetTimeOut(
+    Mod.WorldShare.Utils.SetTimeOut(
         function()
             if self.allPreviousMsg[index] then
                 self:ClosePage()

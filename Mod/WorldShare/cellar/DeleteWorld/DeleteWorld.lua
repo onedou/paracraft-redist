@@ -122,15 +122,16 @@ end
 function DeleteWorld:DeleteWorld()
     local isEnterWorld = Mod.WorldShare.Store:Get("world/isEnterWorld")
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
+    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld")
 
-    if not currentWorld then
+    if not currentWorld or not currentEnterWorld then
         return false
     end
 
     if isEnterWorld then
         local worldTag = WorldCommon.GetWorldInfo()
 
-        if currentWorld.foldername == worldTag.name and
+        if currentWorld.worldpath == currentEnterWorld.worldpath and
            GameLogic.IsReadOnly() == currentWorld.is_zip then
             _guihelper.MessageBox(L"不能刪除正在编辑的世界")
             return false

@@ -92,7 +92,7 @@ function Progress:Cancel(callback)
 
     self.syncInstance:SetBroke(true)
 
-    Mod.WorldShare.MsgBox:Show(L"正在等待上次同步完成，请稍后...", nil, nil, 380, 130)
+    Mod.WorldShare.MsgBox:Show(L"正在等待上次同步完成，请稍后...", nil, nil, 380, 130, 11)
 
     self.broke = true
     self.finish = true
