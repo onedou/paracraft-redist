@@ -344,6 +344,11 @@ function Compare:GetCurrentWorldInfo(callback)
 
     Mod.WorldShare.Store:Set("world/currentEnterWorld", currentWorld)
 
+    if not KeepworkServiceSession:IsCurrentWorldsFolder() then
+        System.World.readonly = true
+        GameLogic.options:ResetWindowTitle()
+    end
+
     if type(callback) == 'function' then
         callback()
     end
