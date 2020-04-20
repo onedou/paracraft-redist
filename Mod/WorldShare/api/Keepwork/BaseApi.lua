@@ -9,6 +9,9 @@ local KeepworkBaseApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua")
 ------------------------------------------------------------
 ]]
 
+local GoogleAnalytics = NPL.load("GoogleAnalytics")
+local Logger = GoogleAnalytics.LogCollector:new():init()
+
 local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 local BaseApi = NPL.load('../BaseApi.lua')
 
@@ -38,26 +41,38 @@ end
 function KeepworkBaseApi:Get(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Get(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Get(url, params, self:GetHeaders(headers), success, self:ErrorCollect("GET", error), noTryStatus)
 end
 
 -- public
 function KeepworkBaseApi:Post(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Post(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Post(url, params, self:GetHeaders(headers), success, self:ErrorCollect("Post", error), noTryStatus)
 end
 
 -- public
 function KeepworkBaseApi:Put(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Put(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Put(url, params, self:GetHeaders(headers), success, self:ErrorCollect("Put", error), noTryStatus)
 end
 
 -- public
 function KeepworkBaseApi:Delete(url, params, headers, success, error, noTryStatus)
     url = self:GetApi() .. url
 
-    BaseApi:Delete(url, params, self:GetHeaders(headers), success, error, noTryStatus)
+    BaseApi:Delete(url, params, self:GetHeaders(headers), success, self:ErrorCollect("Delete", error), noTryStatus)
+end
+
+-- public
+function KeepworkBaseApi:ErrorCollect(method, error)
+    return function(data, err)
+        -- send directly
+        Logger:collect("worldshare_api_error", method, format("httpstatus: %d, content: %s", err, NPL.ToJson(data, true)))
+
+        if type(error) == 'function' then
+            error(data, err)
+        end
+    end
 end
