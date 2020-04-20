@@ -9,9 +9,6 @@ local KeepworkBaseApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/BaseApi.lua")
 ------------------------------------------------------------
 ]]
 
-local GoogleAnalytics = NPL.load("GoogleAnalytics")
-local Logger = GoogleAnalytics.LogCollector:new():init()
-
 local Config = NPL.load('(gl)Mod/WorldShare/config/Config.lua')
 local BaseApi = NPL.load('../BaseApi.lua')
 
@@ -67,6 +64,9 @@ end
 
 -- public
 function KeepworkBaseApi:ErrorCollect(method, error)
+    local GoogleAnalytics = NPL.load("GoogleAnalytics")
+    local Logger = GoogleAnalytics.LogCollector:new():init()
+
     return function(data, err)
         -- send directly
         Logger:collect("worldshare_api_error", method, format("httpstatus: %d, content: %s", err, NPL.ToJson(data, true)))
