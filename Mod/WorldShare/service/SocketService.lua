@@ -125,6 +125,12 @@ function SocketService:ReceiveUDPMsg(msg)
 		end
 
 		if msg.result == "IAM" then
+			local udpIp, udpPort = string.match(msg.nid, "~udp(.+)_(%d+)")
+			
+			if not udpIp or not udpPort then
+				return false
+			end
+
 			if not msg.uuid or not msg.worldHost or not msg.worldPort then
 				return false
 			end
@@ -142,7 +148,7 @@ function SocketService:ReceiveUDPMsg(msg)
 				end
 			end
 
-			udpServerList[#udpServerList + 1] = { ip = msg.worldHost, port = msg.worldPort, username = msg.username, serverName = msg.serverName, uuid = msg.uuid }
+			udpServerList[#udpServerList + 1] = { ip = udpIp, port = msg.worldPort, username = msg.username, serverName = msg.serverName, uuid = msg.uuid }
 
 			Mod.WorldShare.Store:Set('user/udpServerList', udpServerList)
 		end
