@@ -53,8 +53,8 @@ function RegisterModal:ShowBindingPage()
     Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/Binding.html", "Binding")
 end
 
-function RegisterModal:ShowClassificationPage()
-    Mod.WorldShare.Utils.ShowWindow(
+function RegisterModal:ShowClassificationPage(callback)
+    local params = Mod.WorldShare.Utils.ShowWindow(
         370,
         280,
         "Mod/WorldShare/cellar/RegisterModal/BindPhoneInAccountRegister.html",
@@ -65,6 +65,10 @@ function RegisterModal:ShowClassificationPage()
         nil,
         10
     )
+
+    if type(callback) == "function" then
+        params._page.callback = callback
+    end
 end
 
 function RegisterModal:GetServerList()
@@ -120,7 +124,9 @@ function RegisterModal:Register(page)
                 GameLogic.AddBBS(nil, state.message, 5000, "0 0 255")
             else
                 if self.m_mode == "account" then
-                    self:ShowClassificationPage()
+                    self:ShowClassificationPage(function()
+                        WorldList:RefreshCurrentServerList()
+                    end)
 
                     GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
                 end
@@ -147,6 +153,8 @@ function RegisterModal:Classification(phonenumber, captcha, callback)
         if data.data then
             GameLogic.AddBBS(nil, L"实名认证成功", 5000, "0 255 0")
 
+            Mod.WorldShare.Store:Set("user/isVerified", true)
+
             if type(callback) == "function" then
                 callback()
             end
@@ -161,6 +169,9 @@ function RegisterModal:ClassificationAndBind(phonenumber, captcha, callback)
     KeepworkServiceSession:ClassificationAndBindPhone(phonenumber, captcha, function(data, err)
         if data.data then
             GameLogic.AddBBS(nil, L"实名认证成功，手机号绑定成功", 5000, "0 255 0")
+
+            Mod.WorldShare.Store:Set("user/isVerified", true)
+            Mod.WorldShare.Store:Set("user/isBind", true)
 
             if type(callback) == "function" then
                 callback()

@@ -31,11 +31,19 @@
                         if page:GetValue("is_bind") then
                             -- classification and bind
                             RegisterModal:ClassificationAndBind(phonenumber, phonecaptcha, function()
+                                if type(page.callback) == "function" then
+                                    page.callback()
+                                end
+
                                 close()
                             end)
                         else
                             -- only classification
                             RegisterModal:Classification(phonenumber, phonecaptcha, function()
+                                if type(page.callback) == "function" then
+                                    page.callback()
+                                end
+
                                 close()
                             end)
                         end

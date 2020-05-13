@@ -419,7 +419,9 @@
                 end
 
                 function classification()
-                    RegisterModal:ShowClassificationPage()
+                    RegisterModal:ShowClassificationPage(function()
+                        WorldList:RefreshCurrentServerList()
+                    end)
                 end
 
                 function is_verified()

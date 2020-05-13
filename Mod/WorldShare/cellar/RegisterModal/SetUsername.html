@@ -12,6 +12,8 @@
                     end
 
                     function last()
+                        RegisterModal.account = page:GetValue("account")
+
                         close()
                         local params = Mod.WorldShare.Utils.ShowWindow(360, 480, "Mod/WorldShare/cellar/RegisterModal/RegisterModal.html", "RegisterModal")
                         params._page:SetValue("phonenumber", RegisterModal.phonenumber)
@@ -25,6 +27,13 @@
                     end
 
                     function register()
+                        local checked = page:GetValue("checked")
+
+                        if not agree then
+                            GameLogic.AddBBS(nil, L"您未同意用户协议", 3000, "255 0 0")
+                            return false
+                        end
+
                         local account = page:GetValue("account")
 
                         RegisterModal.account = account

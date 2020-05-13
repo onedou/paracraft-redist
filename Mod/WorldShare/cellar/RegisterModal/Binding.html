@@ -17,10 +17,11 @@
                     local phonenumberExist = false
                     local emailExist = false
                     local isClickedGetPhoneCaptcha = false
+                    local isClickedGetPhoneCaptchaOneTime = false
 
                     function get_phone_captcha()
                         if phonenumberExist then
-                            GameLogic.AddBBS(nil, L"用户名已存在", 3000, "255 0 0")
+                            GameLogic.AddBBS(nil, L"手机号已存在", 3000, "255 0 0")
                             return false
                         end
 
@@ -34,6 +35,7 @@
                         end
 
                         isClickedGetPhoneCaptcha = true
+                        isClickedGetPhoneCaptchaOneTime = true
 
                         local times = 60
 
@@ -113,6 +115,11 @@
 
                     function bind(m)
                         if m == "bindphone" then
+                            if not isClickedGetPhoneCaptchaOneTime then
+                                GameLogic.AddBBS(nil, L"请先获取验证码", 3000, "255 0 0")
+                                return false
+                            end
+
                             if phonenumberExist then
                                 GameLogic.AddBBS(nil, L"手机号已存在", 3000, "255 0 0")
                                 return false

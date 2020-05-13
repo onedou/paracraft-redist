@@ -9,8 +9,8 @@
 
                     page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set('page/RegisterModal', page)
-                    accountExist = true
-                    phonenumberExist = true
+                    local accountExist = true
+                    local phonenumberExist = true
 
                     KeepworkServiceSession:FetchCaptcha(function() page:Refresh(0.01) end)
 
@@ -285,7 +285,9 @@
                         RegisterModal.phonepassword = phonepassword
 
                         page:CloseWindow()
-                        Mod.WorldShare.Utils.ShowWindow(360, 230, "Mod/WorldShare/cellar/RegisterModal/SetUsername.html", "RegisterModal/SetUsername")
+                        local params = Mod.WorldShare.Utils.ShowWindow(360, 230, "Mod/WorldShare/cellar/RegisterModal/SetUsername.html", "RegisterModal/SetUsername")
+
+                        params._page:SetValue("account", RegisterModal.account)
                     end
 
                     function check_phone_number(pn)
