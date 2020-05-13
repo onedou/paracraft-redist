@@ -41,6 +41,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
 NPL.load("(gl)script/ide/System/Encoding/guid.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
 NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
+NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
 
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
@@ -65,7 +66,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.13'
+WorldShare.version = '0.0.14'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
