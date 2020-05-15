@@ -57,6 +57,7 @@ local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/Preven
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
@@ -152,6 +153,14 @@ function WorldShare:init()
             else
                 return url
             end
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        "VipNotice",
+        function(bEnable, callback)
+            VipNotice:Init(callback)
+            return true
         end
     )
 
