@@ -43,9 +43,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
 NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
 NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
 
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+-- UI
 local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
 local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
@@ -54,10 +52,18 @@ local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua
 local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local WorldExitDialog = NPL.load("(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua")
 local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
-local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
+local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
+
+-- service
+local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
+
+-- helper
+local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
+local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
+local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
@@ -67,7 +73,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.14'
+WorldShare.version = '0.0.15'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
@@ -160,8 +166,18 @@ function WorldShare:init()
     -- vip notice
     GameLogic.GetFilters():add_filter(
         "VipNotice",
-        function(bEnable, callback)
+        function(bEnabled, callback)
             VipNotice:Init(callback)
+            return true
+        end
+    )
+
+    -- filter KeepworkPremission
+    GameLogic.GetFilters():add_filter(
+        "KeepworkPermission",
+        function(bEnabled, bOpenUIIfNot, authName, callback)
+            Permission:CheckPermission(bOpenUIIfNot, authName, callback)
+
             return true
         end
     )

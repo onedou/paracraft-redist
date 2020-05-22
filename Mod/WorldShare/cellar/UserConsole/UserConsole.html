@@ -3,9 +3,6 @@
     <pe:mcml>
         <script type="text/npl" refresh="false">
             <![CDATA[
-                -- for debug daily checking
-                local kpitem_enabled = ParaEngine.GetAppCommandLineByParam("kpitem_enabled", false);
-
                 InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
                 WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
                 UniString = commonlib.gettable("System.Core.UniString")
@@ -16,6 +13,7 @@
                 local Server = NPL.load('../Server/Server.lua')
                 local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
+                local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -430,20 +428,36 @@
                 function is_verified()
                     return Mod.WorldShare.Store:Get("user/isVerified") == true and true or false
                 end
-                 function OnDailyCheck()
-                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
-                    ParacraftLearningRoomDailyPage.AutoOpen(nil,nil,function()
-                        UserConsole:ClosePage()
-                    end);
+                
+                function get_classification_style()
+                    if Mod.WorldShare.Utils.IsEnglish() then
+                        return 'margin-left: -6px;'
+                    else
+                        return 'margin-left: 40px;'
+                    end
                 end
+
+                function OnDailyCheck()
+                    LoginModal:CheckSignedIn(L"请先登录", function(result)
+                        if result then
+                            local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                            ParacraftLearningRoomDailyPage.AutoOpen(nil,nil,function()
+                                -- UserConsole:ClosePage()
+                            end);
+                        end
+                    end)
+                end
+
                 function OnLearningLand()
                     local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
                     ParacraftLearningRoomDailyPage.OnLearningLand();
                 end
+
                 function OnVIP()
                     local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
                     ParacraftLearningRoomDailyPage.OnVIP();
                 end
+
                 function IsKpItemEnabled()
                     return kpitem_enabled;
                 end
@@ -701,7 +715,7 @@
                             </div>
                             <pe:if condition="<%= not is_verified() %>">
                                 <div>
-                                    <input type="button" style="margin-left:40px" class="mc_light_grey_button_with_fillet" onclick="classification" value='<%= L"实名认证"%>' />
+                                    <input type="button" style="<%= get_classification_style() %>" class="mc_light_grey_button_with_fillet" onclick="classification" value='<%= L"实名认证"%>' />
                                 </div>
                             </pe:if>
                             <div style="margin-top:10px">
@@ -920,23 +934,21 @@
             <div class="middle_line" />
             <!--events_area-->
             <div class="events_area">
-                <pe:if condition='<%= IsKpItemEnabled() %>'>
-                    <div class="link_big_event">
-                        <div class="big_event_item">
-                            <div style="margin-top:5px;">
-                                <div style="float:left;margin-left:40px;">
-                                    <input type="button" tooltip='<%=L"每日签到"%>' onclick="OnDailyCheck" style="float:left;width:37px;height:51px;background:url(Texture/Aries/Dock/kids/hulu_32bits.png#0 0 37 51)" />
-                                </div>
-                                <div style="float:left;margin-left:40px;">
-                                    <input type="button" tooltip='<%=L"知识岛"%>' onclick="OnLearningLand" style="float:left;width:48px;height:48px;background:url(Texture/Aries/Dock/kids/map_btn_32bits.png);" />
-                                </div>
-                                <div style="float:left;margin-left:40px;">
-                                    <input type="button" tooltip='<%=L"VIP会员"%>' onclick="OnVIP" style="float:left;width:48px;height:48px;background:url(Texture/Aries/Dock/kids/magicstar_btn_32bits.png#0 0 45 45);" />
-                                </div>
+                <div class="link_big_event">
+                    <div class="big_event_item">
+                        <div style="margin-top:5px;">
+                            <div style="float:left;margin-left:40px;">
+                                <input type="button" tooltip='<%=L"每日签到"%>' onclick="OnDailyCheck" style="float:left;width:37px;height:51px;background:url(Texture/Aries/Dock/kids/hulu_32bits.png#0 0 37 51)" />
+                            </div>
+                            <div style="float:left;margin-left:40px;">
+                                <input type="button" tooltip='<%=L"知识岛"%>' onclick="OnLearningLand" style="float:left;width:48px;height:48px;background:url(Texture/Aries/Dock/kids/map_btn_32bits.png);" />
+                            </div>
+                            <div style="float:left;margin-left:40px;">
+                                <input type="button" tooltip='<%=L"VIP会员"%>' onclick="OnVIP" style="float:left;width:48px;height:48px;background:url(Texture/Aries/Dock/kids/magicstar_btn_32bits.png#0 0 45 45);" />
                             </div>
                         </div>
                     </div>
-                </pe:if>
+                </div>
                 <a onclick="official_worlds()" class="link_big_event">
                     <div class="big_event_item">
                         <div style="float:left;margin-left:5px;background:url(Texture/3DMapSystem/AppIcons/png/Tasks_64.png);width:48px;height:48px;"></div>
