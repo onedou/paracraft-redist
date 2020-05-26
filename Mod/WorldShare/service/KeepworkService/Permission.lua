@@ -21,6 +21,8 @@ KeepworkServicePermission.AllAuth = {
     SkinOfAllProtagonists = "vip_skin_of_all_protagonists",
     PythonCodeBlock = "vip_python_code_block",
     VideoPluginWatermarkRemoval = "vip_video_plugin_watermark_removal",
+    Lan40PeopleOnline = "vip_lan_40_people_online",
+    WanNetworking = "vip_wan_networking",
 }
 
 function KeepworkServicePermission:GetAuth(authName)

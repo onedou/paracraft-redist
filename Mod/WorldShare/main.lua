@@ -55,6 +55,7 @@ local PreventIndulge = NPL.load("(gl)Mod/WorldShare/cellar/PreventIndulge/Preven
 local Grade = NPL.load("(gl)Mod/WorldShare/cellar/Grade/Grade.lua")
 local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 local Permission = NPL.load("(gl)Mod/WorldShare/cellar/Permission/Permission.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
 
 -- service
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
@@ -178,6 +179,15 @@ function WorldShare:init()
         function(bEnabled, bOpenUIIfNot, authName, callback)
             Permission:CheckPermission(bOpenUIIfNot, authName, callback)
 
+            return true
+        end
+    )
+
+    -- filter CheckSignedIn
+    GameLogic:GetFilters():add_filter(
+        "LoginModal.CheckSignedIn",
+        function(bEnabled, desc, callback)
+            LoginModal:CheckSignedIn(desc, callback)
             return true
         end
     )
