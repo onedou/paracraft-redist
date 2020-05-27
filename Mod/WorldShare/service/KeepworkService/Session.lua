@@ -68,11 +68,15 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/isBind", true)
     end
 
-    if response.vip and response.vip == 1 then
-        Mod.WorldShare.Store:Set("user/userType", 'vip')
+    if response.orgAdmin and response.orgAdmin == 1 then
+        Mod.WorldShare.Store:Set("user/userType", 'teacher')
     elseif response.tLevel and response.tLevel > 0 then
         Mod.WorldShare.Store:Set("user/userType", 'teacher')
         Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
+    elseif response.student and response.student == 1 then
+        Mod.WorldShare.Store:Set("user/userType", 'vip')
+    elseif response.vip and response.vip == 1 then
+        Mod.WorldShare.Store:Set("user/userType", 'vip')
     else
         Mod.WorldShare.Store:Set("user/userType", 'plain')
     end
