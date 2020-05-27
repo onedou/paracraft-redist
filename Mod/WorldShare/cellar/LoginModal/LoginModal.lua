@@ -27,12 +27,29 @@ local LoginModal = NPL.export()
 function LoginModal:Init(callbackFunc)
     if type(callbackFunc) == "function" then
         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-            -- OnLogin
-            GameLogic.GetFilters():apply_filters("OnLogin", bIsSucceed)
+            -- OnKeepWorkLogin
+            GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
             callbackFunc(bIsSucceed)
         end)
     end
     self:ShowPage()
+end
+
+-- @param desc: login desc
+-- @param callback: after login function
+function LoginModal:CheckSignedIn(desc, callback)
+    if KeepworkServiceSession:IsSignedIn() then
+        if type(callback) == "function" then
+            callback(true)
+        end
+
+        return true
+    else
+        Mod.WorldShare.Store:Set("user/loginText", desc)
+        self:Init(callback)
+
+        return false
+    end
 end
 
 function LoginModal:ShowPage()
