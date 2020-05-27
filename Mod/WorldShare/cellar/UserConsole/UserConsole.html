@@ -205,12 +205,8 @@
 
                 function username()
                     local iconList = {
-                        [1] = "textures/worldshare_32bits.png#12 310 26 18",
-                        [2] = "textures/worldshare_32bits.png#48 310 26 18",
-                        [3] = "textures/worldshare_32bits.png#84 310 26 18",
-                        [4] = "textures/worldshare_32bits.png#119 310 26 18",
-                        [5] = "textures/worldshare_32bits.png#155 310 26 18",
-                        vip = "textures/worldshare_32bits.png#195 310 18 18",
+                        vip = "textures/worldshare_32bits.png#256 311 18 18",
+                        teacher = "textures/worldshare_32bits.png#285 311 18 18";
                     }
 
                     local userType = Mod.WorldShare.Store:Get('user/userType')
@@ -218,18 +214,13 @@
                     local textWidth = _guihelper.GetTextWidth(username)
 
                     if userType == 'teacher' then
-                        local tLevel = Mod.WorldShare.Store:Get('user/tLevel')
                         local left = (140 - 23 - 2 - textWidth) / 2
 
-                        if tLevel and iconList[tLevel] then
-                            return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 23px;height: 15px;background:url(' .. iconList[tLevel] .. ')" />' .. username
-                        else
-                            return '<div style="text-align: center">' .. username .. '</div>'
-                        end
+                        return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['teacher'] .. ')" />' .. username
                     elseif userType == 'vip' then
                         local left = (140 - 16 - 2 - textWidth) / 2
 
-                        return '<img style="margin-top: 3px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
+                        return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
                     else
                         return '<div style="text-align: center">' .. username .. '</div>'
                     end
@@ -456,10 +447,6 @@
                 function OnVIP()
                     local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
                     ParacraftLearningRoomDailyPage.OnVIP();
-                end
-
-                function IsKpItemEnabled()
-                    return kpitem_enabled;
                 end
             ]]>
         </script>
