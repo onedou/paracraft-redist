@@ -23,6 +23,7 @@ KeepworkServicePermission.AllAuth = {
     VideoPluginWatermarkRemoval = "vip_video_plugin_watermark_removal",
     Lan40PeopleOnline = "vip_lan_40_people_online",
     WanNetworking = "vip_wan_networking",
+    OnlineWorldData50Mb = "vip_online_world_data_50mb",
 }
 
 function KeepworkServicePermission:GetAuth(authName)

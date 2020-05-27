@@ -176,8 +176,8 @@ function WorldShare:init()
     -- filter KeepworkPremission
     GameLogic.GetFilters():add_filter(
         "KeepworkPermission",
-        function(bEnabled, bOpenUIIfNot, authName, callback)
-            Permission:CheckPermission(bOpenUIIfNot, authName, callback)
+        function(bEnabled, authName, bOpenUIIfNot, callback)
+            Permission:CheckPermission(authName, bOpenUIIfNot, callback)
 
             return true
         end

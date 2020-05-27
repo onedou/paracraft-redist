@@ -40,7 +40,7 @@ function Server:ShowPage()
         WorldList:RefreshCurrentServerList()
     end
 
-    Permission:CheckPermission(true, "OnlineLearning", Handle)
+    Permission:CheckPermission("OnlineLearning", true, Handle)
 end
 
 function Server.OnScreenSizeChange()

@@ -17,7 +17,7 @@ local VipNotice = NPL.load("(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua")
 
 local Permission = NPL.export()
 
-function Permission:CheckPermission(bOpenUIIfNot, authName, callback)
+function Permission:CheckPermission(authName, bOpenUIIfNot, callback)
     if not authName or type(authName) ~= "string" then
         return false
     end
@@ -27,7 +27,7 @@ function Permission:CheckPermission(bOpenUIIfNot, authName, callback)
             if result then
                 KeepworkServicePermission:Authentication(authName, function(result)
                     if result == false then
-                        VipNotice:ShowPage()
+                        self:ShowFailDialog(authName)
                     end
 
                     if type(callback) == "function" then
@@ -44,5 +44,13 @@ function Permission:CheckPermission(bOpenUIIfNot, authName, callback)
                 callback(false)
             end
         end
+    end
+end
+
+function Permission:ShowFailDialog(authName)
+    if authName == "OnlineTeaching" then
+        _guihelper.MessageBox(L"此功能需要教师权限")
+    else
+        VipNotice:ShowPage()
     end
 end
