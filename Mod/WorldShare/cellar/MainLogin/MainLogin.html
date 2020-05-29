@@ -212,6 +212,14 @@
                             <input type="button" class="offline_button mc_light_grey_button_with_fillet" onclick="use_offline()" value="<%= L'离线模式' %>" />
                             <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
                         </div>
+                        <div>
+                            <div style="font-size: 14px;">---- <%= L"第三方登录" %> -----</div>
+                            <div>
+                                <div>QQ</div>
+                                <div>WEIXIN</div>
+                            </div>
+                            <div style="font-size: 14px;"><%= L"将第三方账号绑定到Paracraft账号" %></div>
+                        </div>
                         <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">
                             <a name="forgot" onclick="forget_password()" style="background:url(textures/worldshare_32bits.png#399 76 64 30:0 0 0 0);height:30px;width:150px;font-size: 14px;color: #ffffff;"><%= L"忘记密码" %></a>
                             <span style="color:#ffffff;">|</span>
