@@ -9,12 +9,12 @@
   </npc_files>
 
   <!--the asset server-->
-  <asset_server_addresses bg_loader_list ="http://update.61.com/haqi/assetupdate">
-        <address host="http://update.61.com/haqi/assetupdate/"/>
+  <asset_server_addresses bg_loader_list ="http://cdn.keepwork.com/update61/assetdownload/update/">
+        <address host="http://cdn.keepwork.com/update61/assetdownload/update/"/>
   </asset_server_addresses>
   
   <patch_server_addresses>
-    <address host="http://update.61.com/haqi/coreupdate/" version_host="http://tmlog.paraengine.com/"/>
+    <address host="http://cdn.keepwork.com/update61/" version_host="http://tmlog.paraengine.com/"/>
   </patch_server_addresses>
 
   <chat_server_addresses api_file="config/JabberAPI.config.xml" domain="tm.test.pala5.cn">
