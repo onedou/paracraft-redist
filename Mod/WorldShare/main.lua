@@ -36,12 +36,21 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua
 NPL.load("(gl)script/ide/System/os/os.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
-NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
 NPL.load("(gl)script/ide/System/Encoding/guid.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
 NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
 NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua")
+NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
+NPL.load("(gl)Mod/WorldShare/service/Cef3Manager.lua")
+NPL.load("(gl)script/ide/System/Core/ToolBase.lua")
+
+-- get table lib
+local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
+local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
+local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
+local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
 
 -- UI
 local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
@@ -65,10 +74,6 @@ local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
 local MsgBox = NPL.load("(gl)Mod/WorldShare/cellar/Common/MsgBox/MsgBox.lua")
 local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
-
-local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
-local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
-local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 
 local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonlib.gettable("Mod.WorldShare"))
 
@@ -200,6 +205,11 @@ function WorldShare:init()
 
     -- prevent indulage
     PreventIndulge:Init()
+
+    -- init cef3 for windows
+    if System.os.GetPlatform() == "win32" then
+        Cef3Manager:Init()
+    end
 end
 
 function WorldShare:OnInitDesktop()
