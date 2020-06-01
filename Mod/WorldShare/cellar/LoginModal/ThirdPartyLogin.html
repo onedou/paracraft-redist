@@ -2,7 +2,17 @@
     <body>
         <pe:mcml>
             <script type="text/npl" refresh="false">
+                <![CDATA[
+                    local page = document:GetPageCtrl()
+
+                    function close()
+                        page:CloseWindow()
+                    end
+                ]]>
             </script>
+            <aries:window mode="thin" width="380" height="440" style="float:left;" title_height="40" close_height="25" title='<%=L"第三方登录" %>' onclose="close()">
+                from third party page
+            </aries:window>
         </pe:mcml>
     </body>
 </html>
