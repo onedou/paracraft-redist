@@ -18,23 +18,32 @@ local WorldShare = commonlib.gettable("Mod.WorldShare")
 local ExplorerApp = commonlib.gettable("Mod.ExplorerApp")
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
+-- UI
 local UserInfo = NPL.load("./UserInfo.lua")
 local WorldList = NPL.load("./WorldList.lua")
 local CreateWorld = NPL.load("(gl)Mod/WorldShare/cellar/CreateWorld/CreateWorld.lua")
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
 local HistoryManager = NPL.load("(gl)Mod/WorldShare/cellar/HistoryManager/HistoryManager.lua")
 local BrowseRemoteWorlds = NPL.load("(gl)Mod/WorldShare/cellar/BrowseRemoteWorlds/BrowseRemoteWorlds.lua")
+local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+
+-- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
 local KeepworkServiceProject = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Project.lua")
 local KeepworkServiceWorld = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/World.lua")
 local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
 local GitService = NPL.load("(gl)Mod/WorldShare/service/GitService.lua")
-local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua")
 local Compare = NPL.load("(gl)Mod/WorldShare/service/SyncService/Compare.lua")
-local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+
+-- databse
+local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua")
 
 local UserConsole = NPL.export()
+
+function UserConsole:ShowKickOutPage()
+    Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/UserConsole/KickOut.html", "LoginModal.KickOut", 0, 0, "_fi", false, 15)
+end
 
 -- this is called from ParaWorld Login App
 function UserConsole:CheckShowUserWorlds()
@@ -78,6 +87,10 @@ function UserConsole:ShowPage()
         end
     end
 
+    Mod.WorldShare.Store:Subscribe("user/Logout", function()
+        WorldList:RefreshCurrentServerList()
+    end)
+
     WorldList:RefreshCurrentServerList()
 end
 
@@ -97,6 +110,7 @@ function UserConsole:ClosePage()
         end
 
         UserConsolePage:CloseWindow()
+        Mod.WorldShare.Store:Unsubscribe("user/Logout")
     end
 end
 

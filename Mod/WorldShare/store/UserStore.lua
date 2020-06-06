@@ -10,7 +10,9 @@ local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
 ------------------------------------------------------------
 ]]
 
-local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
+local UserStore = commonlib.inherit(commonlib.gettable("System.Core.ToolBase"), commonlib.gettable('Mod.WorldShare.store.User'))
+
+UserStore:Signal("onLogout", function() end)
 
 function UserStore:Action()
     return {
@@ -52,6 +54,8 @@ function UserStore:Action()
             commonlib.setfield("System.User.NickName", nil)
             commonlib.setfield("System.User.userType", nil)
             commonlib.setfield("System.User.isVip", nil)
+
+            self:onLogout()
         end
     }
 end

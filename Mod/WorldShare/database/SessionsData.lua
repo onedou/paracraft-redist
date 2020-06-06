@@ -131,3 +131,14 @@ function SessionsData:GetSessionByUsername(username)
 
     return false
 end
+
+function SessionsData:GetDeviceUUID()
+    local sessionsData = self:GetSessions()
+
+    if not sessionsData.deviceUUID then
+        sessionsData.deviceUUID = System.Encoding.guid.uuid()
+        GameLogic.GetPlayerController():SaveLocalData("sessions", sessionsData, true)
+    end
+
+    return sessionsData.deviceUUID
+end

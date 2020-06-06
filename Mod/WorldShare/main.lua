@@ -200,6 +200,13 @@ function WorldShare:init()
 
     -- prevent indulage
     PreventIndulge:Init()
+
+    -- init long tcp connection
+    KeepworkServiceSession:LongConnectionInit(function(result)
+        if result == 'KICKOUT' then
+            UserConsole:ShowKickOutPage()
+        end
+    end)
 end
 
 function WorldShare:OnInitDesktop()

@@ -324,7 +324,6 @@ function UserInfo:Logout()
         -- OnKeepWorkLogout
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", true)
         KeepworkServiceSession:Logout()
-        WorldList:RefreshCurrentServerList()
     else
         -- OnKeepWorkLogout
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", false)
