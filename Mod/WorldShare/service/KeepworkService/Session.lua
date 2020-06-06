@@ -171,8 +171,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/userType", 'plain')
     end
 
-    local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
-    SetUserinfo(token, userId, username, nickname)
+    local Login = Mod.WorldShare.Store:Action("user/Login")
+    Login(token, userId, username, nickname)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)

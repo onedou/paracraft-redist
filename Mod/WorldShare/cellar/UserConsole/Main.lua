@@ -91,6 +91,10 @@ function UserConsole:ShowPage()
         WorldList:RefreshCurrentServerList()
     end)
 
+    Mod.WorldShare.Store:Subscribe("user/Login", function()
+        WorldList:RefreshCurrentServerList()
+    end)
+
     WorldList:RefreshCurrentServerList()
 end
 
@@ -110,6 +114,7 @@ function UserConsole:ClosePage()
         end
 
         UserConsolePage:CloseWindow()
+        Mod.WorldShare.Store:Unsubscribe("user/Login")
         Mod.WorldShare.Store:Unsubscribe("user/Logout")
     end
 end
