@@ -42,6 +42,11 @@ local CacheProjectId = NPL.load("(gl)Mod/WorldShare/database/CacheProjectId.lua"
 local UserConsole = NPL.export()
 
 function UserConsole:ShowKickOutPage()
+    if self.isKickOutPageOpened then
+        return false
+    end
+
+    self.isKickOutPageOpened = true
     Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/UserConsole/KickOut.html", "LoginModal.KickOut", 0, 0, "_fi", false, 15)
 end
 

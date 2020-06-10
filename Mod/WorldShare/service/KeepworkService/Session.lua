@@ -12,6 +12,7 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 -- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local GitGatewayService = NPL.load("../GitGatewayService.lua")
+local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua");
 
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
@@ -38,12 +39,25 @@ function KeepworkServiceSession:LongConnectionInit(callback)
         return false
     end
 
+    if connection.inited then
+        return nil
+    end
+
+    if not KpChatChannel.client then
+        KpChatChannel.client = connection
+    
+        KpChatChannel.client:AddEventListener("OnOpen", KpChatChannel.OnOpen, KpChatChannel)
+        KpChatChannel.client:AddEventListener("OnMsg", KpChatChannel.OnMsg, KpChatChannel)
+        KpChatChannel.client:AddEventListener("OnClose", KpChatChannel.OnClose, KpChatChannel)
+    end
+
     connection:AddEventListener("OnOpen", function(self)
         LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
     end, connection)
 
     connection:AddEventListener("OnMsg", self.OnMsg, connection)
     connection.uiCallback = callback
+    connection.inited = true
 end
 
 function KeepworkServiceSession:OnMsg(msg)

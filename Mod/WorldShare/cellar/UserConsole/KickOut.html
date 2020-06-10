@@ -2,6 +2,7 @@
     <body>
         <pe:mcml>
             <script type="text/npl" refresh="false">
+                local UserConsole = NPL.load('./Main.lua')
                 local UserInfo = NPL.load("./UserInfo.lua")
                 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
                 local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
@@ -13,6 +14,7 @@
                 end
 
                 function reset_password()
+                    UserConsole.isKickOutPageOpened = false
                     page:CloseWindow()
 
                     UserInfo:Logout()
@@ -20,12 +22,14 @@
                 end
 
                 function logout()
+                    UserConsole.isKickOutPageOpened = false
                     page:CloseWindow()
 
                     UserInfo:Logout()
                 end
 
                 function re_login()
+                    UserConsole.isKickOutPageOpened = false
                     page:CloseWindow()
                     
                     UserInfo:Logout()
