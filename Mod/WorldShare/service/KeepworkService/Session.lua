@@ -78,7 +78,7 @@ function KeepworkServiceSession:LoginSocket()
 
     local userRoom = '__user_' .. userId .. '__'
 
-    KeepworkSocketApi:SendMsg("app/join", { rooms = { userRoom }, token = token })
+    KeepworkSocketApi:SendMsg("app/join", { rooms = { userRoom } })
 end
 
 function KeepworkServiceSession:IsSignedIn()
