@@ -12,7 +12,7 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 -- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local GitGatewayService = NPL.load("../GitGatewayService.lua")
-local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua");
+local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
 
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
@@ -103,18 +103,26 @@ end
 
 function KeepworkServiceSession:LoginSocket()
     local token = Mod.WorldShare.Store:Get("user/token")
+    local userId = Mod.WorldShare.Store:Get("user/userId")
 
-    if not token then
+    if not token or not userId then
         return false
     end
 
-    KeepworkSocketApi:SendMsg("app/join", { rooms = { self:GetDeviceRoomName() }, token = token })
+    local userRoom = '__user_' .. userId .. '__'
+
+    KeepworkSocketApi:SendMsg("app/join", { rooms = { userRoom, self:GetDeviceRoomName() } })
 end
 
 function KeepworkServiceSession:IsSignedIn()
     local token = Mod.WorldShare.Store:Get("user/token")
+    local bLoginSuccessed = Mod.WorldShare.Store:Get("user/bLoginSuccessed")
 
-    return token ~= nil
+    if token ~= nil and bLoginSuccessed then
+        return true
+    else
+        return false
+    end
 end
 
 function KeepworkServiceSession:Login(account, password, callback)
@@ -188,6 +196,8 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local Login = Mod.WorldShare.Store:Action("user/Login")
     Login(token, userId, username, nickname)
 
+    Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
+
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
             if err == 200 then
@@ -216,6 +226,7 @@ function KeepworkServiceSession:Logout()
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
         self:ResetIndulge()
+        Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
     end
 end
 

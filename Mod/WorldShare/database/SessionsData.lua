@@ -140,5 +140,10 @@ function SessionsData:GetDeviceUUID()
         GameLogic.GetPlayerController():SaveLocalData("sessions", sessionsData, true)
     end
 
+    local machineID = ParaEngine.GetAttributeObject():GetField("MachineID","")
+
+    echo("from sessions data get device UUID", true)
+    echo(machineID, true)
+
     return sessionsData.deviceUUID
 end
