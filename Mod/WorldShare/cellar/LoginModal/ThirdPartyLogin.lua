@@ -32,7 +32,7 @@ end
 
 function ThirdPartyLogin:GetUrl()
     if self.type == 'WECHAT' then
-        return "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101403344&redirect_uri=https%3A%2F%2Fkeepwork.com&state=123456"
+        return "https://open.weixin.qq.com/connect/qrconnect?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=SCOPE&state=STATE#wechat_redirect"
     end
 
     if self.type == "QQ" then
