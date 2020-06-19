@@ -177,10 +177,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/userType", 'plain')
     end
 
+    Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
+
     local Login = Mod.WorldShare.Store:Action("user/Login")
     Login(token, userId, username, nickname)
-
-    Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
