@@ -69,12 +69,11 @@ function KeepworkServiceSession:OnMsg(msg)
 
     if msg.data.sio_pkt_name and msg.data.sio_pkt_name == "event" then
         if msg.data.body and msg.data.body[1] == "app/msg" then
-            if msg.data.body[2] and msg.data.body[2].action == "kickOut" then
-                local connection = KeepworkSocketApi:GetConnection()
 
-                if type(connection.uiCallback) == "function" then
-                    connection.uiCallback("KICKOUT")
-                end
+            local connection = KeepworkSocketApi:GetConnection()
+
+            if type(connection.uiCallback) == "function" then
+                connection.uiCallback(msg.data.body[2])
             end
         end
     end
