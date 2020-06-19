@@ -39,6 +39,8 @@ function SocketApi:Connect()
             _args[1].token = Mod.WorldShare.Store:Get('user/token')
         end
 
+echo("from socket api connect!!!!", true)
+echo(_args, true)
         if #_args == 1 then
             args = self:GetArgs(name, _args[1])
         elseif #_args == 2 then

@@ -80,7 +80,8 @@ function KeepworkServiceSession:OnMsg(msg)
     end
 end
 
-function KeepworkServiceSession:GetDeviceRoomName()
+
+function KeepworkServiceSession:LoginSocket()
     if not self:IsSignedIn() then
         return false
     end
@@ -94,24 +95,7 @@ function KeepworkServiceSession:GetDeviceRoomName()
     end
 
     local machineCode = SessionsData:GetDeviceUUID()
-    local userId = Mod.WorldShare.Store:Get("user/userId") or ""
-
-    local sessionRoomName = "__kick_" .. platform .. "_" .. machineCode .. "_" .. userId .. "__"
-
-    return sessionRoomName
-end
-
-function KeepworkServiceSession:LoginSocket()
-    local token = Mod.WorldShare.Store:Get("user/token")
-    local userId = Mod.WorldShare.Store:Get("user/userId")
-
-    if not token or not userId then
-        return false
-    end
-
-    local userRoom = '__user_' .. userId .. '__'
-
-    KeepworkSocketApi:SendMsg("app/join", { rooms = { userRoom, self:GetDeviceRoomName() } })
+    KeepworkSocketApi:SendMsg("app/login", { platform = platform, machineCode = machineCode })
 end
 
 function KeepworkServiceSession:IsSignedIn()
@@ -223,6 +207,7 @@ end
 function KeepworkServiceSession:Logout()
     if KeepworkService:IsSignedIn() then
         KeepworkUsersApi:Logout()
+        KeepworkSocketApi:SendMsg("app/logout", {})
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
         self:ResetIndulge()

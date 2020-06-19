@@ -47,6 +47,7 @@ function UserConsole:ShowKickOutPage()
     end
 
     self.isKickOutPageOpened = true
+    UserInfo:Logout()
     Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/UserConsole/KickOut.html", "LoginModal.KickOut", 0, 0, "_fi", false, 15)
 end
 
