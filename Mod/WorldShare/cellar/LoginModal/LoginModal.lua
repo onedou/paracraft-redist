@@ -69,7 +69,7 @@ function LoginModal:ShowPage()
         return false
     end
 
-    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
+    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil, 5)
 
     local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
