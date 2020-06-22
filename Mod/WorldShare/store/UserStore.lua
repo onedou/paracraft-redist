@@ -10,10 +10,7 @@ local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
 ------------------------------------------------------------
 ]]
 
-local UserStore = commonlib.inherit(commonlib.gettable("System.Core.ToolBase"), commonlib.gettable('Mod.WorldShare.store.User'))
-
-UserStore:Signal("onLogin", function() end)
-UserStore:Signal("onLogout", function() end)
+local UserStore = commonlib.gettable('Mod.WorldShare.store.User')
 
 function UserStore:Action()
     return {
@@ -21,7 +18,7 @@ function UserStore:Action()
             self.token = token
             commonlib.setfield("System.User.keepworktoken", token)
         end,
-        Login = function(token, userId, username, nickname)
+        SetUserinfo = function(token, userId, username, nickname)
             self.token = token
             self.userId = userId
             self.username = username
@@ -37,8 +34,9 @@ function UserStore:Action()
             commonlib.setfield("System.User.keepworkUsername", username)
             commonlib.setfield("System.User.NickName", nickname)
             commonlib.setfield("System.User.userType", self.userType)
-
-            self:onLogin()
+        end,
+        SetPlayerController = function(playerController)
+            self.playerController = playerController
         end,
         Logout = function()
             self.token = nil
@@ -54,12 +52,7 @@ function UserStore:Action()
             commonlib.setfield("System.User.NickName", nil)
             commonlib.setfield("System.User.userType", nil)
             commonlib.setfield("System.User.isVip", nil)
-
-            self:onLogout()
-        end,
-        SetPlayerController = function(playerController)
-            self.playerController = playerController
-        end,
+        end
     }
 end
 

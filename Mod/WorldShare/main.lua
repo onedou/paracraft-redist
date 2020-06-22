@@ -154,9 +154,13 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "cmd_loadworld", 
         function(url, options)
+			local refreshMode = nil;
+			if (options.force) then
+				refreshMode = "force";
+			end
             local pid = UserConsole:GetProjectId(url)
             if pid then
-                UserConsole:HandleWorldId(pid)
+                UserConsole:HandleWorldId(pid, refreshMode)
                 return
             else
                 return url
@@ -202,21 +206,7 @@ function WorldShare:init()
     PreventIndulge:Init()
 
     -- init long tcp connection
-    KeepworkServiceSession:LongConnectionInit(function(result)
-        if type(result) ~= 'table' then
-            return false
-        end
-
-        if result.action == 'kickOut' then
-            local reason = 1
-
-            if result.payload and result.payload.reason then
-                reason = result.payload.reason
-            end
-
-            UserConsole:ShowKickOutPage(reason)
-        end
-    end)
+    KeepworkServiceSession:LongConnectionInit()
 end
 
 function WorldShare:OnInitDesktop()

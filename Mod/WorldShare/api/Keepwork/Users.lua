@@ -22,27 +22,17 @@ local KeepworkUsersApi = NPL.export()
     password string 必须 密码
 ]]
 -- return: object
-function KeepworkUsersApi:Login(account, password, platform, machineCode, success, error)
+function KeepworkUsersApi:Login(account, password, success, error)
     if type(account) ~= "string" or type(password) ~= "string" then
         return false
     end
 
     local params = {
         username = account,
-        password = password,
-        platform = platform,
-        machineCode = machineCode
+        password = password
     }
 
     KeepworkBaseApi:Post("/users/login", params, nil, success, error, { 503, 400 })
-end
-
--- url: /users/logout
--- method: POST
--- params: []
--- return: object
-function KeepworkUsersApi:Logout(success, error)
-    KeepworkBaseApi:Post("/users/logout", nil, nil, success, error)
 end
 
 -- url: /users/profile
