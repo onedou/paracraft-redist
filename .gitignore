@@ -22,3 +22,5 @@ access.log
 /log/Aries_PreloadList_BeforeLogin.log
 /config/language.txt
 /cef3
+cefclient_config.json
+console.log

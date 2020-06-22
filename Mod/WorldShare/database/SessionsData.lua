@@ -27,7 +27,8 @@ local SessionsData = NPL.export()
                 password = "12345678",
                 autoLogin = true,
                 rememberMe = true,
-                token = "jwttoken"
+                token = "jwttoken",
+                tokenExpire = 12345678
             }
         },
         {
@@ -38,7 +39,8 @@ local SessionsData = NPL.export()
                 loginServer = "STAGE",
                 autoLogin = false,
                 rememberMe = true,
-                token = "jwttoken"
+                token = "jwttoken",
+                tokenExpire = 12345678
             }
         },
         {
@@ -50,7 +52,8 @@ local SessionsData = NPL.export()
                 autoLogin = false,
                 rememberMe = false,
                 password = "123456",
-                token = "jwttoken"
+                token = "jwttoken",
+                tokenExpire = 12345678
             }
         },
     }

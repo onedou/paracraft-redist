@@ -25,6 +25,17 @@ Progress.finish = false
 Progress.broke = false
 
 function Progress:Init(syncInstance)
+    local ProgressPage = Mod.WorldShare.Store:Get("page/Progress")
+    local ProgressOperate = Mod.WorldShare.Store:Get("page/ProgressOperate")
+
+    if ProgressPage then
+        ProgressPage:CloseWindow()
+    end
+
+    if ProgressOperatePage then
+        ProgressOperatePage:CloseWindow()
+    end
+
     local progressParams = Mod.WorldShare.Utils.ShowWindow(0, 0, "Mod/WorldShare/cellar/Sync/Progress/Progress.html", "Progress", 0, 0, "_fi", false, 2)
     local operateParams = Mod.WorldShare.Utils.ShowWindow(270, 65, "Mod/WorldShare/cellar/Sync/Progress/Operate.html", "ProgressOperate", 230, -150 ,"_ct", false, 3)
 
@@ -93,7 +104,6 @@ function Progress:ClosePage()
 
     if ProgressPage then
         ProgressPage:CloseWindow()
-
         self.syncInstance:Close()
     end
 end
