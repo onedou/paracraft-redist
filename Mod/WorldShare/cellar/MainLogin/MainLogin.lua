@@ -157,7 +157,13 @@ function MainLogin:LoginAction()
         function(response, err)
             if err ~= 200 or not response then
                 Mod.WorldShare.MsgBox:Close()
-                GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 3000, "255 0 0")
+
+                if response and response.code and response.message then
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
+                else
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 5000, "255 0 0")
+                end
+
                 return false
             end
 

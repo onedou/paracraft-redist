@@ -133,15 +133,7 @@ function KeepworkServiceSession:LoginWithToken(token, callback)
 end
 
 function KeepworkServiceSession:LoginResponse(response, err, callback)
-    if err == 400 then
-        Mod.WorldShare.MsgBox:Close()
-        GameLogic.AddBBS(nil, L"用户名或者密码错误", 3000, "255 0 0")
-        return false
-    end
-
-    if type(response) ~= "table" then
-        Mod.WorldShare.MsgBox:Close()
-        GameLogic.AddBBS(nil, L"服务器连接失败", 3000, "255 0 0")
+    if err ~= 200 or type(response) ~= "table" then
         return false
     end
 
