@@ -26,6 +26,7 @@ KeepworkServicePermission.AllAuth = {
     OnlineWorldData50Mb = "vip_online_world_data_50mb",
     MakeApp = "MakeApp",
     ChangeAvatarSkin = "ChangeAvatarSkin",
+    CreateVipWorld = "t_create_vip_world",
 }
 
 function KeepworkServicePermission:GetAuth(authName)
@@ -33,8 +34,6 @@ function KeepworkServicePermission:GetAuth(authName)
 end
 
 function KeepworkServicePermission:Authentication(authName, callback)
-    
-
     if not self:GetAuth(authName) then
         if Mod.WorldShare.Store:Get("user/userType") == 'vip' then
             if type(callback) == "function" then
