@@ -309,7 +309,7 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
         end,
         function(data, err)
             if type(callback) == 'function' then
-                callback(data)
+                callback({ message = "", code = err})
             end
         end,
         { 400 }
