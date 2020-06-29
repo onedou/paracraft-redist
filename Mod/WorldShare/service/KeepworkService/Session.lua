@@ -9,13 +9,21 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 ------------------------------------------------------------
 ]]
 
+-- service
 local KeepworkService = NPL.load("../KeepworkService.lua")
+local GitGatewayService = NPL.load("../GitGatewayService.lua")
+local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
+
+-- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks.lua")
 local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
+local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
+
+-- database
 local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
-local GitGatewayService = NPL.load("../GitGatewayService.lua")
-local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+
+-- helper
 local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 
 local Encoding = commonlib.gettable("commonlib.Encoding")
@@ -24,14 +32,100 @@ local KeepworkServiceSession = NPL.export()
 
 KeepworkServiceSession.captchaKey = ''
 
+function KeepworkServiceSession:LongConnectionInit(callback)
+    local connection = KeepworkSocketApi:Connect()
+
+    if not connection then
+        return false
+    end
+
+    if connection.inited then
+        return nil
+    end
+
+    if not KpChatChannel.client then
+        KpChatChannel.client = connection
+    
+        KpChatChannel.client:AddEventListener("OnOpen", KpChatChannel.OnOpen, KpChatChannel)
+        KpChatChannel.client:AddEventListener("OnMsg", KpChatChannel.OnMsg, KpChatChannel)
+        KpChatChannel.client:AddEventListener("OnClose", KpChatChannel.OnClose, KpChatChannel)
+    end
+
+    connection:AddEventListener("OnOpen", function(self)
+        LOG.std("KeepworkServiceSession", "debug", "LongConnectionInit", "Connected client")
+    end, connection)
+
+    connection:AddEventListener("OnMsg", self.OnMsg, connection)
+    connection.uiCallback = callback
+    connection.inited = true
+end
+
+function KeepworkServiceSession:OnMsg(msg)
+    LOG.std("KeepworkServiceSession", "debug", "OnMsg", "data: %s", NPL.ToJson(msg.data))
+
+    if not msg or not msg.data then
+        return false
+    end
+
+    if msg.data.sio_pkt_name and msg.data.sio_pkt_name == "event" then
+        if msg.data.body and msg.data.body[1] == "app/msg" then
+
+            local connection = KeepworkSocketApi:GetConnection()
+
+            if type(connection.uiCallback) == "function" then
+                connection.uiCallback(msg.data.body[2])
+            end
+        end
+    end
+end
+
+
+function KeepworkServiceSession:LoginSocket()
+    if not self:IsSignedIn() then
+        return false
+    end
+
+    local platform
+
+    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
+        platform = "PC"
+    else
+        platform = "MOBILE"
+    end
+
+    local machineCode = SessionsData:GetDeviceUUID()
+    KeepworkSocketApi:SendMsg("app/login", { platform = platform, machineCode = machineCode })
+end
+
 function KeepworkServiceSession:IsSignedIn()
     local token = Mod.WorldShare.Store:Get("user/token")
+    local bLoginSuccessed = Mod.WorldShare.Store:Get("user/bLoginSuccessed")
 
-    return token ~= nil
+    if token ~= nil and bLoginSuccessed then
+        return true
+    else
+        return false
+    end
 end
 
 function KeepworkServiceSession:Login(account, password, callback)
-    KeepworkUsersApi:Login(account, password, callback, callback)
+    local machineCode = SessionsData:GetDeviceUUID()
+    local platform
+
+    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
+        platform = "PC"
+    else
+        platform = "MOBILE"
+    end
+
+    KeepworkUsersApi:Login(
+        account,
+        password,
+        platform,
+        machineCode,
+        callback,
+        callback
+    )
 end
 
 function KeepworkServiceSession:LoginWithToken(token, callback)
@@ -39,18 +133,11 @@ function KeepworkServiceSession:LoginWithToken(token, callback)
 end
 
 function KeepworkServiceSession:LoginResponse(response, err, callback)
-    if err == 400 then
-        Mod.WorldShare.MsgBox:Close()
-        GameLogic.AddBBS(nil, L"用户名或者密码错误", 3000, "255 0 0")
+    if err ~= 200 or type(response) ~= "table" then
         return false
     end
 
-    if type(response) ~= "table" then
-        Mod.WorldShare.MsgBox:Close()
-        GameLogic.AddBBS(nil, L"服务器连接失败", 3000, "255 0 0")
-        return false
-    end
-
+    -- login success ↓
     local token = response["token"] or System.User.keepworktoken
     local userId = response["id"] or 0
     local username = response["username"] or ""
@@ -81,8 +168,30 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/userType", 'plain')
     end
 
-    local SetUserinfo = Mod.WorldShare.Store:Action("user/SetUserinfo")
-    SetUserinfo(token, userId, username, nickname)
+    Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
+
+    local tokenExpire
+
+    if response.tokenExpire then
+        tokenExpire = os.time() + tonumber(response.tokenExpire)
+    end
+
+    if response.mode ~= 'auto' then
+        self:SaveSigninInfo(
+            {
+                account = username,
+                password = response.password,
+                loginServer = KeepworkService:GetEnv(),
+                token = token,
+                autoLogin = response.autoLogin,
+                rememberMe = response.rememberMe,
+                tokenExpire = tokenExpire
+            }
+        )
+    end
+
+    local Login = Mod.WorldShare.Store:Action("user/Login")
+    Login(token, userId, username, nickname)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
@@ -103,13 +212,17 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     )
 
     self:ResetIndulge()
+    self:LoginSocket()
 end
 
 function KeepworkServiceSession:Logout()
     if KeepworkService:IsSignedIn() then
+        KeepworkUsersApi:Logout()
+        KeepworkSocketApi:SendMsg("app/logout", {})
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
         self:ResetIndulge()
+        Mod.WorldShare.Store:Remove('user/bLoginSuccessed')
     end
 end
 
@@ -168,18 +281,11 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
                             return false
                         end
 
-                        self:LoginResponse(loginData, err, function()
-                            self:SaveSigninInfo(
-                                {
-                                    account = username,
-                                    password = password,
-                                    token = loginData["token"] or "",
-                                    loginServer = KeepworkService:GetEnv(),
-                                    autoLogin = false,
-                                    rememberMe = false
-                                }
-                            )
+                        loginData.autoLogin = autoLogin
+                        loginData.rememberMe = rememberMe
+                        loginData.password = password
 
+                        self:LoginResponse(loginData, err, function()
                             if type(callback) == 'function' then
                                 callback(registerData)
                             end
@@ -195,7 +301,7 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
         end,
         function(data, err)
             if type(callback) == 'function' then
-                callback(data)
+                callback({ message = "", code = err})
             end
         end,
         { 400 }
@@ -343,10 +449,11 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
     if not KeepworkService:IsSignedIn() then
         return false
     end
-    
+
     local token = Mod.WorldShare.Store:Get('user/token')
-    local tokeninfo = System.Encoding.jwt.decode(token)
-    local exp = tokeninfo.exp and tokeninfo.exp or 0
+    local info = self:LoadSigninInfo()
+
+    local tokenExpire = info and info.tokenExpire or 0
 
     local function ReEntry()
         self:Logout()
@@ -354,6 +461,9 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
         local currentUser = self:LoadSigninInfo()
 
         if not currentUser or not currentUser.account or not currentUser.password then
+            if type(callback) == "function" then
+                callback(false)
+            end
             return false
         end
 
@@ -378,7 +488,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
     end
 
     -- we will not fetch token if token is expire
-    if exp <= (os.time() + 1 * 24 * 3600) then
+    if tokenExpire <= (os.time() + 1 * 24 * 3600) then
         ReEntry()
         return false
     end

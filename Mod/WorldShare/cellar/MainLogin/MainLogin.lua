@@ -86,6 +86,11 @@ function MainLogin:Show()
             end, 100)
         end
     end
+
+    Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+        -- OnKeepWorkLogin
+        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", bIsSucceed)
+    end)
 end
 
 function MainLogin:Refresh(times)
@@ -111,7 +116,6 @@ function MainLogin:LoginAction()
         return false
     end
     
-    local loginServer = KeepworkService:GetEnv()
     local account = MainLoginPage:GetValue("account")
     local password = MainLoginPage:GetValue("password")
     local autoLogin = MainLoginPage:GetValue("autoLogin")
@@ -127,27 +131,11 @@ function MainLogin:LoginAction()
         return false
     end
 
-    if not loginServer then
-        return false
-    end
 
     Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
 
     local function HandleLogined()
         Mod.WorldShare.MsgBox:Close()
-
-        local token = Mod.WorldShare.Store:Get("user/token") or ""
-
-        KeepworkServiceSession:SaveSigninInfo(
-            {
-                loginServer = loginServer,
-                account = account,
-                password = password,
-                token = token,
-                autoLogin = autoLogin,
-                rememberMe = rememberMe
-            }
-        )
 
         self:EnterUserConsole()
 
@@ -163,15 +151,25 @@ function MainLogin:LoginAction()
         end
     end
 
-    
     KeepworkServiceSession:Login(
         account,
         password,
         function(response, err)
-            if err == 503 then
+            if err ~= 200 or not response then
                 Mod.WorldShare.MsgBox:Close()
+
+                if response and response.code and response.message then
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
+                else
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 5000, "255 0 0")
+                end
+
                 return false
             end
+
+            response.autoLogin = autoLogin
+            response.rememberMe = rememberMe
+            response.password = password
 
             KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
         end

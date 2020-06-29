@@ -11,6 +11,9 @@ ThirdPartyLogin:Init(type)
 ------------------------------------------------------------
 ]]
 
+local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
+local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+
 local ThirdPartyLogin = NPL.export()
 
 function ThirdPartyLogin:Init(type)
@@ -31,12 +34,20 @@ function ThirdPartyLogin:Init(type)
 end
 
 function ThirdPartyLogin:GetUrl()
+    local redirect_uri = Mod.WorldShare.Utils.EncodeURIComponent(KeepworkService:GetKeepworkUrl() .. '/p/third-login/PC/8099')
+
     if self.type == 'WECHAT' then
-        return "https://open.weixin.qq.com/connect/qrconnect?appid=APPID&redirect_uri=REDIRECT_URI&response_type=code&scope=SCOPE&state=STATE#wechat_redirect"
+        local clientId = Config.QQ[KeepworkService:GetEnv()].clientId
+
+        return "https://open.weixin.qq.com/connect/qrconnect?appid=" .. client_id .. "&redirect_uri=" .. .. "&response_type=code&scope=SCOPE&state=STATE#wechat_redirect"
     end
 
     if self.type == "QQ" then
-        return "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=101403344&redirect_uri=https%3A%2F%2Fkeepwork.com&state=123456"
+        local clientId = Config.QQ[KeepworkService:GetEnv()].clientId
+
+        echo("https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=" .. clientId .. "&redirect_uri=" .. redirect_uri .. "&state=123456", true)
+
+        return "https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=" .. clientId .. "&redirect_uri=" .. redirect_uri .. "&state=123456"
     end
 
     return ""

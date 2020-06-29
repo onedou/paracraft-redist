@@ -14,6 +14,8 @@
                 local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                 local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                 local LoginModal = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua")
+                local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
 
                 InternetLoadWorld.OnStaticInit()
                 InternetLoadWorld.GetEvents():AddEventListener(
@@ -216,11 +218,11 @@
                     if userType == 'teacher' then
                         local left = (140 - 23 - 2 - textWidth) / 2
 
-                        return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['teacher'] .. ')" />' .. username
+                        return '<img tooltip="<%= L\'动画编程导师\' %>" style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['teacher'] .. ')" />' .. username
                     elseif userType == 'vip' then
                         local left = (140 - 16 - 2 - textWidth) / 2
 
-                        return '<img style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
+                        return '<img tooltip="<%= L\'VIP用户\' %>" style="margin-top: 4px;margin-left:' .. left .. 'px;margin-right: 2px;width: 16px;height: 16px;background:url(' .. iconList['vip'] .. ')" />' .. username
                     else
                         return '<div style="text-align: center">' .. username .. '</div>'
                     end
@@ -428,25 +430,40 @@
                     end
                 end
 
+                function IsOsSupported()
+                    if(System and System.os and System.os.GetPlatform)then
+                        local platform = System.os.GetPlatform();
+                        if(platform == "win32" or platform == "mac" )then
+                            return true;
+                        end
+                    end
+                end
                 function OnDailyCheck()
-                    LoginModal:CheckSignedIn(L"请先登录", function(result)
-                        if result then
-                            local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
-                            ParacraftLearningRoomDailyPage.AutoOpen(nil,nil,function()
-                                -- UserConsole:ClosePage()
-                            end);
+                        if(KeepworkServiceSession:IsSignedIn())then
+                            ParacraftLearningRoomDailyPage.DoCheckin();
+                            return
+                        end
+                        LoginModal:CheckSignedIn(L"请先登录", function(result)
+                        if result == true then
+                            Mod.WorldShare.Utils.SetTimeOut(function()
+                                if result then
+                                    WorldList:RefreshCurrentServerList()
+                                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
+                                    ParacraftLearningRoomDailyPage.DoCheckin();
+                                end
+                            end, 300)
                         end
                     end)
                 end
-
                 function OnLearningLand()
-                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
                     ParacraftLearningRoomDailyPage.OnLearningLand();
                 end
 
                 function OnVIP()
-                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua");
                     ParacraftLearningRoomDailyPage.OnVIP();
+                end
+                function HasCheckedToday()
+                    return (not ParacraftLearningRoomDailyPage.HasCheckedToday());
                 end
             ]]>
         </script>
@@ -921,15 +938,17 @@
             <div class="middle_line" />
             <!--events_area-->
             <div class="events_area">
-                <div class="link_big_event">
-                    <div class="big_event_item">
+                <pe:if condition="<%=IsOsSupported()%>">
+                    <div class="link_big_event">
+                        <div class="big_event_item">
                             <div style="margin-top:2px;">
-                                <div style="float:left;margin-left:18px;">
+                                <div style="float:left;margin-left:5px;">
                                     <input type="button" tooltip='<%=L"每日签到"%>' onclick="OnDailyCheck" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6)" />
                                     <div style="position:relative;width:70px;margin-top:-45px;color:#ffffff;" >
                                         <div zorder="1001" style="margin-left:26px;width:18px;height:18px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/check_btn_32bits.png#0 0 18 18)"></div>
                                         <div style="margin-top:5px;text-align:center;"><%= L"每日签到" %></div>
                                     </div>
+                                    <kp:redtip style="position:relative;margin-left:55;margin-top:-45px;" onupdate='<%= HasCheckedToday()%>'></kp:redtip>
                                 </div>
                                 <div style="float:left;margin-left:20px;">
                                     <input type="button" tooltip='<%=L"知识岛"%>' onclick="OnLearningLand" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
@@ -937,17 +956,18 @@
                                         <div zorder="1001" style="margin-left:22px;width:25px;height:25px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/island_btn_32bits.png#0 0 25 25)"></div>
                                         <div style="margin-top:-5px;text-align:center;"><%= L"知识岛" %></div>
                                     </div>
-                            </div>
+                                </div>
                                 <div style="float:left;margin-left:20px;">
                                     <input type="button" tooltip='<%=L"VIP会员"%>' onclick="OnVIP" style="float:left;width:70px;height:50px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/gray_bg_32bits.png:6 6 6 6);" />
                                     <div style="position:relative;width:70px;margin-top:-43px;color:#ffffff;" >
                                         <div zorder="1001" style="margin-left:22px;width:20px;height:20px;background:url(Texture/Aries/Creator/keepwork/LearningDailyCheck/vip_32bits.png#0 0 20 20)"></div>
                                         <div style="margin-top:0px;text-align:center;"><%= L"VIP会员" %></div>
-                            </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </pe:if>
                 <a onclick="official_worlds()" class="link_big_event">
                     <div class="big_event_item">
                         <div style="float:left;margin-left:5px;background:url(Texture/3DMapSystem/AppIcons/png/Tasks_64.png);width:48px;height:48px;"></div>

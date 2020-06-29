@@ -69,7 +69,7 @@ function LoginModal:ShowPage()
         return false
     end
 
-    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil)
+    local params = Mod.WorldShare.Utils.ShowWindow(320, 470, "Mod/WorldShare/cellar/LoginModal/LoginModal.html", "LoginModal", nil, nil, nil, nil, 5)
 
     local LoginModalPage = Mod.WorldShare.Store:Get('page/LoginModal')
 
@@ -134,7 +134,6 @@ function LoginModal:LoginAction()
 
     local account = LoginModalPage:GetValue("account")
     local password = LoginModalPage:GetValue("password")
-    local loginServer = KeepworkService:GetEnv()
     local autoLogin = LoginModalPage:GetValue("autoLogin")
     local rememberMe = LoginModalPage:GetValue("rememberMe")
 
@@ -148,27 +147,10 @@ function LoginModal:LoginAction()
         return false
     end
 
-    if not loginServer then
-        return false
-    end
-
-    Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120)
+    Mod.WorldShare.MsgBox:Show(L"正在登陆，请稍后...", 8000, L"链接超时", 300, 120, 6)
 
     local function HandleLogined()
         Mod.WorldShare.MsgBox:Close()
-
-        local token = Mod.WorldShare.Store:Get("user/token") or ""
-
-        KeepworkServiceSession:SaveSigninInfo(
-            {
-                account = account,
-                password = password,
-                loginServer = loginServer,
-                token = token,
-                autoLogin = autoLogin,
-                rememberMe = rememberMe
-            }
-        )
 
         self:ClosePage()
 
@@ -188,10 +170,21 @@ function LoginModal:LoginAction()
         account,
         password,
         function(response, err)
-            if err == 503 then
+            if err ~= 200 or not response then
                 Mod.WorldShare.MsgBox:Close()
+
+                if response and response.code and response.message then
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
+                else
+                    GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 5000, "255 0 0")
+                end
+
                 return false
             end
+
+            response.autoLogin = autoLogin
+            response.rememberMe = rememberMe
+            response.password = password
 
             KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
         end

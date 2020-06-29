@@ -6,7 +6,7 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionDatas.lua")
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionData.lua")
 ------------------------------------------------------------
 ]] local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
@@ -27,7 +27,8 @@ local SessionsData = NPL.export()
                 password = "12345678",
                 autoLogin = true,
                 rememberMe = true,
-                token = "jwttoken"
+                token = "jwttoken",
+                tokenExpire = 12345678
             }
         },
         {
@@ -38,7 +39,8 @@ local SessionsData = NPL.export()
                 loginServer = "STAGE",
                 autoLogin = false,
                 rememberMe = true,
-                token = "jwttoken"
+                token = "jwttoken",
+                tokenExpire = 12345678
             }
         },
         {
@@ -50,7 +52,8 @@ local SessionsData = NPL.export()
                 autoLogin = false,
                 rememberMe = false,
                 password = "123456",
-                token = "jwttoken"
+                token = "jwttoken",
+                tokenExpire = 12345678
             }
         },
     }
@@ -130,4 +133,21 @@ function SessionsData:GetSessionByUsername(username)
     end
 
     return false
+end
+
+function SessionsData:GetDeviceUUID()
+    local sessionsData = self:GetSessions()
+    local currentParacraftDir = ParaIO.GetWritablePath()
+
+    if not sessionsData.softwareUUID or
+       not sessionsData.paracraftDir or
+       sessionsData.paracraftDir ~= currentParacraftDir then
+        sessionsData.paracraftDir = ParaIO.GetWritablePath()
+        sessionsData.softwareUUID = System.Encoding.guid.uuid()
+        GameLogic.GetPlayerController():SaveLocalData("sessions", sessionsData, true)
+    end
+
+    local machineID = ParaEngine.GetAttributeObject():GetField("MachineID","")
+
+    return sessionsData.softwareUUID .. "-" .. machineID
 end

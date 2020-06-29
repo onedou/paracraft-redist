@@ -111,25 +111,29 @@ function RegisterModal:Register(page)
 
     Mod.WorldShare.MsgBox:Show(L"正在注册，请稍后...", 10000, L"链接超时", 500, 120)
 
-    KeepworkServiceSession:Register(self.account, self.password, self.captcha, self.phonenumber, self.phonecaptcha, self.bindphone, function(state, err)
+    KeepworkServiceSession:Register(self.account, self.password, self.captcha, self.phonenumber, self.phonecaptcha, self.bindphone, function(state)
         Mod.WorldShare.MsgBox:Close()
 
-        if err == 422 then
+        if not state then
             GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
             return false
         end
 
-        if state and state.id then
+        if state.id then
             if state.code then
-                GameLogic.AddBBS(nil, state.message, 5000, "0 0 255")
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
             else
+                -- register success
+                -- OnKeepWorkLogin
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
                 if self.m_mode == "account" then
                     self:ShowClassificationPage(function()
                         WorldList:RefreshCurrentServerList()
                     end)
-
-                    GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
                 end
+
+                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
             end
 
             if page then
@@ -143,8 +147,7 @@ function RegisterModal:Register(page)
             return true
         end
 
-        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or ""), 5000, "255 0 0")
-        Mod.WorldShare.MsgBox:Close()
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
     end)
 end
 

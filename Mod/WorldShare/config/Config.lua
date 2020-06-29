@@ -89,4 +89,41 @@ Config.dataSourceRawList = {
   }
 }
 
+Config.socket = {
+  ONLINE = "https://socket.keepwork.com",
+  STAGE = "http://socket-dev.kp-para.cn",
+  RELEASE = "http://socket-rls.kp-para.cn",
+  LOCAL = "http://socket-dev.kp-para.cn"
+}
+
 Config.RecommendedWorldList = 'https://git.keepwork.com/gitlab_rls_official/keepworkdatasource/raw/master/official/paracraft/RecommendedWorldList.md'
+
+Config.QQ = {
+  ONLINE = {
+    clientId = "101403344"
+  },
+  STAGE = {
+    clientId = "101403344"
+  },
+  RELEASE = {
+    clientId = "101403344"
+  },
+  LOCAL = {
+    clientId = "101403344"
+  },
+}
+
+Config.Wechat = {
+  ONLINE = {
+    clientId = ""
+  },
+  STAGE = {
+    clientId = ""
+  },
+  RELEASE = {
+    clientId = ""
+  },
+  LOCAL = {
+    clientId = ""
+  }
+}

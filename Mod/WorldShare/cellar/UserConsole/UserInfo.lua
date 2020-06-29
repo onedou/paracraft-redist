@@ -143,6 +143,7 @@ function UserInfo:LoginWithToken()
 
             if type(data) == 'table' and data.username then
                 data.token = usertoken
+                data.mode = 'auto'
                 KeepworkServiceSession:LoginResponse(
                     data,
                     err,
@@ -151,9 +152,8 @@ function UserInfo:LoginWithToken()
 
                         WorldList:RefreshCurrentServerList()
 
-                        if type(callback) == "function" then
-                            callback()
-                        end
+                        -- OnKeepWorkLogin
+                        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
                     end
                 )
             end
@@ -225,6 +225,7 @@ function UserInfo:CheckDoAutoSignin(callback)
 
             if type(data) == 'table' and data.username then
                 data.token = info.token
+                data.mode = 'auto'
                 KeepworkServiceSession:LoginResponse(
                     data,
                     err,
@@ -243,6 +244,9 @@ function UserInfo:CheckDoAutoSignin(callback)
                         if type(callback) == "function" then
                             callback()
                         end
+
+                        -- OnKeepWorkLogin
+                        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
                     end
                 )
             end
@@ -255,9 +259,7 @@ end
 
 function UserInfo:OnClickLogin()
     Mod.WorldShare.Store:Set("user/loginText", L"请先登录")
-    LoginModal:Init(function()
-        WorldList:RefreshCurrentServerList()
-    end)
+    LoginModal:Init()
 end
 
 local curIndex = 1
@@ -322,7 +324,6 @@ function UserInfo:Logout()
         -- OnKeepWorkLogout
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", true)
         KeepworkServiceSession:Logout()
-        WorldList:RefreshCurrentServerList()
     else
         -- OnKeepWorkLogout
         GameLogic.GetFilters():apply_filters("OnKeepWorkLogout", false)
