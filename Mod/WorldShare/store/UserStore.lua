@@ -14,6 +14,7 @@ local UserStore = commonlib.inherit(commonlib.gettable("System.Core.ToolBase"), 
 
 UserStore:Signal("onLogin", function() end)
 UserStore:Signal("onLogout", function() end)
+UserStore:Signal("onSetThirdPartyLoginAuthinfo", function() end)
 
 function UserStore:Action()
     return {
@@ -60,6 +61,12 @@ function UserStore:Action()
         SetPlayerController = function(playerController)
             self.playerController = playerController
         end,
+        SetThirdPartyLoginAuthinfo = function(authType, authCode)
+            self.authType = authType
+            self.authCode = authCode
+
+            self:onSetThirdPartyLoginAuthinfo()
+        end
     }
 end
 

@@ -30,16 +30,26 @@ function ThirdPartyLogin:Init(type)
     params._page.OnClose = function()
         Mod.WorldShare.Store:Remove('page/ThirdPartyLogin')
         params._page:CallMethod("nplbrowser_instance", "SetVisible", false)
+        Mod.WorldShare.Store:Unsubscribe("user/SetThirdPartyLoginAuthinfo")
     end
+
+    Mod.WorldShare.Store:Subscribe("user/SetThirdPartyLoginAuthinfo", function()
+        local authType = Mod.WorldShare.Store:Get("user/authType")
+        local authCode = Mod.WorldShare.Store:Get("user/authCode")
+
+        echo("from user set third party login authinfo", true)
+        echo(authType, true)
+        echo(authCode, true)
+    end)
 end
 
 function ThirdPartyLogin:GetUrl()
-    local redirect_uri = Mod.WorldShare.Utils.EncodeURIComponent(KeepworkService:GetKeepworkUrl() .. '/p/third-login/PC/8099')
+    local redirect_uri = Mod.WorldShare.Utils.EncodeURIComponent(KeepworkService:GetKeepworkUrl() .. '/p/third-login/')
 
     if self.type == 'WECHAT' then
         local clientId = Config.QQ[KeepworkService:GetEnv()].clientId
 
-        return "https://open.weixin.qq.com/connect/qrconnect?appid=" .. client_id .. "&redirect_uri=" .. .. "&response_type=code&scope=SCOPE&state=STATE#wechat_redirect"
+        return "https://open.weixin.qq.com/connect/qrconnect?appid=" .. clientId .. "&redirect_uri=" .. redirect_uri .. "&response_type=code&scope=SCOPE&state=STATE#wechat_redirect"
     end
 
     if self.type == "QQ" then

@@ -79,7 +79,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.16'
+WorldShare.version = '0.0.17'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
