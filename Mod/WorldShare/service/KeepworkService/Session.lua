@@ -17,6 +17,7 @@ local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSys
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkKeepworksApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Keepworks.lua")
+local KeepworkOauthUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/OauthUsers.lua")
 local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
 local KeepworkSocketApi = NPL.load("(gl)Mod/WorldShare/api/Socket/Socket.lua")
 
@@ -25,6 +26,9 @@ local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 
 -- helper
 local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+
+-- config
+local Config = NPL.load("(gl)Mod/WorldShare/config/Config.lua")
 
 local Encoding = commonlib.gettable("commonlib.Encoding")
 
@@ -630,4 +634,36 @@ function KeepworkServiceSession:CheckEmailExist(email, callback)
             callback(false)
         end
     )
+end
+
+function KeepworkServiceSession:CheckOauthUserExisted(platform, code, callback)
+    echo("from keepwork service session!!!!!", true)
+
+    KeepworkOauthUsersApi:GetOauthUsers(
+        string.lower(platform),
+        self:GetOauthClientId(platform),
+        code,
+        function(data, err)
+            if not data or err ~= 200 then
+                return false
+            end
+
+            if data.username then
+                if type(callback) == "function" then
+                    callback(true, data)
+                end
+            else
+                if type(callback) == "function" then
+                    callback(false, data)
+                end
+            end
+        end)
+end
+
+function KeepworkServiceSession:GetOauthClientId(platform)
+    if type(platform) ~= "string" then
+        return ""
+    end
+
+    return Config[platform][KeepworkService:GetEnv()].clientId
 end

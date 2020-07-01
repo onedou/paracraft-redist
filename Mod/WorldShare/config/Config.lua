@@ -113,17 +113,17 @@ Config.QQ = {
   },
 }
 
-Config.Wechat = {
+Config.WECHAT = {
   ONLINE = {
-    clientId = ""
+    clientId = "wxc97e44ce7c18725e"
   },
   STAGE = {
-    clientId = ""
+    clientId = "wxc97e44ce7c18725e"
   },
   RELEASE = {
-    clientId = ""
+    clientId = "wxc97e44ce7c18725e"
   },
   LOCAL = {
-    clientId = ""
+    clientId = "wxc97e44ce7c18725e"
   }
 }
