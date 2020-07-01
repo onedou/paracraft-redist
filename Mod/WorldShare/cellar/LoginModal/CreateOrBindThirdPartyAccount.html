@@ -1,0 +1,69 @@
+<html>
+    <body>
+        <pe:mcml>
+            <script type="text/npl" refresh="false">
+                <![CDATA[
+                    page = document:GetPageCtrl()
+                    method = page:GetRequestParam("method")
+
+                    function close()
+                        page:CloseWindow()
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+                {
+                    confirm_button = {
+                        ["margin-left"] = 0,
+                        width = 120,
+                        height = 33,
+                        textcolor = "#000000",
+                        color = "#000000",
+                        ["font-size"] = 18
+                        background = "textures/worldshare_32bits.png;149 104 16 16:4 4 4 4",
+                    },
+                    edittext_common = {
+                        width = 150,
+                        height = 30
+                    }
+                }
+            </style>
+            <aries:window
+                mode="thin"
+                width="400"
+                height="300"
+                style="float:left;color: white;"
+                title_height="40"
+                close_height="25"
+                title='<%=L"补充账号信息" %>'
+                onclose="close()">
+                <div style="padding: 30px;">
+                    <div style="margin-bottom: 20px;">
+                        <pe:if condition="<%= method == 'bind' %>">
+                            <%= L"输入已有的Paracraft账号并将第三方账号绑定到该账号" %>
+                        </pe:if>
+                        <pe:if condition="<%= method == 'create' %>">
+                            <%= L"新建Paracraft账号并将第三方账号绑定到该账号" %>
+                        </pe:if>
+                    </div>
+                    <div style="margin-left: 60px;">
+                        <%= L"账号：" %>
+                        <input type="text" class="bbs_text edittext_common"/>   
+                    </div>
+                    <div style="margin-left: 60px;">
+                        <%= L"密码：" %>
+                        <input type="text" class="bbs_text edittext_common" />
+                    </div>
+                    <pe:if>
+                        <div>
+                            <%= L"我同意《Paracraft用户协议》中的内容" %>
+                        </div>
+                    </pe:if>
+                    <div style="margin-top: 30px;margin-left: 110px;">
+                        <input type="button" class="confirm_button" value="确定"/>
+                    </div>
+                </div>
+            </aries:window>
+        </pe:mcml>
+    </body>
+</html>

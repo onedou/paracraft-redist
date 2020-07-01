@@ -39,8 +39,10 @@ function ThirdPartyLogin:Init(type)
         local authCode = Mod.WorldShare.Store:Get("user/authCode")
 
         KeepworkServiceSession:CheckOauthUserExisted(authType, authCode, function(bExisted, data)
-            if bExisted then
+            params._page:CloseWindow()
 
+            if bExisted then
+                -- // TODO: Login
             else
                 Mod.WorldShare.MsgBox:Dialog(
                     "NoThirdPartyAccountNotice",
@@ -52,11 +54,13 @@ function ThirdPartyLogin:Init(type)
                     },
                     function(res)
                         if res and res == _guihelper.DialogResult.Yes then
-                            
+                            echo(1111111, true)
+                            self:ShowCreateOrBindThirdPartyAccountPage("bind")
                         end
 
                         if res and res == _guihelper.DialogResult.No then
-                           
+                            echo(22222222, true)
+                            self:ShowCreateOrBindThirdPartyAccountPage("create")
                         end
                     end,
                     _guihelper.MessageBoxButtons.YesNo,
@@ -74,8 +78,6 @@ function ThirdPartyLogin:Init(type)
                 return false
             end
         end)
-
-        params._page:CloseWindow()
     end)
 end
 
@@ -118,3 +120,6 @@ function ThirdPartyLogin:GetUrl()
     return ""
 end
 
+function ThirdPartyLogin:ShowCreateOrBindThirdPartyAccountPage(method)
+    Mod.WorldShare.Utils.ShowWindow(400, 300, "Mod/WorldShare/cellar/LoginModal/CreateOrBindThirdPartyAccount.html?method=" .. (method or ""), "CreateOrBindThirdPartyAccount")
+end

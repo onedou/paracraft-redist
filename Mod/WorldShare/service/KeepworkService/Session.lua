@@ -637,8 +637,6 @@ function KeepworkServiceSession:CheckEmailExist(email, callback)
 end
 
 function KeepworkServiceSession:CheckOauthUserExisted(platform, code, callback)
-    echo("from keepwork service session!!!!!", true)
-
     KeepworkOauthUsersApi:GetOauthUsers(
         string.lower(platform),
         self:GetOauthClientId(platform),
