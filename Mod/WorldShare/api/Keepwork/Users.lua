@@ -18,21 +18,17 @@ local KeepworkUsersApi = NPL.export()
 -- method: POST
 -- params:
 --[[
-    account	string 必须 用户名	
-    password string 必须 密码
+    account	string necessary username	
+    password string necessary password
+    platform string not necessary platform
+    machineCode string not necessary machine code
+    oauthToken string not necessary third party token 
 ]]
 -- return: object
-function KeepworkUsersApi:Login(account, password, platform, machineCode, success, error)
-    if type(account) ~= "string" or type(password) ~= "string" then
+function KeepworkUsersApi:Login(params, success, error)
+    if not params or type(params.username) ~= "string" or type(params.password) ~= "string" then
         return false
     end
-
-    local params = {
-        username = account,
-        password = password,
-        platform = platform,
-        machineCode = machineCode
-    }
 
     KeepworkBaseApi:Post("/users/login", params, nil, success, error, { 503, 400 })
 end

@@ -6,8 +6,9 @@
                     page = document:GetPageCtrl()
                     method = page:GetRequestParam("method")
 
-                    local ThirdPartyLogin = NPL.load("(gl)Mod/WolrdShare/cellar/LoginModal/ThirdPartyLogin.lua")
+                    local ThirdPartyLogin = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua")
                     local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+                    local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
 
                     local bBound = false
                     local bCreated = false
@@ -22,6 +23,16 @@
                         local agree = page:GetValue("agree")
                         local authToken = Mod.WorldShare.Store:Get("user/authToken")
 
+                        if not Validated:Account(account) then
+                            GameLogic.AddBBS(nil, L"账号格式错误", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if not Validated:Password(password) then
+                            GameLogic.AddBBS(nil, L"密码格式错误", 3000, "255 0 0")
+                            return false
+                        end
+
                         if not agree then
                             GameLogic.AddBBS(nil, L"您未同意用户协议", 3000, "255 0 0")
                             return false
@@ -33,7 +44,7 @@
                                 return false
                             end
 
-                            
+                            ThirdPartyLogin:LoginAndBind()
                         end
 
                         if method == "create" then
@@ -42,6 +53,8 @@
                                 return false
                             end
 
+                            echo(account, true)
+                            echo(password, true)
                             ThirdPartyLogin:RegisterAndBind(account, password, authToken)
                         end
                     end
@@ -114,7 +127,7 @@
                     </div>
                     <div style="margin-left: 60px;">
                         <%= L"密码：" %>
-                        <input type="password" name="password" class="bbs_text edittext_common" />
+                        <input type="text" name="password" PasswordChar="*" class="bbs_text edittext_common" />
                     </div>
                     <pe:if condition="<%= method == 'create' %>">
                         <div style="margin-top: 15px;margin-left: 30px;">

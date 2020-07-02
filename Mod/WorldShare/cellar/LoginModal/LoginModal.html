@@ -7,6 +7,7 @@
                     local ThirdPartyLogin = NPL.load("./ThirdPartyLogin.lua")
                     local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                     local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
+                    local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
                     page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set('page/LoginModal', page)
@@ -71,11 +72,17 @@
                     end
 
                     function login_with_wx()
-                        ThirdPartyLogin:Init("WECHAT")
+                        ThirdPartyLogin:Init("WECHAT", function()
+                            LoginModal:Close()
+                            UserInfo:LoginWithToken()
+                        end)
                     end
 
                     function login_width_qq()
-                        ThirdPartyLogin:Init("QQ")
+                        ThirdPartyLogin:Init("QQ", function()
+                            LoginModal:Close()
+                            UserInfo:LoginWithToken()
+                        end)
                     end
                 ]]>
             </script>

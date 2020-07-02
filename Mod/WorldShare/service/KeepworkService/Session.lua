@@ -122,11 +122,40 @@ function KeepworkServiceSession:Login(account, password, callback)
         platform = "MOBILE"
     end
 
+    local params = {
+        username = account,
+        password = password,
+        platform = platform,
+        machineCode = machineCode
+    }
+
     KeepworkUsersApi:Login(
-        account,
-        password,
-        platform,
-        machineCode,
+        params,
+        callback,
+        callback
+    )
+end
+
+function KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password, oauthToken, callback)
+    local machineCode = SessionsData:GetDeviceUUID()
+    local platform
+
+    if System.os.GetPlatform() == 'mac' or System.os.GetPlatform() == 'win32' then
+        platform = "PC"
+    else
+        platform = "MOBILE"
+    end
+
+    local params = {
+        username = account,
+        password = password,
+        platform = platform,
+        machineCode = machineCode,
+        oauthToken = oauthToken
+    }
+
+    KeepworkUsersApi:Login(
+        params,
         callback,
         callback
     )

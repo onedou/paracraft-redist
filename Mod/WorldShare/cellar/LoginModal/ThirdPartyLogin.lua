@@ -155,6 +155,10 @@ function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
                 GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
 
                 GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+
+                if type(self.callback) == "function" then
+                    self.callback()
+                end
             end
 
             return true
