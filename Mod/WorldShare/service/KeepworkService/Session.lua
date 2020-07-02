@@ -231,10 +231,6 @@ function KeepworkServiceSession:Logout()
 end
 
 function KeepworkServiceSession:Register(username, password, captcha, cellphone, cellphoneCaptcha, isBind, callback)
-    if not username or not password or not captcha then
-        return false
-    end
-
     if type(username) ~= 'string' or
        type(password) ~= 'string' or
        type(captcha) ~= 'string' or
@@ -265,6 +261,66 @@ function KeepworkServiceSession:Register(username, password, captcha, cellphone,
             channel = 3
         }
     end
+
+    KeepworkUsersApi:Register(
+        params,
+        function(registerData, err)
+            if registerData.id then
+                self:Login(
+                    username,
+                    password,
+                    function(loginData, err)
+                        if err ~= 200 then
+                            registerData.message = L'注册成功，登录失败'
+                            registerData.code = 9
+
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+
+                            return false
+                        end
+
+                        loginData.autoLogin = autoLogin
+                        loginData.rememberMe = rememberMe
+                        loginData.password = password
+
+                        self:LoginResponse(loginData, err, function()
+                            if type(callback) == 'function' then
+                                callback(registerData)
+                            end
+                        end)
+                    end
+                )
+                return true
+            end
+
+            if type(callback) == 'function' then
+                callback(registerData)
+            end
+        end,
+        function(data, err)
+            if type(callback) == 'function' then
+                callback({ message = "", code = err})
+            end
+        end,
+        { 400 }
+    )
+end
+
+function KeepworkServiceSession:RegisterAndBindThirdPartyAccount(username, password, oauthToken, callback)
+    if type(username) ~= 'string' or
+       type(password) ~= 'string' or
+       type(oauthToken) ~= 'string' then
+        return false
+    end
+
+    local params = {
+        username = username,
+        password = password,
+        oauthToken = oauthToken,
+        channel = 3
+    }
 
     KeepworkUsersApi:Register(
         params,

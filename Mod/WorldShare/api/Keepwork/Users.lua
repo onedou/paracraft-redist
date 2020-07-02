@@ -66,12 +66,14 @@ end
 -- method: POST
 -- params:
 --[[
-    token string 必须 token
-    username string 必须 username,
-    password string 必须 password,
-    key string 必须 captchaKey,
-    captcha string 必须 captcha,
-    channel = 3
+    username string necessary username,
+    password string necessary password,
+    key string necessary captchaKey,
+    captcha string necessary captcha,
+    channel = 3,
+    platform string not necessary WEB WEB,PC,MOBILE
+    machineCode	string necessary
+    oauthToken string not necessary third party account token 
 ]]
 -- return: object
 function KeepworkUsersApi:Register(params, success, error, noTryStatus)
