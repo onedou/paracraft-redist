@@ -134,7 +134,11 @@ function ThirdPartyLogin:ShowCreateOrBindThirdPartyAccountPage(method)
 end
 
 function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
+
     KeepworkServiceSession:RegisterAndBindThirdPartyAccount(account, password, authToken, function(state)
+        Mod.WorldShare.MsgBox:Close()
+
         local CreateOrBindThirdPartyAccountPage = Mod.WorldShare.Store:Get("page/CreateOrBindThirdPartyAccount")
 
         if CreateOrBindThirdPartyAccountPage then
@@ -154,7 +158,7 @@ function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
                 -- OnKeepWorkLogin
                 GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
 
-                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+                GameLogic.AddBBS(nil, L"注册成功，绑定第三方账号成功", 5000, "0 255 0")
 
                 if type(self.callback) == "function" then
                     self.callback()
@@ -168,6 +172,38 @@ function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
     end)
 end
 
-function ThirdPartyLogin:LoginAndBind()
+function ThirdPartyLogin:LoginAndBind(account, password, authToken)
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
 
+    KeepworkServiceSession:LoginAndBindThirdPartyAccount(account, password, authToken, function(response, err)
+        if err ~= 200 or not response then
+            Mod.WorldShare.MsgBox:Close()
+            if response and response.code and response.message then
+                GameLogic.AddBBS(nil, format(L"登录失败了, 错误信息：%s(%d)", response.message, response.code), 5000, "255 0 0")
+            else
+                GameLogic.AddBBS(nil, format(L"登录失败了, 错误码：%d", err), 5000, "255 0 0")
+            end
+
+            return false
+        end
+
+        KeepworkServiceSession:LoginResponse(response, err, function()
+            Mod.WorldShare.MsgBox:Close()
+
+            local CreateOrBindThirdPartyAccountPage = Mod.WorldShare.Store:Get("page/CreateOrBindThirdPartyAccount")
+
+            if CreateOrBindThirdPartyAccountPage then
+                CreateOrBindThirdPartyAccountPage:CloseWindow()
+            end
+
+            -- OnKeepWorkLogin
+            GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+    
+            GameLogic.AddBBS(nil, L"登录成功，绑定第三方账号成功", 5000, "0 255 0")
+
+            if type(self.callback) == "function" then
+                self.callback()
+            end
+        end)
+    end)
 end

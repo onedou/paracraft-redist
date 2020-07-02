@@ -44,7 +44,7 @@
                                 return false
                             end
 
-                            ThirdPartyLogin:LoginAndBind()
+                            ThirdPartyLogin:LoginAndBind(account, password, authToken)
                         end
 
                         if method == "create" then
@@ -53,8 +53,6 @@
                                 return false
                             end
 
-                            echo(account, true)
-                            echo(password, true)
                             ThirdPartyLogin:RegisterAndBind(account, password, authToken)
                         end
                     end
