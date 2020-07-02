@@ -219,9 +219,12 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     self:LoginSocket()
 end
 
-function KeepworkServiceSession:Logout()
+function KeepworkServiceSession:Logout(mode)
     if KeepworkService:IsSignedIn() then
-        KeepworkUsersApi:Logout()
+        if not mode or mode ~= "KICKOUT" then
+            KeepworkUsersApi:Logout()
+        end
+
         KeepworkSocketApi:SendMsg("app/logout", {})
         local Logout = Mod.WorldShare.Store:Action("user/Logout")
         Logout()
@@ -334,6 +337,7 @@ function KeepworkServiceSession:RegisterAndBindThirdPartyAccount(username, passw
                             registerData.message = L'注册成功，登录失败'
                             registerData.code = 9
 
+                        self:LoginResponse(loginData, err, function()
                             if type(callback) == 'function' then
                                 callback(registerData)
                             end
@@ -566,6 +570,7 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 end
 
 function KeepworkServiceSession:RenewToken()
+    echo("from renew token!!!!!", true)
     self:CheckTokenExpire()
 
     Mod.WorldShare.Utils.SetTimeOut(function()
