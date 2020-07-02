@@ -132,13 +132,15 @@
 
                     function login_with_wx()
                         ThirdPartyLogin:Init("WECHAT", function()
-                            -- close and enter user console
+                            MainLogin:EnterUserConsole()
+                            WorldList:RefreshCurrentServerList()
                         end)
                     end
 
                     function login_width_qq()
                         ThirdPartyLogin:Init("QQ", function()
-                            -- close and enter user console
+                            MainLogin:EnterUserConsole()
+                            WorldList:RefreshCurrentServerList()
                         end)
                     end
                 ]]>

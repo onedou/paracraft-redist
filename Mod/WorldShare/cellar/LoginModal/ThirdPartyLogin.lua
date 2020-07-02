@@ -17,16 +17,16 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 
 local ThirdPartyLogin = NPL.export()
 
-function ThirdPartyLogin:Init(type, callback)
+function ThirdPartyLogin:Init(thirdPartyType, callback)
     if System.os.GetPlatform() ~= 'win32' and System.os.GetPlatform() ~= 'mac' then
         _guihelper.MessageBox(L"操作不支持此系统")
         return false
     end
 
-    self.type = type
+    self.thirdPartyType = thirdPartyType
     self.callback = callback
 
-    local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil)
+    local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil, 6)
 
     params._page:CallMethod("nplbrowser_instance", "SetVisible", true)
     params._page.OnClose = function()
@@ -42,15 +42,19 @@ function ThirdPartyLogin:Init(type, callback)
         KeepworkServiceSession:CheckOauthUserExisted(authType, authCode, function(bExisted, data)
             params._page:CloseWindow()
 
-            if data and data.token then
-                Mod.WorldShare.Store:Set("user/authToken", data.token)
-            else
-                Mod.WorldShare.Store:Remove("user/authToken")
-            end
-
             if bExisted then
-                -- // TODO: Login
+                Mod.WorldShare.Store:Set("user/token", data.token)
+
+                if type(self.callback) == "function" then
+                    self.callback()
+                end
             else
+                if data and data.token then
+                    Mod.WorldShare.Store:Set("user/authToken", data.token)
+                else
+                    Mod.WorldShare.Store:Remove("user/authToken")
+                end
+
                 Mod.WorldShare.MsgBox:Dialog(
                     "NoThirdPartyAccountNotice",
                     L"检测到该第三方账号还未绑定到账号，请绑定到已有账号或者新建账号进行绑定",
@@ -96,7 +100,7 @@ function ThirdPartyLogin:GetUrl()
         sysTag = "MAC"
     end
 
-    if self.type == 'WECHAT' then
+    if self.thirdPartyType == 'WECHAT' then
         local clientId = KeepworkServiceSession:GetOauthClientId("WECHAT")
         local state = "WECHAT|" .. sysTag .. "|8099|" .. System.Encoding.guid.uuid()
 
@@ -109,7 +113,7 @@ function ThirdPartyLogin:GetUrl()
             )
     end
 
-    if self.type == "QQ" then
+    if self.thirdPartyType == "QQ" then
         local clientId = KeepworkServiceSession:GetOauthClientId("QQ")
         local state = "QQ|" .. sysTag .. "|8099|" .. System.Encoding.guid.uuid()
 
@@ -136,7 +140,7 @@ function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
         if CreateOrBindThirdPartyAccountPage then
             CreateOrBindThirdPartyAccountPage:CloseWindow()
         end
-        
+
         if not state then
             GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
             return false
