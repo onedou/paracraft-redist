@@ -337,7 +337,6 @@ function KeepworkServiceSession:RegisterAndBindThirdPartyAccount(username, passw
                             registerData.message = L'注册成功，登录失败'
                             registerData.code = 9
 
-                        self:LoginResponse(loginData, err, function()
                             if type(callback) == 'function' then
                                 callback(registerData)
                             end
