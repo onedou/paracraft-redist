@@ -131,11 +131,15 @@
                     end
 
                     function login_with_wx()
-                        ThirdPartyLogin:Init("WECHAT")
+                        ThirdPartyLogin:Init("WECHAT", function()
+                            -- close and enter user console
+                        end)
                     end
 
                     function login_width_qq()
-                        ThirdPartyLogin:Init("QQ")
+                        ThirdPartyLogin:Init("QQ", function()
+                            -- close and enter user console
+                        end)
                     end
                 ]]>
             </script>

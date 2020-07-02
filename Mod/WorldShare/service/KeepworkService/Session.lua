@@ -569,7 +569,6 @@ function KeepworkServiceSession:CheckTokenExpire(callback)
 end
 
 function KeepworkServiceSession:RenewToken()
-    echo("from renew token!!!!!", true)
     self:CheckTokenExpire()
 
     Mod.WorldShare.Utils.SetTimeOut(function()

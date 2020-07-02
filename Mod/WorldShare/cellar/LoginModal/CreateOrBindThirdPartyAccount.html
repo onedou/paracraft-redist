@@ -6,12 +6,70 @@
                     page = document:GetPageCtrl()
                     method = page:GetRequestParam("method")
 
+                    local ThirdPartyLogin = NPL.load("(gl)Mod/WolrdShare/cellar/LoginModal/ThirdPartyLogin.lua")
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+
+                    local bBound = false
+                    local bCreated = false
+
                     function close()
                         page:CloseWindow()
                     end
 
                     function confirm()
-                        
+                        local account = page:GetValue("account")
+                        local password = page:GetValue("password")
+                        local agree = page:GetValue("agree")
+                        local authToken = Mod.WorldShare.Store:Get("user/authToken")
+
+                        if not agree then
+                            GameLogic.AddBBS(nil, L"您未同意用户协议", 3000, "255 0 0")
+                            return false
+                        end
+
+                        if method == "bind" then
+                            if not bBound then
+                                GameLogic.AddBBS(nil, L"此账号不存在", 3000, "255 0 0")
+                                return false
+                            end
+
+                            
+                        end
+
+                        if method == "create" then
+                            if not bCreated then
+                                GameLogic.AddBBS(nil, L"此账号已存在", 3000, "255 0 0")
+                                return false
+                            end
+
+                            ThirdPartyLogin:RegisterAndBind(account, password, authToken)
+                        end
+                    end
+
+                    function check_account()
+                        local account = page:GetValue("account")
+                        local password = page:GetValue("password")
+
+                        KeepworkServiceSession:CheckUsernameExist(account, function(bExisted)
+                            if method == "bind" then
+                                if not bExisted then
+                                    GameLogic.AddBBS(nil, L"此账号不存在", 3000, "255 0 0")
+                                    bBound = false
+                                else
+                                    bBound = true
+                                end
+                            end
+    
+                            if method == "create" then
+                                if bExisted then
+                                    GameLogic.AddBBS(nil, L"此账号已存在", 3000, "255 0 0")
+                                    bCreated = false
+                                else
+                                    bCreated = true
+                                end
+                            end
+                        end)
+
                     end
                 ]]>
             </script>
@@ -52,11 +110,11 @@
                     </div>
                     <div style="margin-left: 60px;">
                         <%= L"账号：" %>
-                        <input type="text" class="bbs_text edittext_common"/>   
+                        <input type="text" name="account" class="bbs_text edittext_common" onfocusout="check_account()"/>   
                     </div>
                     <div style="margin-left: 60px;">
                         <%= L"密码：" %>
-                        <input type="password" class="bbs_text edittext_common" />
+                        <input type="password" name="password" class="bbs_text edittext_common" />
                     </div>
                     <pe:if condition="<%= method == 'create' %>">
                         <div style="margin-top: 15px;margin-left: 30px;">

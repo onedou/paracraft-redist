@@ -17,13 +17,14 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 
 local ThirdPartyLogin = NPL.export()
 
-function ThirdPartyLogin:Init(type)
+function ThirdPartyLogin:Init(type, callback)
     if System.os.GetPlatform() ~= 'win32' and System.os.GetPlatform() ~= 'mac' then
         _guihelper.MessageBox(L"操作不支持此系统")
         return false
     end
 
     self.type = type
+    self.callback = callback
 
     local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil)
 
@@ -41,6 +42,12 @@ function ThirdPartyLogin:Init(type)
         KeepworkServiceSession:CheckOauthUserExisted(authType, authCode, function(bExisted, data)
             params._page:CloseWindow()
 
+            if data and data.token then
+                Mod.WorldShare.Store:Set("user/authToken", data.token)
+            else
+                Mod.WorldShare.Store:Remove("user/authToken")
+            end
+
             if bExisted then
                 -- // TODO: Login
             else
@@ -54,12 +61,10 @@ function ThirdPartyLogin:Init(type)
                     },
                     function(res)
                         if res and res == _guihelper.DialogResult.Yes then
-                            echo(1111111, true)
                             self:ShowCreateOrBindThirdPartyAccountPage("bind")
                         end
 
                         if res and res == _guihelper.DialogResult.No then
-                            echo(22222222, true)
                             self:ShowCreateOrBindThirdPartyAccountPage("create")
                         end
                     end,
@@ -122,4 +127,39 @@ end
 
 function ThirdPartyLogin:ShowCreateOrBindThirdPartyAccountPage(method)
     Mod.WorldShare.Utils.ShowWindow(400, 300, "Mod/WorldShare/cellar/LoginModal/CreateOrBindThirdPartyAccount.html?method=" .. (method or ""), "CreateOrBindThirdPartyAccount")
+end
+
+function ThirdPartyLogin:RegisterAndBind(account, password, authToken)
+    KeepworkServiceSession:RegisterAndBindThirdPartyAccount(account, password, authToken, function(state)
+        local CreateOrBindThirdPartyAccountPage = Mod.WorldShare.Store:Get("page/CreateOrBindThirdPartyAccount")
+
+        if CreateOrBindThirdPartyAccountPage then
+            CreateOrBindThirdPartyAccountPage:CloseWindow()
+        end
+        
+        if not state then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return false
+        end
+
+        if state.id then
+            if state.code then
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+            else
+                -- register success
+                -- OnKeepWorkLogin
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
+                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+            end
+
+            return true
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+    end)
+end
+
+function ThirdPartyLogin:LoginAndBind()
+
 end
