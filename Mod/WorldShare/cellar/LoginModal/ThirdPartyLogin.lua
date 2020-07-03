@@ -98,7 +98,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
 
 
     if System.os.GetPlatform() == "win32" then
-        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+        Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
         NPLWebServer.CheckServerStarted(function(bStarted, siteUrl)
             Mod.WorldShare.MsgBox:Close()
             if not bStarted or not siteUrl then

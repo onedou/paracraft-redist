@@ -16,7 +16,7 @@ MsgBox.allMsg = {}
 MsgBox.allMsgBox = commonlib.Array:new()
 MsgBox.customLabels = {}
 
-function MsgBox:Show(msg, sec, overtimeMsg, witdh, height, index)
+function MsgBox:Show(msg, sec, overtimeMsg, width, height, index)
     self.msgIdCount = self.msgIdCount + 1
 
     local msgId = self.msgIdCount
@@ -27,7 +27,7 @@ function MsgBox:Show(msg, sec, overtimeMsg, witdh, height, index)
     local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
-        "Mod/WorldShare/cellar/Common/MsgBox/MsgBox.html?msgId=" .. msgId .. "&width=" .. (witdh or 0) .. "&height=" .. (height or 0),
+        "Mod/WorldShare/cellar/Common/MsgBox/MsgBox.html?msgId=" .. msgId .. "&width=" .. (width or 0) .. "&height=" .. (height or 0),
         "MsgBox",
         0,
         0,
