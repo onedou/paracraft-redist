@@ -17,34 +17,60 @@ CODE GUIDELINE
 4. all templates variables and functions use underscore case
 
 ]]
+
+-- include ide
 NPL.load("(gl)script/ide/Files.lua")
 NPL.load("(gl)script/ide/Encoding.lua")
+
+-- include ide system encoding
 NPL.load("(gl)script/ide/System/Encoding/sha1.lua")
 NPL.load("(gl)script/ide/System/Encoding/base64.lua")
+NPL.load("(gl)script/ide/System/Encoding/guid.lua")
+NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
+NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
+
+-- include ide system windows
 NPL.load("(gl)script/ide/System/Windows/Screen.lua")
+
+-- include ide system core
+NPL.load("(gl)script/ide/System/Core/UniString.lua")
+NPL.load("(gl)script/ide/System/Core/Event.lua")
+NPL.load("(gl)script/ide/System/Core/ToolBase.lua")
+
+-- include ide system os
+NPL.load("(gl)script/ide/System/os/os.lua")
+
+-- include aries creator
 NPL.load("(gl)script/apps/Aries/Creator/WorldCommon.lua")
+
+-- include aries creator game login
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/InternetLoadWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/CreateNewWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/LocalLoadWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua")
-NPL.load("(gl)script/ide/System/Core/UniString.lua")
-NPL.load("(gl)script/ide/System/Core/Event.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua")
-NPL.load("(gl)script/ide/System/os/os.lua")
+
+-- include aries creator game areas
+NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua")
+
+-- include aries creator game network
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua")
-NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua")
-NPL.load("(gl)script/ide/System/Encoding/guid.lua")
+
+-- include aries creator game world
+NPL.load("(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua")
+
+-- include aries creator game login
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
-NPL.load("(gl)script/ide/System/Encoding/jwt.lua")
-NPL.load("(gl)script/ide/System/Encoding/basexx.lua")
+
+-- include aries creator game nplbrowser
 NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua")
+
+-- include worldshare service
 NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
 NPL.load("(gl)Mod/WorldShare/service/Cef3Manager.lua")
-NPL.load("(gl)script/ide/System/Core/ToolBase.lua")
 
 -- get table lib
 local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
@@ -79,7 +105,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.17'
+WorldShare.version = '0.0.18'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true
