@@ -13,6 +13,7 @@ ThirdPartyLogin:Init(type)
 
 -- get table lib
 local NPLWebServer = commonlib.gettable("MyCompany.Aries.Game.Network.NPLWebServer")
+local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -107,7 +108,19 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
     
             self.port = siteUrl:match("%:(%d+)") or self.port
 
-            Handle()
+            echo(Cef3Manager.bLoaded, true)
+
+            if Cef3Manager.bLoaded then
+                Handle()
+            else
+                Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000, nil, nil, nil, 6)
+                Cef3Manager:Connect("finishLoadCef3", nil, function()
+                    echo("on download cef3 finish!!!!", true)
+
+                    Mod.WorldShare.MsgBox:Close()
+                    Handle()
+                end, "UniqueConnection")
+            end
         end)
     end
 

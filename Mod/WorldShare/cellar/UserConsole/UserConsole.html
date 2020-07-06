@@ -438,6 +438,7 @@
                         end
                     end
                 end
+
                 function OnDailyCheck()
                         if(KeepworkServiceSession:IsSignedIn())then
                             ParacraftLearningRoomDailyPage.DoCheckin();
@@ -455,6 +456,7 @@
                         end
                     end)
                 end
+
                 function OnLearningLand()
                         if(KeepworkServiceSession:IsSignedIn())then
                             ParacraftLearningRoomDailyPage.OnLearningLand();
@@ -476,8 +478,13 @@
                 function OnVIP()
                     ParacraftLearningRoomDailyPage.OnVIP();
                 end
+
                 function HasCheckedToday()
                     return (not ParacraftLearningRoomDailyPage.HasCheckedToday());
+                end
+
+                function has_setted_my_school()
+                    return true
                 end
             ]]>
         </script>
@@ -742,6 +749,7 @@
                                        onclick="my_school()"
                                        class="my_school_button"
                                        value='<%= L"我的学校" %>' />
+                                <kp:redtip style="position:relative;margin-left:116;margin-top:-33px;" onupdate='<%= has_setted_my_school()%>'></kp:redtip>
                             </div>
                             <div style="margin-top:10px">
                                 <input type="button"

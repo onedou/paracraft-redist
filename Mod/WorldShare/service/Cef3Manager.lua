@@ -20,7 +20,9 @@ Cef3Manager:Signal("finishLoadCef3", function() end)
 
 function Cef3Manager:Init()
     Mod.WorldShare.Utils.SetTimeOut(function()
+        echo("333333333333333333333", true)
         NplBrowserLoaderPage.Check(function()
+            echo("111111111111111111111111", true)
             self:finishLoadCef3()
             self.bLoaded = true
         end)
