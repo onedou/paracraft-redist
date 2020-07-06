@@ -24,5 +24,9 @@ function MySchool:ShowJoinSchool()
 end
 
 function MySchool:ShowJoinInstitute()
-    local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/JoinInstitute.html", "JoinInstitute.html")
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/JoinInstitute.html", "JoinInstitute")
+end
+
+function MySchool:ShowRecordSchool()
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/RecordSchool.html", "RecordSchool")
 end

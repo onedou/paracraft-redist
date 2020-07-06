@@ -9,16 +9,11 @@
                     function close()
                         page:CloseWindow()
                     end
-
-                    function record_school()
-                        MySchool:ShowRecordSchool()
-                        close()
-                    end
                 ]]>
             </script>
             <style type="text/mcss">
             </style>
-            <aries:window mode="thin" title='<%=L"加入学校"%>' onclose="close()">
+            <aries:window mode="thin" title='<%=L"登记学校"%>' onclose="close()">
                 <div width="100%" height="100%" style="color: white;">
                     <div><%= L"您未加入任何学校，请选择：" %></div>
                     <div>
@@ -28,14 +23,10 @@
                         <select name="kind"></select>
                     </div>
                     <div>
-                        <select name="result"></select>
+                        <input type="text" name="result" EmptyText="<%= L'请输入学校全名' %>"/>
                     </div>
                     <div>
-                        <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
-                    </div>
-                    <div>
-                        <input type="button" value="<%= L'登记学校' %>" onclick="record_school()"/>
-                        <input type="button" value="<%= L'确定' %>"/>
+                        <%= L'*管理员人工审核后将会尽快将您的学校添加到列表，请稍后再试。' %>
                     </div>
                 </div>
             </aries:window>
