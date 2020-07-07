@@ -10,7 +10,7 @@
             end
 
             function has_joined()
-                return true
+                return false
             end
 
             function join_school()
@@ -35,8 +35,17 @@
             <div width="100%" height="100%">
                 <pe:if condition="<%= has_joined() %>">
                     <div style="padding: 20px;">
-                        <div style="color: white;height: 180px;">
-                            <div style="width: 250px;height: 100px;background-color: #333333;">
+                        <div style="color: white;height: 160px;">
+                            <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
+                                <div style="float:left; margin-left: 10px;margin-top: 10px;">
+                                    <div style="width: 120px;height: 80px;background-color: red;"></div>
+                                </div>
+                                <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;">
+                                    <div>学校名</div>
+                                    <div>地理位置</div>
+                                </div>
+                            </div>
+                            <div style="width: 260px;height: 100px;background-color: #333333;float: left;">
                                 <div style="float:left; margin-left: 10px;margin-top: 10px;">
                                     <div style="width: 120px;height: 80px;background-color: red;"></div>
                                 </div>
@@ -46,13 +55,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="margin-left: 380px;">
-                            <div>
-                                <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" />
+                        <div style="margin-left: 290px;">
+                            <div style="margin-bottom: 10px;">
+                                <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
+                                <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= true %>'></kp:redtip>
                             </div>
                             <div>
-                                <input type="button" class="button_highlight" value="<%= L'变更学校' %>" />
-                                <input type="button" class="button_highlight" value="<%= L'加入机构' %>" />
+                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" />
+                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" />
                             </div>
                         </div>
                     </div>

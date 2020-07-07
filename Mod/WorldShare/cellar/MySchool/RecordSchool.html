@@ -9,24 +9,91 @@
                     function close()
                         page:CloseWindow()
                     end
+
+                    function get_provinces()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456"
+                            }
+                        }
+                    end
+
+                    function get_cities()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456"
+                            }
+                        }
+                    end
+
+                    function get_areas()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456",
+                                selected = true
+                            }
+                        }
+                    end
+
+                    function get_kinds()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456"
+                            }
+                        }
+                    end
+
+                    function submit()
+
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
             </style>
             <aries:window mode="thin" title='<%=L"登记学校"%>' onclose="close()">
-                <div width="100%" height="100%" style="color: white;">
+                <div width="100%" height="100%" style="color: white;padding: 20px;">
                     <div><%= L"您未加入任何学校，请选择：" %></div>
-                    <div>
-                        <select name="province" ></select>
-                        <select name="city"></select>
-                        <select name="area"></select>
-                        <select name="kind"></select>
+                    <div style="margin-left: 80px;margin-top: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" ></select>
+                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
+                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
+                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;"></select>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <input type="text" name="result" class="bbs_text" style="width: 380px;height: 26px;" EmptyText="<%= L'请输入学校全名' %>"/>
+                        </div>
+                        <div style="width: 380px;">
+                            <%= L'*管理员人工审核后将会尽快将您的学校添加到列表，请稍后再试。' %>
+                        </div>
                     </div>
-                    <div>
-                        <input type="text" name="result" EmptyText="<%= L'请输入学校全名' %>"/>
-                    </div>
-                    <div>
-                        <%= L'*管理员人工审核后将会尽快将您的学校添加到列表，请稍后再试。' %>
+                    <div style="margin-top: 25px;margin-left: 220px;">
+                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'提交' %>" onclick="submit()"/>
+                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'取消' %>" onclick="close()"/>
                     </div>
                 </div>
             </aries:window>

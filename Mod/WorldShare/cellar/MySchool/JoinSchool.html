@@ -14,28 +14,89 @@
                         MySchool:ShowRecordSchool()
                         close()
                     end
+
+                    function get_provinces()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456"
+                            }
+                        }
+                    end
+
+                    function get_cities()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456"
+                            }
+                        }
+                    end
+
+                    function get_areas()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456",
+                                selected = true
+                            }
+                        }
+                    end
+
+                    function get_kinds()
+                        return {
+                            {
+                                text = "123",
+                                value = "123",
+                                selected = true
+                            },
+                            {
+                                text = "456",
+                                value = "456"
+                            }
+                        }
+                    end
                 ]]>
             </script>
             <style type="text/mcss">
             </style>
             <aries:window mode="thin" title='<%=L"加入学校"%>' onclose="close()">
-                <div width="100%" height="100%" style="color: white;">
+                <div width="100%" height="100%" style="color: white;padding: 20px;">
                     <div><%= L"您未加入任何学校，请选择：" %></div>
-                    <div>
-                        <select name="province" ></select>
-                        <select name="city"></select>
-                        <select name="area"></select>
-                        <select name="kind"></select>
+                    <div style="margin-left: 80px;margin-top: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" ></select>
+                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
+                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
+                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;"></select>
+                        </div>
+                        <div style="width: 380px;margin-bottom: 10px;">
+                            <select name="result" size="5">
+                                <option value="test">test</option>
+                            </select>
+                        </div>
+                        <div style="width: 380px;">
+                            <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
+                        </div>
                     </div>
-                    <div>
-                        <select name="result"></select>
-                    </div>
-                    <div>
-                        <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
-                    </div>
-                    <div>
-                        <input type="button" value="<%= L'登记学校' %>" onclick="record_school()"/>
-                        <input type="button" value="<%= L'确定' %>"/>
+                    <div style="margin-top: 10px;margin-left: 220px;">
+                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'登记学校' %>" onclick="record_school()"/>
+                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'确定' %>"/>
                     </div>
                 </div>
             </aries:window>
