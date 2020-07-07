@@ -188,17 +188,23 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/isBind", true)
     end
 
+    local userType = {}
+
     if response.orgAdmin and response.orgAdmin == 1 then
-        Mod.WorldShare.Store:Set("user/userType", 'teacher')
+        userType.teacher = true
     elseif response.tLevel and response.tLevel > 0 then
-        Mod.WorldShare.Store:Set("user/userType", 'teacher')
+        userType.teacher = true
         Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
     elseif response.student and response.student == 1 then
-        Mod.WorldShare.Store:Set("user/userType", 'vip')
-    elseif response.vip and response.vip == 1 then
-        Mod.WorldShare.Store:Set("user/userType", 'vip')
+        userType.student = true
     else
-        Mod.WorldShare.Store:Set("user/userType", 'plain')
+        userType.plain = true
+    end
+
+    Mod.WorldShare.Store:Set("user/userType", userType)
+
+    if response.vip and response.vip == 1 then
+        Mod.WorldShare.Store:Set("user/isVip", true)
     end
 
     Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)

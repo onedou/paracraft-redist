@@ -241,3 +241,22 @@ end
 function KeepworkUsersApi:RefreshToken(success, error)
     KeepworkBaseApi:Get('/users/refreshToken', nil, nil, success, error)
 end
+
+-- url: /users/school
+-- method: PUT
+-- header:
+--[[
+    Authorization string necessary
+]]
+-- params:
+--[[
+    schoolId int necessary
+]]
+-- return: object
+function KeepworkUsersApi:School(schoolId, success, error)
+    if not schoolId then
+        return false
+    end
+
+    KeepworkBaseApi:Put('/users/school', { schoolId = schoolId }, nil, success, error)
+end

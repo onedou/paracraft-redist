@@ -28,16 +28,12 @@ function UserStore:Action()
             self.username = username
             self.nickname = nickname
 
-            if self.userType == 'vip' then
-                -- true or nil
-                commonlib.setfield("System.User.isVip", true)
-            end
-
-            commonlib.setfield("System.User.keepworktoken", token)
-            commonlib.setfield("System.User.username", username)
-            commonlib.setfield("System.User.keepworkUsername", username)
-            commonlib.setfield("System.User.NickName", nickname)
+            commonlib.setfield("System.User.keepworktoken", self.token)
+            commonlib.setfield("System.User.username", self.username)
+            commonlib.setfield("System.User.keepworkUsername", self.username)
+            commonlib.setfield("System.User.NickName", self.nickname)
             commonlib.setfield("System.User.userType", self.userType)
+            commonlib.setfield("System.User.isVip", self.isVip)
 
             self:onLogin()
         end,
