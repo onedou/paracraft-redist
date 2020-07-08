@@ -74,6 +74,17 @@ function MySchool:ShowJoinSchool()
         }
     }
 
+    self.result = {
+        {
+            text = L"在这里显示筛选的结果",
+            value = 0,
+            selected = true,
+        },
+    }
+
+    self.curId = 0
+    self.kind = nil
+
     local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/JoinSchool.html", "JoinSchool")
 
     self:GetProvinces(function(data)
@@ -164,9 +175,19 @@ function MySchool:GetAreas(id, callback)
     end)
 end
 
-function MySchool:GetSearchSchoolResult(id, type)
-    KeepworkSchoolsApi:GetList(nil, id, type, function(data, err)
-        echo("from get search school result!!!!!", true)
-        echo(data, true)
+function MySchool:GetSearchSchoolResult(id, kind, callback)
+    KeepworkSchoolsApi:GetList(nil, id, kind, function(data, err)
+        if data and data.rows then
+            self.result = data.rows
+
+            for key, item in ipairs(self.result) do
+                item.text = item.name
+                item.value = item.id
+            end
+
+            if type(callback) == "function" then
+                callback(self.result)
+            end
+        end
     end)
 end

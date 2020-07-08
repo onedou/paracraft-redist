@@ -5,8 +5,6 @@
                 <![CDATA[
                     local MySchool = NPL.load("./MySchool.lua")
                     local page = document:GetPageCtrl()
-                    local kind
-                    local curId
 
                     function close()
                         page:CloseWindow()
@@ -33,12 +31,16 @@
                         return MySchool.kinds
                     end
 
+                    function get_result()
+                        return MySchool.result
+                    end
+
                     function select_province(name, value)
                         if value == 0 then
                             return false
                         end
 
-                        curId = value
+                        MySchool.curId = value
 
                         MySchool:GetCities(value, function(data)
                             MySchool.cities = data
@@ -50,8 +52,8 @@
                                 }
                             }
 
-                            MySchool:GetSearchSchoolResult(value, kind, function(data)
-                            
+                            MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
+                                page:Refresh(0.01)
                             end)
 
                             page:Refresh(0.01)
@@ -63,13 +65,13 @@
                             return false
                         end
 
-                        curId = value
+                        MySchool.curId = value
 
                         MySchool:GetAreas(value, function(data)
                             MySchool.areas = data
 
-                            MySchool:GetSearchSchoolResult(value, kind, function(data)
-                            
+                            MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
+                                page:Refresh(0.01)
                             end)
                             
                             page:Refresh(0.01)
@@ -81,22 +83,27 @@
                             return false
                         end
 
-                        curId = value
+                        MySchool.curId = value
 
-                        MySchool:GetSearchSchoolResult(value, kind, function(data)
-                                
+                        MySchool:GetSearchSchoolResult(value, MySchool.kind, function(data)
+                            page:Refresh(0.01)
                         end)
                     end
 
                     function select_kind(name, value)
-                        kind = value
+                        if value == 0 then
+                            MySchool.kind = nil
+                        else
+                            MySchool.kind = value
+                        end
 
-                        if not curId or curId == 0 then
+
+                        if not MySchool.curId or MySchool.curId == 0 then
                             return false
                         end
 
-                        MySchool:GetSearchSchoolResult(curId, kind, function(data)
-                            
+                        MySchool:GetSearchSchoolResult(MySchool.curId, MySchool.kind, function(data)
+                            page:Refresh(0.01)
                         end)
                     end
 
@@ -118,9 +125,7 @@
                             <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
                         </div>
                         <div style="width: 380px;margin-bottom: 10px;">
-                            <select name="result" size="5">
-                                <option value="test">test</option>
-                            </select>
+                            <select name="result" DataSource="<%= get_result() %>" size="5"></select>
                         </div>
                         <div style="width: 380px;">
                             <%= L"*如果您的学校未出现在列表中，请登记学校。我们会尽快添加。" %>
