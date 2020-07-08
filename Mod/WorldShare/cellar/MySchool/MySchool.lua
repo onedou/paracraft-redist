@@ -11,7 +11,7 @@ local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
-local KeepworkServiceLesson = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Lesson.lua")
+local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 
 local MySchool = NPL.export()
 
@@ -20,15 +20,58 @@ function MySchool:Show()
 
     local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
 
-    self:GetMyAllOrgsAndSchool(function(data)
+    KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         Mod.WorldShare.MsgBox:Close()
-        echo('from get my all orgs and school!!!!!', true)
-        echo(data, true)
+
+        echo(schoolData, true)
+        echo(orgData, true)
     end)
 end
 
 function MySchool:ShowJoinSchool()
+    self.provinces = {
+        {
+            text = L"请选择",
+            value = L"请选择",
+            selected = true,
+        }
+    }
+
+    self.cities = {
+        {
+            text = L"请选择",
+            value = L"请选择",
+            selected = true,
+        }
+    }
+
+    self.areas = {
+        {
+            text = L"请选择",
+            value = L"请选择",
+            selected = true,
+        }
+    }
+
+    self.kinds = {
+        {
+            text = L"请选择",
+            value = L"请选择",
+            selected = true,
+        }
+    }
+
     local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/JoinSchool.html", "JoinSchool")
+
+    self:GetProvinces(function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        self.provinces = data
+
+        params._page:Refresh(0.01)
+    end)
 end
 
 function MySchool:ShowJoinInstitute()
@@ -39,12 +82,29 @@ function MySchool:ShowRecordSchool()
     local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/RecordSchool.html", "RecordSchool")
 end
 
-function MySchool:GetMyAllOrgsAndSchool(callback)
-    KeepworkServiceLesson:GetUserAllOrgs(function()
-        
+function MySchool:GetProvinces(callback)
+    KeepworkServiceSchoolAndOrg:GetSchoolRegion("province", function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        if type(callback) == "function" then
+            for key, item in ipairs(data) do
+                item.text = item.name
+                item.value = item.id
+            end
+
+            data[#data + 1] = {
+                text = L"请选择",
+                value = L"请选择",
+                selected = true,
+            }
+
+            callback(data)
+        end
     end)
 end
 
-function MySchool:GetProvinces()
-
+function MySchool:GetCities(id, callback)
+    
 end

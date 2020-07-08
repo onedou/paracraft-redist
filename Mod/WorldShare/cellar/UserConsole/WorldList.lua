@@ -234,7 +234,7 @@ function WorldList:EnterWorld(index)
             if currentWorld.shared then
                 Mod.WorldShare.MsgBox:Dialog(
                     "MultiPlayerWorldLogin",
-                    L"此世界为多人世界，请登陆后再打开世界，或者以只读模式打开世界",
+                    L"此世界为多人世界，请登录后再打开世界，或者以只读模式打开世界",
                     {
                         Title = L"多人世界",
                         Yes = L"知道了",

@@ -124,19 +124,19 @@ function UserInfo:LoginWithToken()
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在自动登陆，请稍后...", 8000, L"链接超时")
+    Mod.WorldShare.MsgBox:Show(L"正在自动登录，请稍后...", 8000, L"链接超时")
 
     KeepworkServiceSession:Profile(
         function(data, err)
             if err == 401 then
                 Mod.WorldShare.MsgBox:Close()
                 -- token not exist
-                GameLogic.AddBBS(nil, format("%s%d", L"自动登陆失败了， 错误码：", err), 3000, "255 0 0")
+                GameLogic.AddBBS(nil, format("%s%d", L"自动登录失败了， 错误码：", err), 3000, "255 0 0")
 
                 return false
             elseif err ~= 200 then
                 Mod.WorldShare.MsgBox:Close()
-                GameLogic.AddBBS(nil, format("%s%d", L"自动登陆失败了， 错误码：", err), 3000, "255 0 0")
+                GameLogic.AddBBS(nil, format("%s%d", L"自动登录失败了， 错误码：", err), 3000, "255 0 0")
 
                 return false
             end
@@ -169,7 +169,7 @@ function UserInfo:CheckDoAutoSignin(callback)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"正在自动登陆，请稍后...", 8000, L"链接超时")
+    Mod.WorldShare.MsgBox:Show(L"正在自动登录，请稍后...", 8000, L"链接超时")
 
     KeepworkServiceSession:Profile(
         function(data, err)
@@ -187,7 +187,7 @@ function UserInfo:CheckDoAutoSignin(callback)
                             SessionsData:SaveSession(info)
 
                             -- token not exist
-                            GameLogic.AddBBS(nil, format("%s%d", L"自动登陆失败了， 错误码：", err), 3000, "255 0 0")
+                            GameLogic.AddBBS(nil, format("%s%d", L"自动登录失败了， 错误码：", err), 3000, "255 0 0")
                             return false
                         end
 
@@ -196,7 +196,7 @@ function UserInfo:CheckDoAutoSignin(callback)
 
                             if err ~= 200 then
                                 -- login fail
-                                GameLogic.AddBBS(nil, format("%s%d", L"自动登陆失败了， 错误码：", err), 3000, "255 0 0")
+                                GameLogic.AddBBS(nil, format("%s%d", L"自动登录失败了， 错误码：", err), 3000, "255 0 0")
                                 return false
                             end
 
@@ -218,7 +218,7 @@ function UserInfo:CheckDoAutoSignin(callback)
                 return false
             elseif err ~= 200 then
                 Mod.WorldShare.MsgBox:Close()
-                GameLogic.AddBBS(nil, format("%s%d", L"自动登陆失败了， 错误码：", err), 3000, "255 0 0")
+                GameLogic.AddBBS(nil, format("%s%d", L"自动登录失败了， 错误码：", err), 3000, "255 0 0")
 
                 return false
             end

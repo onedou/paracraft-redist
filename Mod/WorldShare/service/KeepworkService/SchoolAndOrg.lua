@@ -1,0 +1,88 @@
+--[[
+Title: KeepworkService School
+Author(s):  big
+Date:  2020.7.7
+Place: Foshan
+use the lib:
+------------------------------------------------------------
+local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+------------------------------------------------------------
+]]
+
+-- api
+local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
+local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
+local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
+
+
+local KeepworkServiceSchoolAndOrg = NPL.export()
+
+function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
+    if type(callback) ~= "function" then
+        return false
+    end
+
+    LessonOrganizationsApi:GetUserAllOrgs(
+        function(data, err)
+            if err == 200 then
+                if data and data.data and type(data.data.allOrgs) == 'table' then
+                    callback(data.data.allOrgs)
+                end
+            end
+        end
+    )
+end
+
+function KeepworkServiceSchoolAndOrg:GetUserAllSchools(callback)
+    if type(callback) ~= "function" then
+        return false
+    end
+
+    KeepworkUsersApi:School(
+        function(data, err)
+            if err == 200 then
+                callback(data)
+            end
+        end
+    )
+end
+
+function KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(callback)
+    if type(callback) ~= "function" then
+        return false
+    end
+    
+    self:GetUserAllSchools(function(data)
+        local schoolData = data
+
+        self:GetUserAllOrgs(function(data)
+            local orgData = data
+
+            callback(schoolData, orgData)
+        end)
+    end)
+end
+
+function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, callback)
+    if type(selectType) ~= "string" or not callback then
+        return false
+    end
+
+    KeepworkRegionsApi:GetList(function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        if selectType == "province" then
+            local provinceData = {}
+            
+            for key, item in ipairs(data) do
+                if item and item.level == 2 then
+                    provinceData[#provinceData + 1] = item
+                end
+            end
+
+            callback(provinceData)
+        end
+    end)
+end

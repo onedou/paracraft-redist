@@ -16,60 +16,24 @@
                     end
 
                     function get_provinces()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456"
-                            }
-                        }
+                        return MySchool.provinces
                     end
 
                     function get_cities()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456"
-                            }
-                        }
+                        return MySchool.cities
                     end
 
                     function get_areas()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456",
-                                selected = true
-                            }
-                        }
+                        return MySchool.areas
                     end
 
                     function get_kinds()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456"
-                            }
-                        }
+                        return MySchool.kinds
+                    end
+
+                    function select_province(name, value)
+                        echo('select province!!!!', true)
+                        echo(value, true)
                     end
                 ]]>
             </script>
@@ -80,7 +44,7 @@
                     <div><%= L"您未加入任何学校，请选择：" %></div>
                     <div style="margin-left: 80px;margin-top: 10px;">
                         <div style="margin-bottom: 10px;">
-                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" ></select>
+                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" onselect="select_province"></select>
                             <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
                             <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
                             <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;"></select>

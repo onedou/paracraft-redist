@@ -27,5 +27,5 @@ local KeepworkRegionsApi = NPL.export()
     level number necessary 1.国家 2.省 3.市 4.区
 ]]
 function KeepworkRegionsApi:GetList(success, error)
-    KeepworkregionsApi:Get('/regions', nil, nil, success, error)
+    KeepworkBaseApi:Get('/regions', nil, nil, success, error)
 end

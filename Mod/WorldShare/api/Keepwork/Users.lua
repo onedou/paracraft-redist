@@ -243,6 +243,30 @@ function KeepworkUsersApi:RefreshToken(success, error)
 end
 
 -- url: /users/school
+-- desc: get user school list
+-- method: GET
+-- headers: 
+--[[
+    Authorization string necessary
+]]
+-- return:
+--[[
+    id number not necessary
+    name string not necessary
+    regionId number not necessary
+    region object not necessary
+        country string not necessary
+        state string not necessary
+        city string not necessary
+        county string not necessary	
+    type string not necessary
+    orgId number not necessary
+]]
+function KeepworkUsersApi:School(success, error)
+    KeepworkBaseApi:Get('/users/school', nil, nil, success, error)
+end
+
+-- url: /users/school
 -- method: PUT
 -- header:
 --[[
@@ -253,10 +277,33 @@ end
     schoolId int necessary
 ]]
 -- return: object
-function KeepworkUsersApi:School(schoolId, success, error)
+function KeepworkUsersApi:ChangeSchool(schoolId, success, error)
     if not schoolId then
         return false
     end
 
     KeepworkBaseApi:Put('/users/school', { schoolId = schoolId }, nil, success, error)
+end
+
+-- url: /users/school/register
+-- method: POST
+-- header:
+--[[
+    Authorization string necessary
+]]
+-- params:
+--[[
+    type string necessary 学校类型	
+    regionId integer necessary 地域ID
+    name string necessary 学校名称
+]]
+-- return: object
+function KeepworkUsersApi:SchoolRegister(success, error)
+    local params = {
+        type = type,
+        regionId = regionId,
+        name = name
+    }
+
+    KeepworkBaseApi:Post('/users/school/register', params, nil, success, error)
 end
