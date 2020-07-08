@@ -13,6 +13,7 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
+local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
 
 
 local KeepworkServiceSchoolAndOrg = NPL.export()
@@ -63,7 +64,7 @@ function KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(callback)
     end)
 end
 
-function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, callback)
+function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callback)
     if type(selectType) ~= "string" or not callback then
         return false
     end
@@ -84,5 +85,33 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, callback)
 
             callback(provinceData)
         end
+
+        if selectType == "city" then
+            local cityData = {}
+
+            for key, item in ipairs(data) do
+                if item and tonumber(item.parentId) == tonumber(parentId) then
+                    cityData[#cityData + 1] = item
+                end
+            end
+
+            callback(cityData)
+        end
+
+        if selectType == "area" then
+            local areaData = {}
+
+            for key, item in ipairs(data) do
+                if item and tonumber(item.parentId) == tonumber(parentId) then
+                    areaData[#areaData + 1] = item
+                end
+            end
+
+            callback(areaData)
+        end
     end)
+end
+
+function KeepworkServiceSchoolAndOrg:SearchSchool()
+
 end

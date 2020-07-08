@@ -23,7 +23,8 @@ local KeepworkSchoolsApi = NPL.export()
 -- params:
 --[[
     name string not necessary 根据学校名称模糊匹配
-    regionId int not necessary	
+    regionId int not necessary
+    type string not necessary 小学、中学、大学
 ]]
 -- return:
 --[[
@@ -37,6 +38,20 @@ local KeepworkSchoolsApi = NPL.export()
         orgId integer not necessary
         region object necessary
 ]]
-function KeepworkSchoolsApi:GetList(success, error)
-    KeepworkBaseApi:Get('/schools', nil, nil, success, error)
+function KeepworkSchoolsApi:GetList(name, regionId, type, success, error)
+    local params = {}
+
+    if name then
+        params.name = name
+    end
+
+    if regionId then
+        params.regionId = regionId
+    end
+
+    if type then
+        params.type = Mod.WorldShare.Utils.EncodeURIComponent(type)
+    end
+
+    KeepworkBaseApi:Get('/schools', params, nil, success, error)
 end

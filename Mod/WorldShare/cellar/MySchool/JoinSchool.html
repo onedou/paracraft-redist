@@ -5,6 +5,8 @@
                 <![CDATA[
                     local MySchool = NPL.load("./MySchool.lua")
                     local page = document:GetPageCtrl()
+                    local kind
+                    local curId
 
                     function close()
                         page:CloseWindow()
@@ -32,8 +34,74 @@
                     end
 
                     function select_province(name, value)
-                        echo('select province!!!!', true)
-                        echo(value, true)
+                        if value == 0 then
+                            return false
+                        end
+
+                        curId = value
+
+                        MySchool:GetCities(value, function(data)
+                            MySchool.cities = data
+                            MySchool.areas = {
+                                {
+                                    text = L"请选择",
+                                    value = 0,
+                                    selected = true,
+                                }
+                            }
+
+                            MySchool:GetSearchSchoolResult(value, kind, function(data)
+                            
+                            end)
+
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function select_city(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        curId = value
+
+                        MySchool:GetAreas(value, function(data)
+                            MySchool.areas = data
+
+                            MySchool:GetSearchSchoolResult(value, kind, function(data)
+                            
+                            end)
+                            
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function select_area(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        curId = value
+
+                        MySchool:GetSearchSchoolResult(value, kind, function(data)
+                                
+                        end)
+                    end
+
+                    function select_kind(name, value)
+                        kind = value
+
+                        if not curId or curId == 0 then
+                            return false
+                        end
+
+                        MySchool:GetSearchSchoolResult(curId, kind, function(data)
+                            
+                        end)
+                    end
+
+                    function confirm()
+                        close()
                     end
                 ]]>
             </script>
@@ -45,9 +113,9 @@
                     <div style="margin-left: 80px;margin-top: 10px;">
                         <div style="margin-bottom: 10px;">
                             <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" onselect="select_province"></select>
-                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
-                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
-                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;"></select>
+                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_city"></select>
+                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_area"></select>
+                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
                         </div>
                         <div style="width: 380px;margin-bottom: 10px;">
                             <select name="result" size="5">
