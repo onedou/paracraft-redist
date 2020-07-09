@@ -33,17 +33,19 @@
                 function get_data()
                     local data = {}
 
-                    MySchool.schoolData.showType = 1
+                    if type(MySchool.schoolData) == "table" then
+                        MySchool.schoolData.showType = 1
 
-                    data[#data + 1] = MySchool.schoolData
-
-                    for key, item in ipairs(MySchool.orgData) do
-                        item.showType = 2
-
-                        data[#data + 1] = item
+                        data[#data + 1] = MySchool.schoolData
                     end
 
-                    echo(data, true)
+                    if type(MySchool.orgData) == "table" then
+                        for key, item in ipairs(MySchool.orgData) do
+                            item.showType = 2
+
+                            data[#data + 1] = item
+                        end
+                    end
 
                     return data
                 end
