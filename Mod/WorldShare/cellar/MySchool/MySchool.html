@@ -2,74 +2,77 @@
 <body>
     <pe:mcml>
         <script type="text/npl">
-            local MySchool = NPL.load("./MySchool.lua")
-            local page = document:GetPageCtrl()
+            <![CDATA[
+                local MySchool = NPL.load("./MySchool.lua")
+                local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+                local page = document:GetPageCtrl()
 
-            function close()
-                page:CloseWindow()
-            end
-
-            function has_joined()
-                return MySchool.hasJoined
-            end
-
-            function join_school()
-                MySchool:ShowJoinSchool()
-                close()
-            end
-
-            function join_institute()
-                MySchool:ShowJoinInstitute()
-                close()
-            end
-
-            function get_school_name()
-                if not MySchool.schoolData then
-                    return ""
+                function close()
+                    page:CloseWindow()
                 end
 
-                return MySchool.schoolData.name
-            end
-
-            function get_school_place()
-                if not MySchool.schoolData or
-                   not MySchool.schoolData.region or
-                   not MySchool.schoolData.region.state   
-                then
-                    return ""
+                function has_joined()
+                    return MySchool.hasJoined or false
                 end
 
-                return MySchool.schoolData.region.state.name
-            end
-
-            function enter_school()
-                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua")
-                ParacraftLearningRoomDailyPage.OnLearningLand()
-            end
-
-            function get_data()
-                local data = {}
-
-                MySchool.schoolData.showType = 1
-
-                data[#data + 1] = MySchool.schoolData
-
-                for key, item in ipairs(MySchool.orgData) do
-                    item.showType = 2
-
-                    data[#data + 1] = item
+                function join_school()
+                    MySchool:ShowJoinSchool()
+                    close()
                 end
 
-                return data
-            end
-
-            function has_school_joined()
-                if MySchool.schoolData and MySchool.schoolData.regionId then
-                    return false
-                else
-                    return true
+                function join_institute()
+                    MySchool:ShowJoinInstitute()
+                    close()
                 end
-            end
+
+                function enter_school()
+                    local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua")
+                    ParacraftLearningRoomDailyPage.OnLearningLand()
+                end
+
+                function get_data()
+                    local data = {}
+
+                    MySchool.schoolData.showType = 1
+
+                    data[#data + 1] = MySchool.schoolData
+
+                    for key, item in ipairs(MySchool.orgData) do
+                        item.showType = 2
+
+                        data[#data + 1] = item
+                    end
+
+                    echo(data, true)
+
+                    return data
+                end
+
+                function has_school_joined()
+                    if MySchool.schoolData and MySchool.schoolData.regionId then
+                        return false
+                    else
+                        return true
+                    end
+                end
+
+                function open_org_page(index)
+                    local data = get_data()
+                    local curData = data[index] or {}
+
+                    local url = KeepworkService:GetKeepworkUrl() .. "/org/" .. curData.name .. "/index"
+
+                    ParaGlobal.ShellExecute("open", url, "", "", 1)
+                end
+
+                function get_place(region) 
+                    if region and region.state and region.state.name then
+                        return region.state.name
+                    else
+                        return L"暂无"
+                    end
+                end
+            ]]>
         </script>
         <style type="text/mcss">
             {
@@ -101,19 +104,21 @@
                                 <Columns>
                                     <pe:if condition="<%= Eval('showType') == 1%>">
                                         <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
+                                            <input type="button" class="click" name='<%=Eval("index")%>' onclick="enter_school" />
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;">
-                                                <div style="width: 120px;height: 80px;background-color:white;"></div>
+                                                <div style="width: 120px;height: 80px;background: url(textures/worldshare_32bits.png#287 346 170 99);"></div>
                                             </div>
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;color: white">
                                                 <div><%= Eval('name') %></div>
-                                                <div><%= Eval('region').state.name %></div>
+                                                <div><%= get_place(Eval('region')) %></div>
                                             </div>
                                         </div>
                                     </pe:if>
                                     <pe:if condition="<%= Eval('showType') == 2%>">
                                         <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
+                                            <input type="button" class="click" name='<%=Eval("index")%>' onclick="open_org_page" />
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;">
-                                                <div style="width: 120px;height: 80px;background-color:white;"></div>
+                                                <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or '') .. ');' %>"></div>
                                             </div>
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;color: white">
                                                 <div><%= Eval('name') %></div>
