@@ -6,6 +6,17 @@
                     local MySchool = NPL.load("./MySchool.lua")
                     local page = document:GetPageCtrl()
 
+                    function submit()
+                        MySchool:JoinInstitute(page:GetValue("code"), function(bSuccessed)
+                            if bSuccessed then
+                                GameLogic.AddBBS(nil, "加入机构成功", 3000, "0 255 0")
+                                close()
+                            else
+                                GameLogic.AddBBS(nil, "加入机构失败，或已加入此机构", 3000, "255 0 0")
+                            end
+                        end)
+                    end
+
                     function close()
                         page:CloseWindow()
                     end
@@ -18,7 +29,7 @@
                     <div style="color:white">
                         <div><%= L"请输入从机构处获得的激活码" %></div>
                         <div style="margin-left: 80px;margin-top: 10px;">
-                            <input type="text" class="bbs_text" style="width: 380px;height: 30px;" value="" />
+                            <input type="text" class="bbs_text" style="width: 380px;height: 30px;" name="code" value="" />
                         </div>
                         <div style="margin-top: 25px;margin-left: 220px;">
                             <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'提交' %>" onclick="submit()"/>

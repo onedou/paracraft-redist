@@ -108,7 +108,26 @@
                     end
 
                     function confirm()
-                        close()
+                        local text = page:GetValue("result")
+                        local curItem
+
+                        for key, item in ipairs(get_result()) do
+                            if item.text == text then
+                                curItem = item
+                                break
+                            end
+                        end
+
+                        Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                        MySchool:ChangeSchool(curItem.value, function(bSuccessed)
+                            Mod.WorldShare.MsgBox:Close()
+                            if bSuccessed then
+                                close()
+                                GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
+                            else
+                                GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
+                            end
+                        end)
                     end
                 ]]>
             </script>
@@ -133,7 +152,7 @@
                     </div>
                     <div style="margin-top: 10px;margin-left: 220px;">
                         <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'登记学校' %>" onclick="record_school()"/>
-                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'确定' %>"/>
+                        <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'确定' %>" onclick="confirm()"/>
                     </div>
                 </div>
             </aries:window>

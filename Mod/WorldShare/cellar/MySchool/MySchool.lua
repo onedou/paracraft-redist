@@ -12,7 +12,6 @@ local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
-local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
 
 local MySchool = NPL.export()
 
@@ -176,18 +175,24 @@ function MySchool:GetAreas(id, callback)
 end
 
 function MySchool:GetSearchSchoolResult(id, kind, callback)
-    KeepworkSchoolsApi:GetList(nil, id, kind, function(data, err)
-        if data and data.rows then
-            self.result = data.rows
+    KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, function(data)
+        self.result = data
 
-            for key, item in ipairs(self.result) do
-                item.text = item.name
-                item.value = item.id
-            end
+        for key, item in ipairs(self.result) do
+            item.text = item.name
+            item.value = item.id
+        end
 
-            if type(callback) == "function" then
-                callback(self.result)
-            end
+        if type(callback) == "function" then
+            callback(self.result)
         end
     end)
+end
+
+function MySchool:ChangeSchool(schoolId, callback)
+    KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
+end
+
+function MySchool:JoinInstitute(code, callback)
+    KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
 end

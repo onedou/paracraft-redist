@@ -175,6 +175,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local userId = response["id"] or 0
     local username = response["username"] or ""
     local nickname = response["nickname"] or ""
+    local realname = response['realname'] or ""
 
     if not response.realname then
         Mod.WorldShare.Store:Set("user/isVerified", false)
@@ -230,7 +231,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     end
 
     local Login = Mod.WorldShare.Store:Action("user/Login")
-    Login(token, userId, username, nickname)
+    Login(token, userId, username, nickname, realname)
 
     LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)

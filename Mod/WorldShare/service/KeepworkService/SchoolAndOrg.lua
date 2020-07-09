@@ -14,7 +14,7 @@ local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrg
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
 local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
-
+local LessonOrganizationActivateCodesApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizationActivateCodes.lua")
 
 local KeepworkServiceSchoolAndOrg = NPL.export()
 
@@ -112,6 +112,51 @@ function KeepworkServiceSchoolAndOrg:GetSchoolRegion(selectType, parentId, callb
     end)
 end
 
-function KeepworkServiceSchoolAndOrg:SearchSchool()
+function KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, callback)
+    KeepworkSchoolsApi:GetList(nil, id, kind, function(data, err)
+        if data and data.rows then
+            if type(callback) == "function" then
+                callback(data.rows)
+            end
+        end
+    end)
+end
 
+-- return true or false
+function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
+    KeepworkUsersApi:ChangeSchool(schoolId, function(data, err)
+        if err == 200 then
+            if type(callback) == "function" then
+                callback(true)
+            else
+                callback(false)
+            end
+        end
+    end)
+end
+
+-- return true or false
+function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
+    local realname = Mod.WorldShare.Store:Get("user/realname")
+
+    code = string.gsub(code, " ", "")
+
+    LessonOrganizationActivateCodesApi:Activate(
+        code,
+        realname,
+        function(data, err)
+            if err == 200 then
+                if type(callback) == "function" then
+                    callback(true)
+                else
+                    callback(false)
+                end
+            end
+        end,
+        function()
+            if type(callback) == "function" then
+                callback(false)
+            end
+        end
+    )
 end
