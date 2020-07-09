@@ -485,7 +485,7 @@
                 end
 
                 function has_setted_my_school()
-                    return true
+                    return not Mod.WorldShare.Store:Get('user/hasJoinedSchoolOrOrg')
                 end
             ]]>
         </script>

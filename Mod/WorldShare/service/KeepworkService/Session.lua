@@ -13,6 +13,7 @@ local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkServ
 local KeepworkService = NPL.load("../KeepworkService.lua")
 local GitGatewayService = NPL.load("../GitGatewayService.lua")
 local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
+local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
 
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
@@ -245,9 +246,24 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
                 end
             end
 
-            if type(callback) == "function" then
-                callback()
-            end
+            KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
+                if type(schoolData) == "table" and schoolData.regionId then
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
+                else
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
+
+                end
+                
+                if type(orgData) == "table" and #orgData > 0 then
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', true)
+                else
+                    Mod.WorldShare.Store:Set('user/hasJoinedSchoolOrOrg', false)
+                end
+                
+                if type(callback) == "function" then
+                    callback()
+                end
+            end)
         end
     )
 
