@@ -11,64 +11,94 @@
                     end
 
                     function get_provinces()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456"
-                            }
-                        }
+                        return MySchool.provinces
                     end
 
                     function get_cities()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456"
-                            }
-                        }
+                        return MySchool.cities
                     end
 
                     function get_areas()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456",
-                                selected = true
-                            }
-                        }
+                        return MySchool.areas
                     end
 
                     function get_kinds()
-                        return {
-                            {
-                                text = "123",
-                                value = "123",
-                                selected = true
-                            },
-                            {
-                                text = "456",
-                                value = "456"
+                        return MySchool.kinds
+                    end
+
+                    function select_province(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        MySchool.curId = value
+
+                        MySchool:GetCities(value, function(data)
+                            MySchool.cities = data
+                            MySchool.areas = {
+                                {
+                                    text = L"请选择",
+                                    value = 0,
+                                    selected = true,
+                                }
                             }
-                        }
+
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function select_city(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        MySchool.curId = value
+
+                        MySchool:GetAreas(value, function(data)
+                            MySchool.areas = data
+                            
+                            page:Refresh(0.01)
+                        end)
+                    end
+
+                    function select_area(name, value)
+                        if value == 0 then
+                            return false
+                        end
+
+                        MySchool.curId = value
+                    end
+
+                    function select_kind(name, value)
+                        if value == 0 then
+                            MySchool.kind = nil
+                        else
+                            MySchool.kind = value
+                        end
+
+                        if not MySchool.curId or MySchool.curId == 0 then
+                            return false
+                        end
                     end
 
                     function submit()
+                        local schoolName = page:GetValue("schoolname")
+                        local schoolType = MySchool.kind
+                        local regionId = MySchool.curId
 
+                        MySchool:RecordSchool(
+                            schoolType,
+                            regionId,
+                            schoolName,
+                            function(bSuccessed, data)
+                                if bSuccessed and data and data.status then
+                                    GameLogic.AddBBS(nil, format(L"已提交，状态：%s", data.status), 5000, "0 255 0")
+                                    close()
+                                else
+                                    GameLogic.AddBBS(nil, L"提交失败", 3000, "255 0 0")
+                                end
+                            end
+                        )
                     end
                 ]]>
             </script>
@@ -79,13 +109,13 @@
                     <div><%= L"您未加入任何学校，请选择：" %></div>
                     <div style="margin-left: 80px;margin-top: 10px;">
                         <div style="margin-bottom: 10px;">
-                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" ></select>
-                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
-                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;"></select>
-                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;"></select>
+                            <select name="province" style="width:87px;height: 26px;" DataSource="<%= get_provinces() %>" onselect="select_province"></select>
+                            <select name="city" DataSource="<%= get_cities() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_city"></select>
+                            <select name="area" DataSource="<%= get_areas() %>" style="margin-left: 10px;width:87px;height: 26px;" onselect="select_area"></select>
+                            <select name="kind" DataSource="<%= get_kinds() %>" style="margin-left: 10px;width:88px;height: 26px;" onselect="select_kind"></select>
                         </div>
                         <div style="margin-bottom: 10px;">
-                            <input type="text" name="result" class="bbs_text" style="width: 380px;height: 26px;" EmptyText="<%= L'请输入学校全名' %>"/>
+                            <input type="text" name="schoolname" class="bbs_text" style="width: 380px;height: 26px;" EmptyText="<%= L'请输入学校全名' %>"/>
                         </div>
                         <div style="width: 380px;">
                             <%= L'*管理员人工审核后将会尽快将您的学校添加到列表，请稍后再试。' %>

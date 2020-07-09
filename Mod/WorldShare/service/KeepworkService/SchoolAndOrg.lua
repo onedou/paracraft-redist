@@ -160,3 +160,29 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
         end
     )
 end
+
+function KeepworkServiceSchoolAndOrg:SchoolRegister(schoolType, regionId, schoolName, callback)
+    KeepworkUsersApi:SchoolRegister(
+        schoolType,
+        regionId,
+        schoolName,
+        function(data, err)
+            if err ~= 200 then
+                if type(callback) == "function" then
+                    callback(false)
+                end
+
+                return false
+            end
+
+
+            if type(callback) == "function" then
+                callback(true, data)
+            end
+        end,
+        function()
+            if type(callback) == "function" then
+                callback(false)
+            end
+        end)
+end

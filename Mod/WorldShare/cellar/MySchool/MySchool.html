@@ -10,7 +10,7 @@
             end
 
             function has_joined()
-                return false
+                return MySchool.hasJoined
             end
 
             function join_school()
@@ -22,6 +22,54 @@
                 MySchool:ShowJoinInstitute()
                 close()
             end
+
+            function get_school_name()
+                if not MySchool.schoolData then
+                    return ""
+                end
+
+                return MySchool.schoolData.name
+            end
+
+            function get_school_place()
+                if not MySchool.schoolData or
+                   not MySchool.schoolData.region or
+                   not MySchool.schoolData.region.state   
+                then
+                    return ""
+                end
+
+                return MySchool.schoolData.region.state.name
+            end
+
+            function enter_school()
+                local ParacraftLearningRoomDailyPage = NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParacraftLearningRoom/ParacraftLearningRoomDailyPage.lua")
+                ParacraftLearningRoomDailyPage.OnLearningLand()
+            end
+
+            function get_data()
+                local data = {}
+
+                MySchool.schoolData.showType = 1
+
+                data[#data + 1] = MySchool.schoolData
+
+                for key, item in ipairs(MySchool.orgData) do
+                    item.showType = 2
+
+                    data[#data + 1] = item
+                end
+
+                return data
+            end
+
+            function has_school_joined()
+                if MySchool.schoolData and MySchool.schoolData.regionId then
+                    return false
+                else
+                    return true
+                end
+            end
         </script>
         <style type="text/mcss">
             {
@@ -29,40 +77,61 @@
                     color = '#000000',
                     background = "textures/worldshare_32bits.png;149 104 16 16:4 4 4 4",
                 },
+                click = {
+                    position = 'relative',
+                    width = 260,
+                    height = 100,
+                    background = ''
+                }
             }
         </style>
         <aries:window mode="thin" title='<%=L"我的学校"%>' onclose="close()">
             <div width="100%" height="100%">
                 <pe:if condition="<%= has_joined() %>">
                     <div style="padding: 20px;">
-                        <div style="color: white;height: 160px;">
-                            <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
-                                <div style="float:left; margin-left: 10px;margin-top: 10px;">
-                                    <div style="width: 120px;height: 80px;background-color: red;"></div>
-                                </div>
-                                <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;">
-                                    <div>学校名</div>
-                                    <div>地理位置</div>
-                                </div>
-                            </div>
-                            <div style="width: 260px;height: 100px;background-color: #333333;float: left;">
-                                <div style="float:left; margin-left: 10px;margin-top: 10px;">
-                                    <div style="width: 120px;height: 80px;background-color: red;"></div>
-                                </div>
-                                <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;">
-                                    <div>学校名</div>
-                                    <div>地理位置</div>
-                                </div>
-                            </div>
+                        <div style="color: white;height: 160px;;margin-bottom: 10px">
+                            <pe:gridview
+                                RememberScrollPos="true"
+                                AllowPaging="false"
+                                VerticalScrollBarStep="50"
+                                DefaultNodeHeight="85"
+                                ItemsPerLine="2"
+                                DataSource="<%= get_data() %>"
+                            >
+                                <Columns>
+                                    <pe:if condition="<%= Eval('showType') == 1%>">
+                                        <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;">
+                                                <div style="width: 120px;height: 80px;background-color:white;"></div>
+                                            </div>
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;color: white">
+                                                <div><%= Eval('name') %></div>
+                                                <div><%= Eval('region').state.name %></div>
+                                            </div>
+                                        </div>
+                                    </pe:if>
+                                    <pe:if condition="<%= Eval('showType') == 2%>">
+                                        <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;">
+                                                <div style="width: 120px;height: 80px;background-color:white;"></div>
+                                            </div>
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;color: white">
+                                                <div><%= Eval('name') %></div>
+                                                <div><%= Eval('location') %></div>
+                                            </div>
+                                        </div>
+                                    </pe:if>
+                                </Columns>
+                            </pe:gridview>
                         </div>
                         <div style="margin-left: 290px;">
                             <div style="margin-bottom: 10px;">
                                 <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
-                                <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= true %>'></kp:redtip>
+                                <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= has_school_joined() %>'></kp:redtip>
                             </div>
                             <div>
-                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" />
-                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" />
+                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" onclick="join_school()"/>
+                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" onclick="join_institute()"/>
                             </div>
                         </div>
                     </div>

@@ -298,11 +298,11 @@ end
     name string necessary 学校名称
 ]]
 -- return: object
-function KeepworkUsersApi:SchoolRegister(success, error)
+function KeepworkUsersApi:SchoolRegister(schoolType, regoinId, schoolName, success, error)
     local params = {
-        type = type,
-        regionId = regionId,
-        name = name
+        type = schoolType,
+        regionId = regoinId,
+        name = schoolName
     }
 
     KeepworkBaseApi:Post('/users/school/register', params, nil, success, error)

@@ -16,15 +16,25 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 local MySchool = NPL.export()
 
 function MySchool:Show()
-    Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+    self.hasJoined = false
 
-    local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
+    Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 320, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
 
     KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         Mod.WorldShare.MsgBox:Close()
 
-        echo(schoolData, true)
-        echo(orgData, true)
+        if type(schoolData) == "table" and schoolData.regionId then
+            self.hasJoined = true
+            self.schoolData= schoolData
+        end
+
+        if type(orgData) == "table" and #orgData > 0 then
+            self.hasJoined = true
+            self.orgData = orgData
+        end
+
+        params._page:Refresh(0.01)
     end)
 end
 
@@ -102,7 +112,64 @@ function MySchool:ShowJoinInstitute()
 end
 
 function MySchool:ShowRecordSchool()
+    self.provinces = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.cities = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.areas = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        }
+    }
+
+    self.kinds = {
+        {
+            text = L"请选择",
+            value = 0,
+            selected = true,
+        },
+        {
+            text = L"小学",
+            value = L"小学"
+        },
+        {
+            text = L"中学",
+            value = L"中学"
+        },
+        {
+            text = L"大学",
+            value = L"大学",
+        }
+    }
+
+    self.curId = 0
+    self.kind = nil
+
     local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/RecordSchool.html", "RecordSchool")
+
+    self:GetProvinces(function(data)
+        if type(data) ~= "table" then
+            return false
+        end
+
+        self.provinces = data
+
+        params._page:Refresh(0.01)
+    end)
 end
 
 function MySchool:GetProvinces(callback)
@@ -195,4 +262,8 @@ end
 
 function MySchool:JoinInstitute(code, callback)
     KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
+end
+
+function MySchool:RecordSchool(schoolType, regionId, schoolName, callback)
+    KeepworkServiceSchoolAndOrg:SchoolRegister(schoolType, regionId, schoolName, callback)
 end
