@@ -11,11 +11,18 @@ ThirdPartyLogin:Init(type)
 ------------------------------------------------------------
 ]]
 
+-- get table lib
+local NPLWebServer = commonlib.gettable("MyCompany.Aries.Game.Network.NPLWebServer")
+local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
+
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
+local NPLServerService = NPL.load("(gl)Mod/WorldShare/service/NPLServerService.lua")
 
 local ThirdPartyLogin = NPL.export()
+
+ThirdPartyLogin.port = 8099
 
 function ThirdPartyLogin:Init(thirdPartyType, callback)
     if System.os.GetPlatform() ~= 'win32' and System.os.GetPlatform() ~= 'mac' then
@@ -23,71 +30,108 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
         return false
     end
 
-    self.thirdPartyType = thirdPartyType
-    self.callback = callback
+    local function Handle()
+        self.thirdPartyType = thirdPartyType
+        self.callback = callback
+    
+        local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil, 6)
+    
+        params._page:CallMethod("thridpartylogin", "SetVisible", true)
+        params._page.OnClose = function()
+            Mod.WorldShare.Store:Remove('page/ThirdPartyLogin')
+            params._page:CallMethod("thridpartylogin", "SetVisible", false)
+            Mod.WorldShare.Store:Unsubscribe("user/SetThirdPartyLoginAuthinfo")
 
-    local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil, 6)
-
-    params._page:CallMethod("nplbrowser_instance", "SetVisible", true)
-    params._page.OnClose = function()
-        Mod.WorldShare.Store:Remove('page/ThirdPartyLogin')
-        params._page:CallMethod("nplbrowser_instance", "SetVisible", false)
-        Mod.WorldShare.Store:Unsubscribe("user/SetThirdPartyLoginAuthinfo")
+            Mod.WorldShare.Utils.SetTimeOut(function()
+                params._page:CallMethod("thridpartylogin", "Reload", "https://keepwork.com/zhanglei/empty/index")
+            end, 1000)
+        end
+    
+        Mod.WorldShare.Store:Subscribe("user/SetThirdPartyLoginAuthinfo", function()
+            local authType = Mod.WorldShare.Store:Get("user/authType")
+            local authCode = Mod.WorldShare.Store:Get("user/authCode")
+    
+            KeepworkServiceSession:CheckOauthUserExisted(authType, authCode, function(bExisted, data)
+                params._page:CloseWindow()
+    
+                if bExisted then
+                    Mod.WorldShare.Store:Set("user/token", data.token)
+    
+                    if type(self.callback) == "function" then
+                        self.callback()
+                    end
+                else
+                    if data and data.token then
+                        Mod.WorldShare.Store:Set("user/authToken", data.token)
+                    else
+                        Mod.WorldShare.Store:Remove("user/authToken")
+                    end
+    
+                    Mod.WorldShare.MsgBox:Dialog(
+                        "NoThirdPartyAccountNotice",
+                        L"检测到该第三方账号还未绑定到账号，请绑定到已有账号或者新建账号进行绑定",
+                        {
+                            Title = L"补充账号信息",
+                            Yes = L"绑定到已有账号",
+                            No = L"新建账号并绑定"
+                        },
+                        function(res)
+                            if res and res == _guihelper.DialogResult.Yes then
+                                self:ShowCreateOrBindThirdPartyAccountPage("bind")
+                            end
+    
+                            if res and res == _guihelper.DialogResult.No then
+                                self:ShowCreateOrBindThirdPartyAccountPage("create")
+                            end
+                        end,
+                        _guihelper.MessageBoxButtons.YesNo,
+                        {
+                            Yes = {
+                                marginLeft = "40px",
+                                width = "120px"
+                            },
+                            No = {
+                                width = "120px"
+                            }
+                        }
+                    )
+    
+                    return false
+                end
+            end)
+        end)
     end
 
-    Mod.WorldShare.Store:Subscribe("user/SetThirdPartyLoginAuthinfo", function()
-        local authType = Mod.WorldShare.Store:Get("user/authType")
-        local authCode = Mod.WorldShare.Store:Get("user/authCode")
 
-        KeepworkServiceSession:CheckOauthUserExisted(authType, authCode, function(bExisted, data)
-            params._page:CloseWindow()
-
-            if bExisted then
-                Mod.WorldShare.Store:Set("user/token", data.token)
-
-                if type(self.callback) == "function" then
-                    self.callback()
-                end
-            else
-                if data and data.token then
-                    Mod.WorldShare.Store:Set("user/authToken", data.token)
-                else
-                    Mod.WorldShare.Store:Remove("user/authToken")
-                end
-
-                Mod.WorldShare.MsgBox:Dialog(
-                    "NoThirdPartyAccountNotice",
-                    L"检测到该第三方账号还未绑定到账号，请绑定到已有账号或者新建账号进行绑定",
-                    {
-                        Title = L"补充账号信息",
-                        Yes = L"绑定到已有账号",
-                        No = L"新建账号并绑定"
-                    },
-                    function(res)
-                        if res and res == _guihelper.DialogResult.Yes then
-                            self:ShowCreateOrBindThirdPartyAccountPage("bind")
-                        end
-
-                        if res and res == _guihelper.DialogResult.No then
-                            self:ShowCreateOrBindThirdPartyAccountPage("create")
-                        end
-                    end,
-                    _guihelper.MessageBoxButtons.YesNo,
-                    {
-                        Yes = {
-                            marginLeft = "40px",
-                            width = "120px"
-                        },
-                        No = {
-                            width = "120px"
-                        }
-                    }
-                )
-
+    if System.os.GetPlatform() == "win32" then
+        Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+        NPLServerService:CheckDefaultServerStarted(function(bStarted, siteUrl)
+            Mod.WorldShare.MsgBox:Close()
+            if not bStarted or not siteUrl then
                 return false
             end
+    
+            self.port = siteUrl:match("%:(%d+)") or self.port
+
+            echo(Cef3Manager.bLoaded, true)
+
+            if Cef3Manager.bLoaded then
+                Handle()
+            else
+                Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000, nil, nil, nil, 6)
+                Cef3Manager:Connect("finishLoadCef3", nil, function()
+                    echo("on download cef3 finish!!!!", true)
+
+                    Mod.WorldShare.MsgBox:Close()
+                    Handle()
+                end, "UniqueConnection")
+            end
         end)
-    end)
+    end
+
+    if System.os.GetPlatform == "mac" then
+        Handle()
+    end
 end
 
 function ThirdPartyLogin:GetUrl()
@@ -102,7 +146,7 @@ function ThirdPartyLogin:GetUrl()
 
     if self.thirdPartyType == 'WECHAT' then
         local clientId = KeepworkServiceSession:GetOauthClientId("WECHAT")
-        local state = "WECHAT|" .. sysTag .. "|8099|" .. System.Encoding.guid.uuid()
+        local state = "WECHAT|" .. sysTag .. "|" .. self.port .. "|" .. System.Encoding.guid.uuid()
 
         return
             format(
@@ -115,7 +159,7 @@ function ThirdPartyLogin:GetUrl()
 
     if self.thirdPartyType == "QQ" then
         local clientId = KeepworkServiceSession:GetOauthClientId("QQ")
-        local state = "QQ|" .. sysTag .. "|8099|" .. System.Encoding.guid.uuid()
+        local state = "QQ|" .. sysTag .. "|" .. self.port .. "|" .. System.Encoding.guid.uuid()
 
         return 
             format(

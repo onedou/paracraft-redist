@@ -35,7 +35,11 @@ function Validated:Phone(str)
 end
 
 function Validated:Password(str)
-    if not str or type(str) ~= "string" or str == '' or #str > 64 then
+    if not str or
+       type(str) ~= "string" or
+       str == '' or
+       #str < 6 or
+       #str > 64 then
         return false
     else
         return true

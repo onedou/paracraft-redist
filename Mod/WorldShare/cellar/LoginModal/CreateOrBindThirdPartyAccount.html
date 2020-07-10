@@ -9,6 +9,7 @@
                     local ThirdPartyLogin = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua")
                     local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/Session.lua")
                     local Validated = NPL.load("(gl)Mod/WorldShare/helper/Validated.lua")
+                    local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
 
                     local bBound = false
                     local bCreated = false
@@ -80,7 +81,10 @@
                                 end
                             end
                         end)
+                    end
 
+                    function user_agreement()
+                        RegisterModal:ShowUserAgreementPage()
                     end
                 ]]>
             </script>
@@ -130,7 +134,12 @@
                     <pe:if condition="<%= method == 'create' %>">
                         <div style="margin-top: 15px;margin-left: 30px;">
                             <input type="checkbox" style="float:left;margin-top:3px;min-width:90px;" name="agree" checked="checked"/>
-                            <%= L"我同意《Paracraft用户协议》中的内容" %>
+                            <div style="float:left; color: white;font-size: 12px;margin-top:1px;">
+                                <div style="float:left;width: 2px;"></div>
+                                <%= L"我同意" %>
+                                <div style="float:left;color: #fe5927" onclick="user_agreement()"><%= L"《Paracraft用户协议》" %></div>
+                                <%= L"中的内容" %>
+                            </div>
                         </div>
                     </pe:if>
                     <div style="margin-top: 30px;margin-left: 110px;">
