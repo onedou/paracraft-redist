@@ -33,13 +33,13 @@
                 function get_data()
                     local data = {}
 
-                    if type(MySchool.schoolData) == "table" then
+                    if MySchool.schoolData and type(MySchool.schoolData) == "table" then
                         MySchool.schoolData.showType = 1
 
                         data[#data + 1] = MySchool.schoolData
                     end
 
-                    if type(MySchool.orgData) == "table" then
+                    if MySchool.orgData and type(MySchool.orgData) == "table" then
                         for key, item in ipairs(MySchool.orgData) do
                             item.showType = 2
 
@@ -52,9 +52,9 @@
 
                 function has_school_joined()
                     if MySchool.schoolData and MySchool.schoolData.regionId then
-                        return false
-                    else
                         return true
+                    else
+                        return false
                     end
                 end
 
@@ -94,7 +94,7 @@
             <div width="100%" height="100%">
                 <pe:if condition="<%= has_joined() %>">
                     <div style="padding: 20px;">
-                        <div style="color: white;height: 160px;;margin-bottom: 10px">
+                        <div style="color: white;height: 220px;;margin-bottom: 10px">
                             <pe:gridview
                                 RememberScrollPos="true"
                                 AllowPaging="false"
@@ -120,7 +120,7 @@
                                         <div style="width: 260px;height: 100px;background-color: #333333;float: left;margin-bottom: 10px;margin-right: 10px;">
                                             <input type="button" class="click" name='<%=Eval("index")%>' onclick="open_org_page" />
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;">
-                                                <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or '') .. ');' %>"></div>
+                                                <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or 'textures/worldshare_32bits.png#287 346 170 99') .. ');' %>"></div>
                                             </div>
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;color: white">
                                                 <div><%= Eval('name') %></div>
@@ -132,12 +132,14 @@
                             </pe:gridview>
                         </div>
                         <div style="margin-left: 290px;">
-                            <div style="margin-bottom: 10px;">
-                                <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
-                                <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= has_school_joined() %>'></kp:redtip>
-                            </div>
                             <div>
-                                <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" onclick="join_school()"/>
+                                <pe:if condition="<%= has_school_joined() %>">
+                                    <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" onclick="join_school()"/>
+                                </pe:if>
+                                <pe:if condition="<%= not has_school_joined() %>">
+                                    <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
+                                    <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= not has_school_joined() %>'></kp:redtip>    
+                                </pe:if>
                                 <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" onclick="join_institute()"/>
                             </div>
                         </div>

@@ -19,7 +19,7 @@ function MySchool:Show()
     self.hasJoined = false
 
     Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
-    local params = Mod.WorldShare.Utils.ShowWindow(600, 320, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
+    local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
 
     KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         Mod.WorldShare.MsgBox:Close()
