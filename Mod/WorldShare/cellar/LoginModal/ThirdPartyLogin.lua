@@ -46,12 +46,14 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
     
         self.needToWait = true
 
-        NplBrowserPlugin.OnCreatedCallback("thridpartylogin",function()
-            local ThirdPartyLoginPage = Mod.WorldShare.Store:Get('page/ThirdPartyLogin')
-            if ThirdPartyLoginPage then
-                ThirdPartyLoginPage:Refresh(0)
-            end
-        end)
+        if System.os.GetPlatform() == 'win32' then
+            NplBrowserPlugin.OnCreatedCallback("thridpartylogin",function()
+                local ThirdPartyLoginPage = Mod.WorldShare.Store:Get('page/ThirdPartyLogin')
+                if ThirdPartyLoginPage then
+                    ThirdPartyLoginPage:Refresh(0)
+                end
+            end)
+        end
     
         local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil, 6)
 
