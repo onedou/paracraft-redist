@@ -14,6 +14,7 @@ ThirdPartyLogin:Init(type)
 -- get table lib
 local NPLWebServer = commonlib.gettable("MyCompany.Aries.Game.Network.NPLWebServer")
 local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
+local NplBrowserPlugin = commonlib.gettable("NplBrowser.NplBrowserPlugin")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -44,6 +45,13 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
         end
     
         self.needToWait = true
+
+        NplBrowserPlugin.OnCreatedCallback("thridpartylogin",function()
+            local ThirdPartyLoginPage = Mod.WorldShare.Store:Get('page/ThirdPartyLogin')
+            if ThirdPartyLoginPage then
+                ThirdPartyLoginPage:Refresh(0)
+            end
+        end)
     
         local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil, 6)
 
