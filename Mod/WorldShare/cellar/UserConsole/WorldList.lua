@@ -223,11 +223,7 @@ function WorldList:EnterWorld(index)
         end
     end
 
-    local function Handle(result)
-        if result == 'REGISTER' or result == 'FORGET' then
-            return false
-        end
-
+    local function Handle()
         if not KeepworkService:IsSignedIn() then
             local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
 
@@ -482,12 +478,24 @@ function WorldList:EnterWorld(index)
     if not KeepworkService:IsSignedIn() and currentWorld.kpProjectId then
         LoginModal:Init(function(result)
             if result then
+                if result == 'THIRD' then
+                    return function()
+                        self:RefreshCurrentServerList(function()
+                            Handle()
+                        end)
+                    end
+                end
+
                 -- refresh world list after 
                 self:RefreshCurrentServerList(function()
-                    Handle(result)
+                    if result == 'REGISTER' or result == 'FORGET' then
+                        return false
+                    end
+
+                    Handle()
                 end)
             else
-                Handle(result)
+                Handle()
             end
         end)
     else

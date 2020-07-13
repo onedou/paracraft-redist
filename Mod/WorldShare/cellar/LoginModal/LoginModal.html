@@ -72,16 +72,24 @@
                     end
 
                     function login_with_wx()
-                        LoginModal:Close()
+                        local callback = LoginModal:Close('THIRD')
                         ThirdPartyLogin:Init("WECHAT", function()
-                            UserInfo:LoginWithToken()
+                            UserInfo:LoginWithToken(function()
+                                if type(callback) == 'function' then
+                                    callback()
+                                end
+                            end)
                         end)
                     end
 
                     function login_width_qq()
-                        LoginModal:Close()
+                        local callback = LoginModal:Close('THIRD')
                         ThirdPartyLogin:Init("QQ", function()
-                            UserInfo:LoginWithToken()
+                            UserInfo:LoginWithToken(function()
+                                if type(callback) == 'function' then
+                                    callback()
+                                end
+                            end)
                         end)
                     end
                 ]]>
