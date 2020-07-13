@@ -33,9 +33,20 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
     local function Handle()
         self.thirdPartyType = thirdPartyType
         self.callback = callback
+
+        if self.needToWait then
+            Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
+
+            Mod.WorldShare.Utils.SetTimeOut(function()
+                self:Init(thirdPartyType, callback)
+            end, 1500)
+            return false
+        end
+    
+        self.needToWait = true
     
         local params = Mod.WorldShare.Utils.ShowWindow(400, 450, "Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.html", "ThirdPartyLogin", nil, nil, nil, nil, 6)
-    
+
         params._page:CallMethod("thridpartylogin", "SetVisible", true)
         params._page.OnClose = function()
             Mod.WorldShare.Store:Remove('page/ThirdPartyLogin')
@@ -44,6 +55,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
 
             Mod.WorldShare.Utils.SetTimeOut(function()
                 params._page:CallMethod("thridpartylogin", "Reload", "https://keepwork.com/zhanglei/empty/index")
+                self.needToWait = false
             end, 1000)
         end
     
@@ -116,7 +128,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
             if Cef3Manager.bLoaded then
                 Handle()
             else
-                Mod.WorldShare.MsgBox:Show(L"请稍后...", 20000, nil, nil, nil, 6)
+                Mod.WorldShare.MsgBox:Show(L"请稍后...", 30000, nil, nil, nil, 6)
                 Cef3Manager:Connect("finishLoadCef3", nil, function()
                     Mod.WorldShare.MsgBox:Close()
                     Handle()
