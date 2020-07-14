@@ -67,6 +67,7 @@ NPL.load("(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua")
 
 -- include aries creator game nplbrowser
 NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua")
+NPL.load("(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserPlugin.lua")
 
 -- include worldshare service
 NPL.load("(gl)Mod/WorldShare/service/SocketService.lua")
@@ -105,7 +106,7 @@ local WorldShare = commonlib.inherit(commonlib.gettable("Mod.ModBase"), commonli
 
 WorldShare:Property({"Name", "WorldShare", "GetName", "SetName", { auto = true }})
 WorldShare:Property({"Desc", "world share mod can share world to keepwork online", "GetDesc", "SetDesc", { auto = true }})
-WorldShare.version = '0.0.18'
+WorldShare.version = '0.0.19'
 
 if Config.defaultEnv == 'RELEASE' or Config.defaultEnv == 'STAGE' then
     System.options.isAB_SDK = true

@@ -117,7 +117,7 @@ function UserInfo:GetUserName()
 end
 
 -- for restart game
-function UserInfo:LoginWithToken()
+function UserInfo:LoginWithToken(callback)
     local usertoken = KeepworkServiceSession:GetCurrentUserToken()
 
     if type(usertoken) ~= "string" or #usertoken <= 0 then
@@ -154,6 +154,10 @@ function UserInfo:LoginWithToken()
 
                         -- OnKeepWorkLogin
                         GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
+                        if type(callback) == 'function' then
+                            callback()
+                        end
                     end
                 )
             end
