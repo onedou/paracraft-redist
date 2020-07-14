@@ -77,6 +77,9 @@
                             UserInfo:LoginWithToken(function()
                                 if type(callback) == 'function' then
                                     callback()
+                                    Mod.WorldShare.Utils.SetTimeOut(function()
+                                        ParaUI.GetUIObject("root"):Focus()
+                                    end, 2000)
                                 end
                             end)
                         end)
@@ -88,6 +91,9 @@
                             UserInfo:LoginWithToken(function()
                                 if type(callback) == 'function' then
                                     callback()
+                                    Mod.WorldShare.Utils.SetTimeOut(function()
+                                        ParaUI.GetUIObject("root"):Focus()
+                                    end, 2000)
                                 end
                             end)
                         end)
