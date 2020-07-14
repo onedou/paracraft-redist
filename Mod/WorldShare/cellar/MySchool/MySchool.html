@@ -6,6 +6,7 @@
                 local MySchool = NPL.load("./MySchool.lua")
                 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
                 local page = document:GetPageCtrl()
+                local global_type = type
 
                 function close()
                     page:CloseWindow()
@@ -33,13 +34,13 @@
                 function get_data()
                     local data = {}
 
-                    if MySchool.schoolData and type(MySchool.schoolData) == "table" then
+                    if MySchool.schoolData and global_type(MySchool.schoolData) == "table" then
                         MySchool.schoolData.showType = 1
 
                         data[#data + 1] = MySchool.schoolData
                     end
 
-                    if MySchool.orgData and type(MySchool.orgData) == "table" then
+                    if MySchool.orgData and global_type(MySchool.orgData) == "table" then
                         for key, item in ipairs(MySchool.orgData) do
                             item.showType = 2
 
@@ -110,7 +111,7 @@
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;">
                                                 <div style="width: 120px;height: 80px;background: url(textures/worldshare_32bits.png#287 346 170 99);"></div>
                                             </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;color: white">
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 95px;color: white">
                                                 <div><%= Eval('name') %></div>
                                                 <div><%= get_place(Eval('region')) %></div>
                                             </div>
@@ -122,7 +123,7 @@
                                             <div style="float:left; margin-left: 10px;margin-top: 10px;">
                                                 <div style="<%= 'width: 120px;height: 80px;background:url(' .. (Eval('logo') or 'textures/worldshare_32bits.png#287 346 170 99') .. ');' %>"></div>
                                             </div>
-                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 80px;color: white">
+                                            <div style="float:left; margin-left: 10px;margin-top: 10px;width: 95px;color: white">
                                                 <div><%= Eval('name') %></div>
                                                 <div><%= Eval('location') %></div>
                                             </div>
@@ -131,14 +132,16 @@
                                 </Columns>
                             </pe:gridview>
                         </div>
-                        <div style="margin-left: 290px;">
+                        <div style="margin-left: 280px;">
                             <div>
                                 <pe:if condition="<%= has_school_joined() %>">
                                     <input type="button" class="button_highlight" style="height: 35px;width: 120px;" value="<%= L'变更学校' %>" onclick="join_school()"/>
                                 </pe:if>
                                 <pe:if condition="<%= not has_school_joined() %>">
-                                    <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
-                                    <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= not has_school_joined() %>'></kp:redtip>    
+                                    <div style="float:left;">
+                                        <input type="button" class="join_school_bg" style="width: 120px;height: 35px;" value="<%= L'加入学校' %>" onclick="join_school()"/>
+                                        <kp:redtip style="position:relative;margin-left:117px;margin-top:-40px;" onupdate='<%= not has_school_joined() %>'></kp:redtip>    
+                                    </div>
                                 </pe:if>
                                 <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'加入机构' %>" onclick="join_institute()"/>
                             </div>
