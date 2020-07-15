@@ -7,16 +7,22 @@
             <script type="text/npl">
                 <![CDATA[
                     NPL.load("(gl)script/apps/Aries/Creator/Game/Login/Rebranding.lua")
+                    
+                    -- load lib
                     Rebranding = commonlib.gettable("MyCompany.Aries.Creator.Game.Rebranding")
                     local GameMainLogin = commonlib.gettable("MyCompany.Aries.Game.MainLogin")
 
+                    -- load UI
                     local MainLogin = NPL.load("./MainLogin.lua")
                     local LoginModal = NPL.load("../LoginModal/LoginModal.lua")
                     local RegisterModal = NPL.load("(gl)Mod/WorldShare/cellar/RegisterModal/RegisterModal.lua")
                     local ForgetPassword = NPL.load("(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua")
-                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
-                    local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
                     local ThirdPartyLogin = NPL.load("(gl)Mod/WorldShare/cellar/LoginModal/ThirdPartyLogin.lua")
+                    local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
+                    local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
+                    
+                    -- service
+                    local KeepworkServiceSession = NPL.load("(gl)Mod/WorldShare/service/KeepWorkService/Session.lua")
 
                     local page = document:GetPageCtrl()
                     Mod.WorldShare.Store:Set("page/MainLogin", page)
@@ -132,13 +138,15 @@
                     
                     function login_with_wx()
                         ThirdPartyLogin:Init("WECHAT", function()
+                            UserConsole.notFirstTimeShown = nil
                             MainLogin:EnterUserConsole()
                             WorldList:RefreshCurrentServerList()
                         end)
                     end
 
-                    function login_width_qq()
+                    function login_with_qq()
                         ThirdPartyLogin:Init("QQ", function()
+                            UserConsole.notFirstTimeShown = nil
                             MainLogin:EnterUserConsole()
                             WorldList:RefreshCurrentServerList()
                         end)
@@ -234,8 +242,8 @@
                                 <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
                             </div>
                             <div style="margin-top: 5px;margin-bottom: 5px;">
-                                <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 98px;"></div>
-                                <!-- <div onclick="login_width_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div> -->
+                                <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
+                                <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(textures/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
                             </div>
                         </div>
                         <div style="<%='text-align:left;margin-left:55px;' .. get_english_style('margin-left:15px;')%>">

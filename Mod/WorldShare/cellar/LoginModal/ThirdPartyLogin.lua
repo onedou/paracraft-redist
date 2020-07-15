@@ -164,7 +164,7 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
 end
 
 function ThirdPartyLogin:GetUrl()
-    local redirect_uri = Mod.WorldShare.Utils.EncodeURIComponent(KeepworkService:GetKeepworkUrl() .. '/p/third-login/')
+    local redirect_uri = Mod.WorldShare.Utils.EncodeURIComponent(KeepworkService:GetKeepworkUrl() .. '/p/third-login')
     local sysTag = ''
 
     if System.os.GetPlatform() == 'win32' then

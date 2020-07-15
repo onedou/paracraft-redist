@@ -38,7 +38,7 @@ function KeepworkOauthUsersApi:GetOauthUsers(platform, clientId, code, success, 
         state = "login",
         code = code,
         clientId = clientId,
-        redirectUri = ""
+        redirectUri = "https://keepwork.com"
     }
 
     KeepworkBaseApi:Post(url, params, nil, success, error)
