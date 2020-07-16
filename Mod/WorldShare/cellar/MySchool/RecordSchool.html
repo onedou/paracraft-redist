@@ -42,8 +42,10 @@
                                     selected = true,
                                 }
                             }
-
+                            
+                            local schoolname = page:GetValue("schoolname")
                             page:Refresh(0.01)
+                            page:SetValue("schoolname", schoolname)
                         end)
                     end
 
@@ -57,7 +59,9 @@
                         MySchool:GetAreas(value, function(data)
                             MySchool.areas = data
                             
+                            local schoolname = page:GetValue("schoolname")
                             page:Refresh(0.01)
+                            page:SetValue("schoolname", schoolname)
                         end)
                     end
 
