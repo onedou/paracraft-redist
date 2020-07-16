@@ -16,7 +16,7 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 local MySchool = NPL.export()
 
 function MySchool:Show()
-    self.hasJoined = false
+    self.hasJoined = nil
 
     Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
     local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
@@ -27,11 +27,15 @@ function MySchool:Show()
         if type(schoolData) == "table" and schoolData.regionId then
             self.hasJoined = true
             self.schoolData= schoolData
+        else
+            self.hasJoined = false
         end
 
         if type(orgData) == "table" and #orgData > 0 then
             self.hasJoined = true
             self.orgData = orgData
+        else
+            self.hasJoined = false
         end
 
         params._page:Refresh(0.01)

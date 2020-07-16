@@ -12,8 +12,26 @@
                     page:CloseWindow()
                 end
 
-                function has_joined()
-                    return MySchool.hasJoined or false
+                function has_joined(index)
+                    if not MySchool or global_type(MySchool.hasJoined) ~= "boolean" then
+                        return false
+                    end
+
+                    if index == 1 then
+                        if MySchool.hasJoined then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+
+                    if index == 2 then
+                        if MySchool.hasJoined then
+                            return false
+                        else
+                            return true
+                        end
+                    end
                 end
 
                 function join_school()
@@ -93,7 +111,7 @@
         </style>
         <aries:window mode="thin" title='<%=L"我的学校"%>' onclose="close()">
             <div width="100%" height="100%">
-                <pe:if condition="<%= has_joined() %>">
+                <pe:if condition="<%= has_joined(1) %>">
                     <div style="padding: 20px;">
                         <div style="color: white;height: 220px;;margin-bottom: 10px">
                             <pe:gridview
@@ -148,7 +166,7 @@
                         </div>
                     </div>
                 </pe:if>
-                <pe:if condition="<%= not has_joined() %>">
+                <pe:if condition="<%= has_joined(2) %>">
                     <div style="padding-top: 100px;padding-left: 100px;">
                         <input type="button"
                                class="button_highlight join_school_bg"
