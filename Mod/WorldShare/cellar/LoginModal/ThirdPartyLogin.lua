@@ -32,10 +32,18 @@ function ThirdPartyLogin:Init(thirdPartyType, callback)
     end
 
     if self.beShowed then
-        return false
+        if thirdPartyType == self.thirdPartyType then
+            return false
+        else
+            local ThirdPartyLoginPage = Mod.WorldShare.Store:Get('page/ThirdPartyLogin')
+            if ThirdPartyLoginPage then
+                ThirdPartyLoginPage:CloseWindow()
+            end
+        end
     end
 
     self.beShowed = true
+    self.curThirdPartyType = thirdPartyType
 
     local function Handle()
         self.thirdPartyType = thirdPartyType
