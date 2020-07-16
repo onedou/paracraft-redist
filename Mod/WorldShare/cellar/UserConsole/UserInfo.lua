@@ -152,12 +152,13 @@ function UserInfo:LoginWithToken(callback)
 
                         WorldList:RefreshCurrentServerList()
 
-                        -- OnKeepWorkLogin
-                        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
-
                         if type(callback) == 'function' then
                             callback()
+                            return
                         end
+
+                        -- OnKeepWorkLogin
+                        GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
                     end
                 )
             end

@@ -205,6 +205,12 @@ function WorldList:EnterWorld(index)
         return false
     end
 
+    local ThirdPartyLoginPage = Mod.WorldShare.Store:Get('page/ThirdPartyLogin')
+
+    if ThirdPartyLoginPage then
+        ThirdPartyLoginPage:CloseWindow()
+    end
+
     local function CheckWorld()
         local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
         local output = commonlib.Files.Find({}, currentWorld.worldpath, 0, 500, "worldconfig.txt")
