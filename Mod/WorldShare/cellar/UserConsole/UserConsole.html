@@ -235,7 +235,7 @@
                         end
                     end
 
-                    if userType and userType.plain then
+                    if userType and userType.plain or userType.orgAdmin then
                         if isVip then
                             local left = (140 - 18 - 2 - textWidth) / 2
 

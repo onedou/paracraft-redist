@@ -193,9 +193,9 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     local userType = {}
 
     if response.orgAdmin and response.orgAdmin == 1 then
-        userType.teacher = true
+        userType.orgAdmin = true
     end
-    
+
     if response.tLevel and response.tLevel > 0 then
         userType.teacher = true
         Mod.WorldShare.Store:Set("user/tLevel", response.tLevel)
