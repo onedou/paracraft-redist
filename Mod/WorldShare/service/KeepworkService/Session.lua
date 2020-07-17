@@ -205,7 +205,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         userType.student = true
     end
 
-    if not userType.teacher and not userType.student then
+    if not userType.teacher and not userType.student and not userType.orgAdmin then
         userType.plain = true
     end
 
