@@ -79,7 +79,6 @@ local SocketService = commonlib.gettable("Mod.WorldShare.service.SocketService")
 local GameLogic = commonlib.gettable("MyCompany.Aries.Game.GameLogic")
 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
 local Cef3Manager = commonlib.gettable("Mod.WorldShare.service.Cef3Manager")
-local DesktopMenu = commonlib.gettable("MyCompany.Aries.Creator.Game.Desktop.DesktopMenu")
 
 -- UI
 local MainLogin = NPL.load("(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua")
@@ -306,17 +305,13 @@ function WorldShare:OnWorldLoad()
 
     Store:Subscribe("user/Logout", function()
         Compare:RefreshWorldList(function()
-            Compare:GetCurrentWorldInfo(function()
-                DesktopMenu.LoadMenuItems(true)
-            end)
+            Compare:GetCurrentWorldInfo()
         end)
     end)
 
     Store:Subscribe("user/Login", function()
         Compare:RefreshWorldList(function()
-            Compare:GetCurrentWorldInfo(function()
-                DesktopMenu.LoadMenuItems(true)
-            end)
+            Compare:GetCurrentWorldInfo()
         end)
     end)
 end
