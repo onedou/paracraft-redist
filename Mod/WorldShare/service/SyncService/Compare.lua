@@ -254,7 +254,8 @@ function Compare:GetCurrentWorldInfo(callback)
             progress = "0",
             size = 0,
             worldpath = originWorldPath,
-            kpProjectId = worldTag.kpProjectId
+            kpProjectId = worldTag.kpProjectId,
+            fromProjectId = tonumber(worldTag.fromProjects)
         }
 
         Mod.WorldShare.Store:Set("world/worldTag", worldTag)
@@ -286,6 +287,10 @@ function Compare:GetCurrentWorldInfo(callback)
                     currentWorld.status = 3
                     currentWorld.worldpath = worldpath
                     currentWorld.local_tagname = currentWorld.remote_tagname
+                end
+
+                if type(worldTag) == 'table' then
+                    currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
                 end
 
                 Mod.WorldShare.Store:Set("world/worldTag", worldTag)
@@ -323,6 +328,10 @@ function Compare:GetCurrentWorldInfo(callback)
             currentWorld.kpProjectId = worldTag.kpProjectId
         else
             currentWorld.status = 1
+        end
+
+        if type(worldTag) == 'table' then
+            currentWorld.fromProjectId = tonumber(worldTag.fromProjects)
         end
 
         Mod.WorldShare.Store:Set("world/worldTag", worldTag)
