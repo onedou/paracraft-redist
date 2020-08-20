@@ -378,7 +378,23 @@ function Compare:RefreshWorldList(callback)
             localWorlds,
             function(currentWorldList)
                 currentWorldList = LocalServiceWorld:MergeInternetLocalWorldList(currentWorldList)
+
+                local searchText = Mod.WorldShare.Store:Get("world/searchText")
+
+                if type(searchText) == "string" and searchText ~= "" then
+                    local searchWorldList = {}
+
+                    for key, item in ipairs(currentWorldList) do
+                        if item and item.text and string.match(item.text, searchText) then
+                            searchWorldList[#searchWorldList + 1] = item
+                        end
+                    end
+
+                    currentWorldList = searchWorldList
+                end
+
                 self.SortWorldList(currentWorldList)
+
                 Mod.WorldShare.Store:Set("world/compareWorldList", currentWorldList)
                 if type(callback) == 'function' then
                     callback(currentWorldList)
