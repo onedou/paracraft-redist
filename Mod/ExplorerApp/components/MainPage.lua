@@ -595,13 +595,13 @@ function MainPage:SelectProject(index)
                         "never",
                         function(bSucceed, localWorldPath)
                             if bSucceed then
-                                if not Store:Get("world/personalMode") then
+                                if not Mod.WorldShare.Store:Get("world/personalMode") then
                                     self.playerBalance = self.playerBalance - 1
                                     self.balance = self.balance - 1
                                     Wallet:SetPlayerBalance(self.playerBalance)
                                     Wallet:SetUserBalance(self.balance)
-                                    Store:Remove("explorer/reduceRemainingTime")
-                                    Store:Remove("explorer/warnReduceRemainingTime")
+                                    Mod.WorldShare.Store:Remove("explorer/reduceRemainingTime")
+                                    Mod.WorldShare.Store:Remove("explorer/warnReduceRemainingTime")
                                     self:HandleGameProcess()
                                 end
 
@@ -615,7 +615,7 @@ function MainPage:SelectProject(index)
 
         -- prevent recursive calls.
         mytimer:Change(2, nil)
-        Store:Set("explorer/mode", "recommend")
+        Mod.WorldShare.Store:Set("explorer/mode", "recommend")
     end
 
     self:CheckoutNewVersion(projectInfo.world, Handle)
@@ -623,26 +623,26 @@ end
 
 function MainPage:HandleGameProcess()
     if not Mod.WorldShare.Store:Get("explorer/warnReduceRemainingTime") then
-        Store:Set("explorer/warnReduceRemainingTime", (1000 * 60 * 10) - (60 * 1000))
+        Mod.WorldShare.Store:Set("explorer/warnReduceRemainingTime", (1000 * 60 * 10) - (60 * 1000))
     end
 
     if not Mod.WorldShare.Store:Get("explorer/reduceRemainingTime") then
-        Store:Set("explorer/reduceRemainingTime", 1000 * 60 * 10)
+        Mod.WorldShare.Store:Set("explorer/reduceRemainingTime", 1000 * 60 * 10)
     end
 
     Mod.WorldShare.Utils.SetTimeOut(
         function()
-            local reduceRemainingTime = Store:Get("explorer/reduceRemainingTime")
-            local warnReduceRemainingTime = Store:Get("explorer/warnReduceRemainingTime")
+            local reduceRemainingTime = Mod.WorldShare.Store:Get("explorer/reduceRemainingTime")
+            local warnReduceRemainingTime = Mod.WorldShare.Store:Get("explorer/warnReduceRemainingTime")
 
             if warnReduceRemainingTime == 1000 then
                 if self.playerBalance > 0 then
                     Toast:ShowPage(L"即将消耗一个金币")
                 end
 
-                Store:Set("explorer/warnReduceRemainingTime", warnReduceRemainingTime - 1000)
+                Mod.WorldShare.Store:Set("explorer/warnReduceRemainingTime", warnReduceRemainingTime - 1000)
             elseif warnReduceRemainingTime > 0 then
-                Store:Set("explorer/warnReduceRemainingTime", warnReduceRemainingTime - 1000)
+                Mod.WorldShare.Store:Set("explorer/warnReduceRemainingTime", warnReduceRemainingTime - 1000)
             end
 
             if reduceRemainingTime == 1000 then
@@ -653,15 +653,15 @@ function MainPage:HandleGameProcess()
                     Wallet:SetPlayerBalance(self.playerBalance)
                     Wallet:SetUserBalance(self.balance)
 
-                    Store:Set("explorer/reduceRemainingTime", reduceRemainingTime - 1000)
-                    Store:Remove("explorer/reduceRemainingTime")
-                    Store:Remove("explorer/warnReduceRemainingTime")
+                    Mod.WorldShare.Store:Set("explorer/reduceRemainingTime", reduceRemainingTime - 1000)
+                    Mod.WorldShare.Store:Remove("explorer/reduceRemainingTime")
+                    Mod.WorldShare.Store:Remove("explorer/warnReduceRemainingTime")
                     self:HandleGameProcess()
                 else
                     TimeUp:ShowPage()
                 end
             elseif reduceRemainingTime > 0 then
-                Store:Set("explorer/reduceRemainingTime", reduceRemainingTime - 1000)
+                Mod.WorldShare.Store:Set("explorer/reduceRemainingTime", reduceRemainingTime - 1000)
                 self:HandleGameProcess()
             end
         end,
@@ -682,15 +682,15 @@ function MainPage:SelectDownloadedCategory(value)
 end
 
 function MainPage:GetSortIndex()
-    return Store:Get("explorer/selectSortIndex")
+    return Mod.WorldShare.Store:Get("explorer/selectSortIndex")
 end
 
 function MainPage:GetSortList()
-    return Store:Get("explorer/sortList")
+    return Mod.WorldShare.Store:Get("explorer/sortList")
 end
 
 function MainPage:OnWorldLoad()
-    local personalMode = Store:Get("world/personalMode")
+    local personalMode = Mod.WorldShare.Store:Get("world/personalMode")
 
     if not personalMode then
         Mod.WorldShare.Utils.SetTimeOut(
@@ -703,7 +703,7 @@ function MainPage:OnWorldLoad()
 end
 
 function MainPage:CanGoBack()
-    local canGoBack = Store:Get("explorer/canGoBack")
+    local canGoBack = Mod.WorldShare.Store:Get("explorer/canGoBack")
 
     if canGoBack == false then
         return false
@@ -721,7 +721,7 @@ function MainPage:OpenProject(id)
 end
 
 function MainPage:GetPage()
-    return Store:Get("page/MainPage")
+    return Mod.WorldShare.Store:Get("page/MainPage")
 end
 
 function MainPage:IsEnglish()
