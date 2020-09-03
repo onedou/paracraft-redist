@@ -8,33 +8,35 @@ use the lib:
 local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
 ------------------------------------------------------------
 ]]
+
+-- pkg libs
 NPL.load("(gl)Mod/WorldShare/service/FileDownloader/FileDownloader.lua")
 NPL.load("(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua")
 
-local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
 local FileDownloader = commonlib.gettable("Mod.WorldShare.service.FileDownloader.FileDownloader")
+local DownloadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.DownloadWorld")
 local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
 local RemoteWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.RemoteWorld")
-local Wallet = NPL.load("(gl)Mod/ExplorerApp/database/Wallet.lua")
 local Screen = commonlib.gettable("System.Windows.Screen")
 local LocalLoadWorld = commonlib.gettable("MyCompany.Aries.Game.MainLogin.LocalLoadWorld")
 local Translation = commonlib.gettable("MyCompany.Aries.Game.Common.Translation")
 
-local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
-local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
+-- databse
+local Wallet = NPL.load("(gl)Mod/ExplorerApp/database/Wallet.lua")
+local ProjectsDatabase = NPL.load("../database/Projects.lua")
+
+-- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 local KeepworkServiceProject = NPL.load("../service/KeepworkService/Project.lua")
 local KeepworkEsServiceProject = NPL.load("../service/KeepworkEsService/Project.lua")
+
+-- UI
+local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
+local Toast = NPL.load("./Toast/Toast.lua")
 local Password = NPL.load("./Password/Password.lua")
 local GameOver = NPL.load("./GameProcess/GameOver/GameOver.lua")
 local TimeUp = NPL.load("./GameProcess/TimeUp/TimeUp.lua")
 local ProactiveEnd = NPL.load("./GameProcess/ProactiveEnd/ProactiveEnd.lua")
-local Wallet = NPL.load("../database/Wallet.lua")
-local ProjectsDatabase = NPL.load("../database/Projects.lua")
-local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
-local Toast = NPL.load("./Toast/Toast.lua")
-local LocalService = NPL.load("(gl)Mod/WorldShare/service/LocalService.lua")
-local HttpRequest = NPL.load("(gl)Mod/WorldShare/service/HttpRequest.lua")
 
 local MainPage = NPL.export()
 
@@ -620,15 +622,15 @@ function MainPage:SelectProject(index)
 end
 
 function MainPage:HandleGameProcess()
-    if not Store:Get("explorer/warnReduceRemainingTime") then
+    if not Mod.WorldShare.Store:Get("explorer/warnReduceRemainingTime") then
         Store:Set("explorer/warnReduceRemainingTime", (1000 * 60 * 10) - (60 * 1000))
     end
 
-    if not Store:Get("explorer/reduceRemainingTime") then
+    if not Mod.WorldShare.Store:Get("explorer/reduceRemainingTime") then
         Store:Set("explorer/reduceRemainingTime", 1000 * 60 * 10)
     end
 
-    Utils.SetTimeOut(
+    Mod.WorldShare.Utils.SetTimeOut(
         function()
             local reduceRemainingTime = Store:Get("explorer/reduceRemainingTime")
             local warnReduceRemainingTime = Store:Get("explorer/warnReduceRemainingTime")
@@ -691,7 +693,7 @@ function MainPage:OnWorldLoad()
     local personalMode = Store:Get("world/personalMode")
 
     if not personalMode then
-        Utils.SetTimeOut(
+        Mod.WorldShare.Utils.SetTimeOut(
             function()
                 Toast:ShowPage(L"消耗一个金币")
             end,

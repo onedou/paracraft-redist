@@ -555,7 +555,7 @@ function SyncToDataSource:UpdateRecord(callback)
             worldInfo.fileSize = filesTotals
             worldInfo.commitId = lastCommitSha
             -- worldInfo.username = username
-            worldInfo.archiveUrl = format('%s/repos/%s/archive.zip?ref=%s', KeepworkService:GetCoreApi(), repoPath, lastCommitSha)
+            worldInfo.archiveUrl = format('%s/repos/%s/archive.zip?ref=%s', KeepworkService:GetApiCdnApi(), repoPath, lastCommitSha)
 
             local function AfterHandlePreview(preview)
                 preview = preview or ""
@@ -644,7 +644,8 @@ function SyncToDataSource:UpdateRecord(callback)
                             return false
                         end
 
-                        StorageFilesApi:List(function(listData, err)
+                        StorageFilesApi:List(data.key, function(listData, err)
+                            echo(listData, true)
                             if listData and type(listData.data) ~= 'table' then
                                 AfterHandlePreview()
                                 return false
@@ -658,7 +659,7 @@ function SyncToDataSource:UpdateRecord(callback)
                                     end
                                 end
                             end
-
+ 
                             AfterHandlePreview()
                         end)
                     end
