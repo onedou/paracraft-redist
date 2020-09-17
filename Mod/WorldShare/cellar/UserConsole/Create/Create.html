@@ -1348,9 +1348,11 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div style="margin-left: 20px;margin-top: 20px;float:left;font-size: 12px;">
-                                                <img style="width: 19px;height: 16px;margin-right: 5px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#311 311 19 16" />
-                                                <%= get_school_name() %>
+                                            <div style="margin-left: 20px;margin-top: 25px;height: 16px;float:left;font-size: 12px;">
+                                                <pe:if condition="<%= get_school_name() ~= '' %>">
+                                                    <img style="width: 19px;height: 16px;margin-right: 5px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#311 311 19 16" />
+                                                    <%= get_school_name() %>
+                                                </pe:if>
                                             </div>
                                             <div align="right" class="share_world_info_button"  style="margin-right: 12px;width:30px;height:30px;margin-top: -34px;">
                                                 <!-- ENTER -->

@@ -70,32 +70,39 @@ function MainPage:ShowPage(callback)
         }
     )
 
-    local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
-    local params
+    -- local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+    -- local params
 
-    if worldsharebeat and worldsharebeat == 'true' then
-        params = Mod.WorldShare.Utils.ShowWindow(
-            1100,
-            650,
-            "Mod/ExplorerApp/components/Theme/MainPage.html",
-            "Mod.ExplorerApp.MainPage"
-        )
-    else
-        params = Mod.WorldShare.Utils.ShowWindow(
-            0,
-            0,
-            "Mod/ExplorerApp/components/MainPage.html",
-            "Mod.ExplorerApp.MainPage",
-            0,
-            0,
-            "_fi",
-            false,
-            2
-        )
+    -- if worldsharebeat and worldsharebeat == 'true' then
+    --     params = Mod.WorldShare.Utils.ShowWindow(
+    --         1100,
+    --         650,
+    --         "Mod/ExplorerApp/components/Theme/MainPage.html",
+    --         "Mod.ExplorerApp.MainPage"
+    --     )
+    -- else
+    --     params = Mod.WorldShare.Utils.ShowWindow(
+    --         0,
+    --         0,
+    --         "Mod/ExplorerApp/components/MainPage.html",
+    --         "Mod.ExplorerApp.MainPage",
+    --         0,
+    --         0,
+    --         "_fi",
+    --         false,
+    --         2
+    --     )
 
-        Screen:Connect("sizeChanged", MainPage, MainPage.OnScreenSizeChange, "UniqueConnection")
-        MainPage.OnScreenSizeChange()
-    end
+    --     Screen:Connect("sizeChanged", MainPage, MainPage.OnScreenSizeChange, "UniqueConnection")
+    --     MainPage.OnScreenSizeChange()
+    -- end
+
+    local params = Mod.WorldShare.Utils.ShowWindow(
+        1100,
+        650,
+        "Mod/ExplorerApp/components/Theme/MainPage.html",
+        "Mod.ExplorerApp.MainPage"
+    )
 
     params._page.OnClose = function()
         self.worksTree = {}
@@ -358,8 +365,6 @@ function MainPage:SetWorksTree(categoryItem, sort)
         sort,
         { page = self.curPage },
         function(data, err)
-            echo(data, true)
-
             Mod.WorldShare.MsgBox:Close()
 
             if type(data) ~= 'table' or type(data.hits) ~= 'table' or err ~= 200 then
