@@ -21,7 +21,15 @@ function MySchool:Show()
     self.orgData = {}
 
     Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
-    local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/MySchool.html", "MySchool")
+
+    local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+    local params
+
+    if worldsharebeat then
+        params = Mod.WorldShare.Utils.ShowWindow(600, 330, "(ws)Theme/MySchool/MySchool.html", "Mod.WorldShare.MySchool")
+    else
+        params = Mod.WorldShare.Utils.ShowWindow(600, 330, "(ws)MySchool", "Mod.WorldShare.MySchool")
+    end
 
     KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         Mod.WorldShare.MsgBox:Close()
@@ -52,7 +60,7 @@ end
 function MySchool:ShowJoinSchool()
     self.provinces = {
         {
-            text = L"请选择",
+            text = L"省",
             value = 0,
             selected = true,
         }
@@ -60,7 +68,7 @@ function MySchool:ShowJoinSchool()
 
     self.cities = {
         {
-            text = L"请选择",
+            text = L"市",
             value = 0,
             selected = true,
         }
@@ -68,7 +76,7 @@ function MySchool:ShowJoinSchool()
 
     self.areas = {
         {
-            text = L"请选择",
+            text = L"区",
             value = 0,
             selected = true,
         }
@@ -76,7 +84,7 @@ function MySchool:ShowJoinSchool()
 
     self.kinds = {
         {
-            text = L"请选择",
+            text = L"学校类型",
             value = 0,
             selected = true,
         },
@@ -105,7 +113,17 @@ function MySchool:ShowJoinSchool()
     self.curId = 0
     self.kind = nil
 
-    local params = Mod.WorldShare.Utils.ShowWindow(600, 330, "Mod/WorldShare/cellar/MySchool/JoinSchool.html", "JoinSchool")
+    local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+    local params1
+    local params2
+
+    if worldsharebeat then
+        params1 = Mod.WorldShare.Utils.ShowWindow(600, 420, "(ws)Theme/MySchool/JoinSchool.html", "Mod.WorldShare.JoinSchool", nil, nil, nil, false, 1)
+        params2 = Mod.WorldShare.Utils.ShowWindow(380, 100, "(ws)Theme/MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 20, nil, nil, 2)
+    else
+        params1 = Mod.WorldShare.Utils.ShowWindow(600, 420, "(ws)MySchool/JoinSchool.html", "Mod.WorldShare.JoinSchool", nil, nil, nil, false, 1)
+        params2 = Mod.WorldShare.Utils.ShowWindow(380, 100, "(ws)MySchool/JoinSchoolResult.html", "Mod.WorldShare.JoinSchoolResult", nil, 50, nil, nil, 2)
+    end
 
     self:GetProvinces(function(data)
         if type(data) ~= "table" then
@@ -114,18 +132,45 @@ function MySchool:ShowJoinSchool()
 
         self.provinces = data
 
-        params._page:Refresh(0.01)
+        self:RefreshJoinSchool()
     end)
+
+    params1._page.OnClose = function()
+        if params2._page then
+            params2._page:CloseWindow()
+        end
+    end
+end
+
+function MySchool:RefreshJoinSchool()
+    local JoinSchoolPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.JoinSchool")
+
+    if JoinSchoolPage then
+        JoinSchoolPage:Refresh(0.01)
+
+        local JoinSchoolResultPage = Mod.WorldShare.Store:Get("page/Mod.WorldShare.JoinSchoolResult")
+
+        if JoinSchoolResultPage then
+            JoinSchoolResultPage:Refresh(0.01)
+        end
+    end
 end
 
 function MySchool:ShowJoinInstitute()
-    local params = Mod.WorldShare.Utils.ShowWindow(600, 200, "Mod/WorldShare/cellar/MySchool/JoinInstitute.html", "JoinInstitute")
+    local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+    local params
+
+    if worldsharebeat then
+        params = Mod.WorldShare.Utils.ShowWindow(600, 200, "(ws)Theme/MySchool/JoinInstitute.html", "Mod.WorldShare.JoinInstitute")
+    else
+        params = Mod.WorldShare.Utils.ShowWindow(600, 200, "(ws)MySchool/JoinInstitute.html", "Mod.WorldShare.JoinInstitute")
+    end
 end
 
 function MySchool:ShowRecordSchool()
     self.provinces = {
         {
-            text = L"请选择",
+            text = L"省",
             value = 0,
             selected = true,
         }
@@ -133,7 +178,7 @@ function MySchool:ShowRecordSchool()
 
     self.cities = {
         {
-            text = L"请选择",
+            text = L"市",
             value = 0,
             selected = true,
         }
@@ -141,7 +186,7 @@ function MySchool:ShowRecordSchool()
 
     self.areas = {
         {
-            text = L"请选择",
+            text = L"区",
             value = 0,
             selected = true,
         }
@@ -149,7 +194,7 @@ function MySchool:ShowRecordSchool()
 
     self.kinds = {
         {
-            text = L"请选择",
+            text = L"学校类型",
             value = 0,
             selected = true,
         },
@@ -170,7 +215,14 @@ function MySchool:ShowRecordSchool()
     self.curId = 0
     self.kind = nil
 
-    local params = Mod.WorldShare.Utils.ShowWindow(600, 300, "Mod/WorldShare/cellar/MySchool/RecordSchool.html", "RecordSchool")
+    local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+    local params
+
+    if worldsharebeat then
+        params = Mod.WorldShare.Utils.ShowWindow(600, 300, "(ws)Theme/MySchool/RecordSchool.html", "Mod.WorldShare.RecordSchool")
+    else
+        params = Mod.WorldShare.Utils.ShowWindow(600, 300, "(ws)MySchool/RecordSchool.html", "Mod.WorldShare.RecordSchool")
+    end
 
     self:GetProvinces(function(data)
         if type(data) ~= "table" then
@@ -196,7 +248,7 @@ function MySchool:GetProvinces(callback)
             end
 
             data[#data + 1] = {
-                text = L"请选择",
+                text = L"省",
                 value = 0,
                 selected = true,
             }
@@ -219,7 +271,7 @@ function MySchool:GetCities(id, callback)
             end
 
             data[#data + 1] = {
-                text = L"请选择",
+                text = L"市",
                 value = 0,
                 selected = true,
             }
@@ -242,7 +294,7 @@ function MySchool:GetAreas(id, callback)
             end
 
             data[#data + 1] = {
-                text = L"请选择",
+                text = L"区",
                 value = 0,
                 selected = true,
             }
@@ -261,7 +313,38 @@ function MySchool:GetSearchSchoolResult(id, kind, callback)
             item.value = item.id
         end
 
-        if type(callback) == "function" then
+        if callback and type(callback) == "function" then
+            callback(self.result)
+        end
+    end)
+end
+
+function MySchool:GetSearchSchoolResultByName(name, callback)
+    if not name or type(name) ~= "string" or #name == 0 then
+        if callback and type(callback) == "function" then
+            self.result = {
+                {
+                    text = L"在这里显示筛选的结果",
+                    value = 0,
+                    selected = true,
+                },
+            }
+
+            callback()
+        end
+
+        return false
+    end
+
+    KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, function(data)
+        self.result = data
+
+        for key, item in ipairs(self.result) do
+            item.text = item.name
+            item.value = item.id
+        end
+
+        if callback and type(callback) == "function" then
             callback(self.result)
         end
     end)

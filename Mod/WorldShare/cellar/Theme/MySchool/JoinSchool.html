@@ -3,7 +3,7 @@
         <pe:mcml>
             <script type="text/npl">
                 <![CDATA[
-                    local MySchool = NPL.load("./MySchool.lua")
+                    local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
                     local page = document:GetPageCtrl()
 
                     function close()
@@ -228,8 +228,11 @@
             </script>
             <style type="text/mcss">
             </style>
-            <aries:window mode="thin" title='<%=L"加入学校"%>' onclose="close()">
-                <div width="100%" height="100%" style="color: white;padding: 20px;">
+            <kp:window width="600" height="420" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_xuexiao_32bits.png" onclose="close()">
+                <div style="width: 600px; height: 40px;">
+                    <div style="margin-left: 120px;margin-top: 14px;font-size: 14px;base-font-size: 14px;color: #ffffff;"><%=L"加入学校"%></div>
+                </div>
+                <div width="100%" height="100%" style="padding-left: 30px;padding-top: 25px;">
                     <div style="margin-left: 80px;margin-top: 10px;">
                         <div><%= L"请输入学校名称搜索：" %></div>
                         <div>
@@ -256,7 +259,7 @@
                         <input type="button" class="button_highlight" style="height: 35px;width: 120px;margin-left: 10px;" value="<%= L'确定' %>" onclick="confirm()"/>
                     </div>
                 </div>
-            </aries:window>
+            </kp:window>
         </pe:mcml>
     </body>
 </html>

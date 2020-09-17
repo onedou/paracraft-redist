@@ -40,9 +40,11 @@ local ProactiveEnd = NPL.load("./GameProcess/ProactiveEnd/ProactiveEnd.lua")
 
 local MainPage = NPL.export()
 
-MainPage.categorySelected = {value = L"收藏"}
+MainPage.categorySelected = {
+    -- value = L"收藏"
+}
 MainPage.categoryTree = {
-    {value = L"收藏"}
+    -- {value = L"收藏"}
 }
 MainPage.worksTree = {}
 MainPage.downloadedGame = "all"
@@ -57,7 +59,7 @@ function MainPage:ShowPage(callback)
     self.balance = Wallet:GetUserBalance()
     self.playerBalance = Wallet:GetPlayerBalance()
 
-    Mod.WorldShare.Store:Set("explorer/selectSortIndex", 1)
+    Mod.WorldShare.Store:Set("explorer/selectSortIndex", 3)
     Mod.WorldShare.Store:Set(
         "explorer/sortList",
         {
@@ -68,17 +70,32 @@ function MainPage:ShowPage(callback)
         }
     )
 
-    local params = Mod.WorldShare.Utils.ShowWindow(
-        0,
-        0,
-        "Mod/ExplorerApp/components/MainPage.html",
-        "Mod.ExplorerApp.MainPage",
-        0,
-        0,
-        "_fi",
-        false,
-        2
-    )
+    local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+    local params
+
+    if worldsharebeat and worldsharebeat == 'true' then
+        params = Mod.WorldShare.Utils.ShowWindow(
+            1100,
+            650,
+            "Mod/ExplorerApp/components/Theme/MainPage.html",
+            "Mod.ExplorerApp.MainPage"
+        )
+    else
+        params = Mod.WorldShare.Utils.ShowWindow(
+            0,
+            0,
+            "Mod/ExplorerApp/components/MainPage.html",
+            "Mod.ExplorerApp.MainPage",
+            0,
+            0,
+            "_fi",
+            false,
+            2
+        )
+
+        Screen:Connect("sizeChanged", MainPage, MainPage.OnScreenSizeChange, "UniqueConnection")
+        MainPage.OnScreenSizeChange()
+    end
 
     params._page.OnClose = function()
         self.worksTree = {}
@@ -92,9 +109,6 @@ function MainPage:ShowPage(callback)
     if MainPagePage then
         self:SetCategoryTree()
     end
-
-    Screen:Connect("sizeChanged", MainPage, MainPage.OnScreenSizeChange, "UniqueConnection")
-    MainPage.OnScreenSizeChange()
 end
 
 function MainPage:SetPage()
@@ -186,10 +200,10 @@ function MainPage:SetCategoryTree()
                 end
             end
 
-            self.remoteCategoryTree[#self.remoteCategoryTree + 1] = { value = L"收藏", id = -1 }
+            -- self.remoteCategoryTree[#self.remoteCategoryTree + 1] = { value = L"收藏", id = -1 }
 
             MainPagePage:GetNode("categoryTree"):SetAttribute("DataSource", self.remoteCategoryTree)
-            self:SetWorksTree(self.remoteCategoryTree[1], Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+            self:SetWorksTree({ value = 'all' }, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
         end
     )
 end
@@ -198,6 +212,10 @@ function MainPage:SetWorksTree(categoryItem, sort)
     local MainPage = Mod.WorldShare.Store:Get("page/MainPage")
 
     if not MainPage then
+        return false
+    end
+
+    if not categoryItem or type(categoryItem) ~= 'table' or not categoryItem.value then
         return false
     end
 
@@ -329,13 +347,19 @@ function MainPage:SetWorksTree(categoryItem, sort)
         sort = nil
     end
 
-    local filter = { "paracraft专用", categoryItem.value }
+    local filter = { "paracraft专用" }
+
+    if categoryItem.value ~= 'all' then
+        filter[#filter + 1] = categoryItem.value
+    end
 
     KeepworkEsServiceProject:GetEsProjectsByFilter(
         filter,
         sort,
         { page = self.curPage },
         function(data, err)
+            echo(data, true)
+
             Mod.WorldShare.MsgBox:Close()
 
             if type(data) ~= 'table' or type(data.hits) ~= 'table' or err ~= 200 then

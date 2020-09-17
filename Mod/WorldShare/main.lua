@@ -136,6 +136,20 @@ function WorldShare:init()
         end
     )
 
+    GameLogic.GetFilters():add_filter(
+        "ShowClientUpdaterNotice",
+        function()
+            Mod.WorldShare.MsgBox:Show(L"正在检查更新， 请稍后...", nil, nil, nil, nil, nil, "_ct")
+        end
+    )
+
+    GameLogic.GetFilters():add_filter(
+        "HideClientUpdaterNotice",
+        function()
+            Mod.WorldShare.MsgBox:Close()
+        end
+    )
+
     -- replace load world page
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
@@ -165,8 +179,8 @@ function WorldShare:init()
     -- replace share world page
     GameLogic.GetFilters():add_filter(
         "SaveWorldPage.ShowSharePage",
-        function(bEnable)
-            ShareWorld:Init()
+        function(bEnable, callback)
+            ShareWorld:Init(bEnable, callback)
             return false
         end
     )

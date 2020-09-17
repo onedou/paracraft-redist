@@ -1,0 +1,795 @@
+<html>
+<body>
+<pe:mcml>
+    <script refresh="false" type="text/npl" src="MainPage.lua">
+        <![CDATA[
+            -- UI
+            MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
+            Sort = NPL.load("(gl)Mod/ExplorerApp/components/Sort/Sort.lua")
+            
+            -- service
+            KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+
+            -- lib
+            UniString = commonlib.gettable("System.Core.UniString")
+
+            MainPage.SetPage()
+
+            global_type = type
+
+            function get_world_text(text)
+                if global_type(text) ~= 'string' then
+                    return ''
+                end
+
+                local utf8Text = UniString:new(text)
+
+                if _guihelper.GetTextWidth(text) > 112 then
+                    return utf8Text:sub(1, 8).text .. '...'
+                else
+                    return text
+                end
+            end
+
+            function select_category(index)
+                if index == 'newest' then
+                    Mod.WorldShare.Store:Set("explorer/selectSortIndex", 3)
+                    MainPage.curPage = 1
+                    MainPage:SetWorksTree({ value = 'all' }, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+                    return
+                end
+            
+                if index == 'hottest' then
+                    Mod.WorldShare.Store:Set("explorer/selectSortIndex", 4)
+                    MainPage.curPage = 1
+                    MainPage:SetWorksTree({ value = 'all' }, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+                    return
+                end
+
+                select_value = nil
+
+                Mod.WorldShare.Store:Set("explorer/selectSortIndex", 1)
+                MainPage.curPage = 1
+                MainPage:SetWorksTree(MainPage.remoteCategoryTree[index], Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+            end
+
+            function search()
+                MainPage:Search()
+            end
+
+            function close()
+                MainPage:CanGoBack()
+            end
+
+            function select_project(index)
+                
+            end
+
+            function enter(index)
+                MainPage:SelectProject(index)
+            end
+
+            function download(index)
+                MainPage:DownloadWorld(index)
+            end
+
+            function myfavorite(index)
+                MainPage:SetFavorite(index)
+            end
+
+            function set_coins()
+                MainPage:SetCoins()
+            end
+
+            function get_image(cover)
+                if not cover then
+                    return "position:relative;top:0px;left:0;width:250px;height:120px;background:url();"
+                else
+                    return "position:relative;top:0px;left:0;width:250px;height:120px;background:url(" .. cover .. ");"
+                end
+            end
+
+            function select_sort()
+                local x, y, width, height = _guihelper.GetLastUIObjectPos()
+
+                Sort:ShowPage(x, y)
+            end
+
+            function get_cur_sort()
+                return MainPage:GetSortList()[MainPage:GetSortIndex()].value
+            end
+
+            function select_downloaded_category(value)
+                local page = MainPage:GetPage()
+            
+                if not page then
+                    return false
+                end
+
+                if value == 'all' then
+                    page:SetValue('downloaded_game_local', false)
+                elseif value == 'local' then
+                    page:SetValue('downloaded_game_all', false)
+                end
+
+                page:Refresh(0.01)
+
+                MainPage:SelectDownloadedCategory(value)
+            end
+
+            function is_load_more_items(index)
+                if index == #MainPage.worksTree then
+                    return true
+                end
+            end
+
+            function lazy_load()
+                if MainPage.worksTree[#MainPage.worksTree].isLoaded then
+                    return false
+                end
+
+                MainPage.worksTree[#MainPage.worksTree].isLoaded = true
+                MainPage.curPage = MainPage.curPage + 1
+                MainPage:SetWorksTree(MainPage.categorySelected, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+            end
+
+            function get_page_size()
+                return #MainPage.worksTree
+            end
+
+            function go_project_web(id)
+                MainPage:OpenProject(id)
+            end
+
+            function get_project_url_text(id)
+                return format("%s/pbl/project/%d/", KeepworkService:GetKeepworkUrl(), id or 0)
+            end
+
+            function is_show_balance()
+                return not Store:Get("world/personalMode")
+            end
+
+            function is_english()
+                return MainPage:IsEnglish()
+            end
+
+            function get_english_style(styleStr)
+                if is_english() then
+                    return styleStr
+                end
+            end
+
+            function get_menubar_button_value()
+                local value = Eval('value')
+
+                if value == '单人' then
+                    return '<img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#104 234 29 15" />'
+                end
+
+                if value == '多人' then
+                    return '<img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#179 234 29 15" />'
+                end
+                    
+                if value == '动画' then
+                    return '<img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#141 234 29 15" />'
+                end
+                    
+                if value == '解谜' then
+                    return '<img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#254 234 29 15" />'
+                end
+
+                if value == '校园' then
+                    return '<img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#329 234 29 15" />'
+                end
+
+                if value == '教学' then
+                    return '<img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#216 234 29 15" />'
+                end
+
+                if value == '编程' then
+                    return '<img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#65 234 29 15" />'
+                end
+
+                return value
+            end
+
+            function get_menubar_button_style(value)
+                if value and global_type(value) == 'string' then
+                    if value == 'newest' then
+                        if Mod.WorldShare.Store:Get("explorer/selectSortIndex") == 3 then
+                            return true
+                        end
+                    end
+
+                    if value == 'hottest' then
+                        if Mod.WorldShare.Store:Get("explorer/selectSortIndex") == 4 then
+                            return true
+                        end
+                    end
+
+                    return false
+                end
+
+                if Eval("value") == MainPage.categorySelected.value then
+                    return 'menubar_button_selected'
+                else
+                    return 'menubar_button'
+                end
+            end
+
+            function has_rated()
+                if Eval('point') then
+                    return true
+                else
+                    return false
+                end
+            end
+
+            function has_username()
+                return false
+            end
+
+            function get_art_number()
+                local point = Eval('point')
+
+                if not point or
+                    global_type(point) ~= "number"  then
+                    return ""
+                end
+
+                local number = point
+                local n = math.floor(1)
+                local fmt = '%.' .. n .. 'f'
+                local nRet = tonumber(string.format(fmt, number))
+
+                number = tostring(nRet)
+
+                local returnString = ""
+
+                for item in string.gmatch(number, ".") do
+                    if item == "1" then
+                        returnString = returnString .. "<img style='width: 11px;height: 18px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;108 287 11 18' />"
+                    end
+
+                    if item == "2" then
+                        returnString = returnString .. "<img style='width: 14px;height: 18px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;122 287 14 18' />"
+                    end
+
+                    if item == "3" then
+                        returnString = returnString .. "<img style='width: 11px;height: 20px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;139 286 11 20' />"
+                    end
+
+                    if item == "4" then
+                        returnString = returnString .. "<img style='width: 14px;height: 18px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;152 287 15 18' />"
+                    end
+                    
+                    if item == "5" then
+                        returnString = returnString .. "<img style='width: 14px;height: 19px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;170 287 15 19' />"
+                    end
+
+                    if item == "6" then
+                        returnString = returnString .. "<img style='width: 14px;height: 19px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;188 287 14 19' />"
+                    end
+
+                    if item == "7" then
+                        returnString = returnString .. "<img style='width: 14px;height: 18px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;204 287 14 18' />"
+                    end
+                        
+                    if item == "8" then
+                        returnString = returnString .. "<img style='width: 15px;height: 19px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;221 287 15 19' />"
+                    end
+                        
+                    if item == "9" then
+                        returnString = returnString .. "<img style='width: 13px;height: 19px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;257 287 13 19' />"
+                    end
+
+                    if item == "0" then
+                        returnString = returnString .. "<img style='width: 15px;height: 19px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;238 287 15 19' />"
+                    end
+                        
+                    if item == "." then
+                        returnString = returnString .. "<img style='width: 6px;height: 7px;margin-top: 11px;margin-right: 2px;' src='Texture/Aries/Creator/keepwork/worldshare_32bits.png;273 293 6 7' />"
+                    end
+                end
+
+                return returnString
+            end
+
+            function get_world_date()
+                return os.date("%Y-%m-%d %H:%M", Mod.WorldShare.Utils:UnifiedTimestampFormat(Eval("updated_at")))
+            end
+
+            function get_project_views()
+                local recent_view = Eval('recent_view')
+
+                if recent_view and global_type(recent_view) == "number" then
+                    return recent_view
+                else
+                    return 0
+                end
+            end
+
+            function get_project_thumbs()
+                local recent_like = Eval('recent_like')
+
+                if recent_like and global_type(recent_like) == "number" then
+                    return recent_like
+                else
+                    return 0
+                end 
+            end
+
+            function get_project_comments()
+                local total_comment = Eval('total_comment')
+
+                if total_comment and global_type(total_comment) == "number" then
+                    return total_comment
+                else
+                    return 0
+                end 
+            end
+        ]]>
+    </script>
+    <style type="text/mcss">
+        {
+            close = {
+                ['margin-top'] = 8,
+                ['margin-right'] = 10,
+                float = 'left',
+                width = 65,
+                height = 28,
+                background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#61 131 16 16:3 3 3 3',
+                color = '#ffffff'
+            },
+            close_click = {
+                width = 65,
+                height = 28,
+                position = 'relative'
+            },
+            close_icon = {
+                float = 'left',
+                background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#105 3 15 16',
+                width = 15,
+                height = 16,
+                ['margin-top'] = 6,
+                ['margin-left'] = 10,
+            },
+            close_word = {
+                float = 'left',
+                ['margin-top'] = 3,
+                ['margin-left'] = 3
+            },
+            area = {
+                color = 'white'
+            },
+            strip = {
+                height = 45,
+                width = 1100,
+            },
+            title = {
+                position = 'relative',
+                ['margin-left'] = 12,
+                ['margin-top'] = 12
+            },
+            balance = {
+                width = 300,
+                height = 30,
+                position = 'relative',
+                align = 'center',
+                ['margin-top'] = 7.5
+            },
+            strip_icon_1 = {
+                position = 'relative',
+                float = 'left',
+                width = 28,
+                height = 28,
+                background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#3 27 30 30:8 8 8 8'
+            },
+            strip_coins = {
+                float = 'left',
+                width = 220,
+                height = 25,
+                ['text-align'] = 'center',
+                background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#31 131 24 24:4 4 4 4',
+                ['margin-top'] = 3,
+                ['margin-left'] = 10
+            },
+            strip_icon_2 = {
+                float = 'left',
+                width = 56,
+                height = 24,
+                ['text-align'] = 'center',
+                color = '#333333',
+                background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png#3 131 25 24:5 5 5 5',
+                ['margin-left'] = 4,
+                ['margin-top'] = 3
+            },
+            area_content = {
+                width = 1100,
+            },
+            menubar = {
+                float = "left",
+                width = 147,
+                height = 500,
+                ['margin-left'] = 10,
+                ['margin-top'] = 10,
+            },
+            menubar_button = {
+                width = 140,
+                height = 40,
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#336 125 32 32:10 10 10 10",
+                ['margin-left'] = 4,
+                ['margin-bottom'] = 6,
+            },
+            menubar_button_selected = {
+                width = 140,
+                height = 40,
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#299 125 32 32:10 10 10 10",
+                ['margin-left'] = 4,
+                ['margin-bottom'] = 6,
+            },
+            list = {
+                float = 'left',
+                width = 943,
+            },
+            list_search_tool = {
+
+            },
+            downloaded_game = {
+                float = 'left',
+                width = 170,
+                height = 30,
+                ['margin-top'] = 22,
+                ['padding-left'] = 5,
+            },
+            list_search_bar = {
+                float = 'left',
+                ['margin-left'] = 710,
+                ['margin-top'] = 4,
+                textcolor = "#ffffff",
+                width = 316,
+                height = 30,
+                padding = 0,
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#198 132 16 16:4 4 4 4",
+            },
+            list_search_bar_radius = {
+                position = 'relative',
+                height = 30,
+                width = 316,
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#126 29 16 12:3 3 3 3",
+            },
+            list_search_textfield = {
+                width = 266,
+                height = 30,
+                background = ''
+            },
+            list_search_button = {
+                position = 'relative',
+                align = 'right',
+                color = "#000000",
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#225 127 36 28:6 5 7 6",
+                height = 30,
+                width = 57,
+                ['text-align'] = 'center',
+                ['padding-top'] = 3,
+                ['margin-top'] = -32
+            },
+            list_search_button_click = {
+                postion = 'relative',
+                height = 30,
+                width = 57,
+                ['margin-top'] = -25,
+                background = ''
+            },
+            list_filter = {
+                float = 'left',
+                ['margin-top'] = 0,
+            },
+            list_filter_button = {
+                color = "#cccccc",
+                ['margin-left'] = 20,
+                background = "",
+                height = 30,
+                ['min-width'] = 32
+            },
+            list_content = {
+                padding = 10
+            },
+            work_item = {
+                height = 240,
+                width = 290,
+                ['margin-right'] = 10,
+                ['margin-bottom'] = 10,
+                ['padding-left'] = 8,
+                ['padding-top'] = 8,
+                background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;435 212 30 30:11 11 11 11",
+            },
+            work_item_info = {
+                height = 60,
+                width = 290,
+            },
+            work_item_info_left = {
+                position = 'relative'
+            },
+            work_item_info_workname = {
+                ['font-weight'] = 'bold',
+                ['font-size'] = 14,
+                ['base-font-size'] = 14
+            },
+            work_item_info_author = {
+                ['font-size'] = 12,
+                ['base-font-size'] = 12,
+                color = '#999999'
+            },
+            work_item_info_right = {
+                position = 'relative',
+                ['margin-left'] = 130,
+                ['margin-top'] = 0
+            },
+            radius = {
+                position = 'relative',
+                height = 180,
+                width = 250,
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png;37 28 16 15:4 4 4 4",
+            },
+            project_id = {
+                color = '#ffffff',
+                ['font-size'] = 12,
+                ['base-font-size'] = 12,
+                background = "",
+                height = 20,
+                width = 100,
+                ['text-align'] = 'right',
+                color = '#999999'
+            },
+            item_button = {
+                position = 'relative',
+                width = 60,
+                left = 28
+            },
+            download = {
+                float = 'left'
+                width = 30,
+                height = 18,
+                background = "",
+            },
+            not_download_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 9,
+                ['margin-top'] = 3,
+                background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png;53 3 12 12',
+            },
+            download_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 8,
+                ['margin-top'] = 3,
+                background = 'Texture/Aries/Creator/keepwork/explorer_32bits.png;83 3 15 12',
+            },
+            download_icon_click = {
+                position = 'relative',
+                width = 30,
+                height = 18,
+                background = ''
+            },
+            favorite = {
+                float = 'left',
+                background = "",
+                width = 30,
+                height = 18
+            },
+            favorite_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 9.5,
+                ['margin-top'] = 4,
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png;69 3 12 12",
+            },
+            not_favorite_icon = {
+                width = 11,
+                height = 11,
+                ['margin-left'] = 9.5,
+                ['margin-top'] = 4,
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png;37 3 12 12",
+            },
+            favorite_icon_click = {
+                position = 'relative',
+                width = 30,
+                height = 18,
+                background = ''
+            },
+            click = {
+                position = 'relative',
+                width = 290,
+                height = 220,
+                background = ''
+            },
+            sort_icon = {
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png;183 131 10 5",
+                float = 'left',
+                width = 10,
+                height = 5,
+                ['margin-top'] = 12
+            },
+            share_button = {
+                width = 36,
+                height = 37,
+                ["margin-right"] = 6,
+                background ='Texture/Aries/Creator/keepwork/worldshare_32bits.png;419 10 38 38'
+            },
+            share_world_name = {
+                ["text-singleline"] = "true",
+                width = 220,
+                float = "left",
+                ["base-font-size"] = 16,
+                ["font-size"] = 16,
+                ["margin-top"] = 2,
+                ["text-align"] = "left",
+                color = "#000000",
+            },
+            share_world_info = {
+                ["text-singleline"] = "true",
+                float = "left",
+                ["margin-left"] = 0,
+                height = 18,
+                ["font-size"] = 12,
+                color = "#9e9e9e",
+            },
+        }
+    </style>
+    <kp:window width="1100" height="630" icon="Texture/Aries/Creator/keepwork/Window/title/biaoti_tansuo_32bits.png" onclose="close()">
+        <div class="area" name="area">
+            <div class="strip" name="strip">
+                <div class="list_search_bar" style="<%=get_english_style('width: 250px;')%>">
+                    <input type="text" name="project_id" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入你搜索的内容"%>' rows="1"/>
+                    <div class="list_search_button">
+                        <%=L"搜索"%>
+                        <input type="button" class="list_search_button_click" DefaultButton="true" onclick="search()" />
+                    </div>
+                </div>
+            </div>
+            <div class="area_content" name="area_content">
+                <div class="menubar">
+                    <div>
+                        <pe:if condition="<%= get_menubar_button_style('newest') %>">
+                            <div class="menubar_button_selected">
+                                <div style="position: relative;">
+                                    <img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#367 234 29 15" />
+                                </div>
+                                <input type="button" style="position: relative;width: 140px;height: 40px;background: ;" name="newest" onclick="select_category()" />
+                            </div>
+                        </pe:if>
+                        <pe:if condition="<%= not get_menubar_button_style('newest') %>">
+                            <div class="menubar_button">
+                                <div style="position: relative;">
+                                    <img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#367 234 29 15" />
+                                </div>
+                                <input type="button" style="position: relative;width: 140px;height: 40px;background: ;" name="newest" onclick="select_category()" />
+                            </div>
+                        </pe:if>
+                        <pe:if condition="<%= get_menubar_button_style('hottest') %>">
+                            <div class="menubar_button_selected">
+                                <div style="position: relative;">
+                                    <img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#292 234 29 15" />
+                                </div>
+                                <input type="button" style="position: relative;width: 140px;height: 40px;background: ;" name="hottest" onclick="select_category()" />
+                            </div>
+                        </pe:if>
+                        <pe:if condition="<%= not get_menubar_button_style('hottest') %>">
+                            <div class="menubar_button">
+                                <div style="position: relative;">
+                                    <img style="width: 29px;height: 15px;margin-left: 55px;margin-top:13px;" src="Texture/Aries/Creator/keepwork/explorer_32bits.png#292 234 29 15" />
+                                </div>
+                                <input type="button" style="position: relative;width: 140px;height: 40px;background: ;" name="hottest" onclick="select_category()" />
+                            </div>
+                        </pe:if>
+                        <pe:gridview name="categoryTree" DefaultNodeHeight="10" pagesize="100" ItemsPerLine="1" AllowPaging="false">
+                            <Columns>
+                                <div class="<%= get_menubar_button_style() %>" style="text-align: center;">
+                                    <div style="position: relative;">
+                                        <%= get_menubar_button_value() %>
+                                    </div>
+                                    <input type="button" style="position: relative;width: 140px;height: 40px;background: ;" name="<%= Eval('index') %>" onclick="select_category()" />
+                                </div>
+                            </Columns>
+                        </pe:gridview>
+                    </div>
+                    <div class="list_filter" style="height: 40px;width: 80px;">
+                        <input class="list_filter_button" onclick="select_sort()" type="button" value='<%=get_cur_sort()%>' />
+                        <div class="sort_icon"></div>
+                    </div>
+                </div>
+                <div class="list">
+                    <div class="list_content">
+                        <pe:gridview RememberScrollPos="true" name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="180" pagesize="<%=get_page_size%>" ItemsPerLine="3" AllowPaging="false">
+                            <Columns>
+                                <div class="work_item">
+                                    <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
+                                    <pe:if condition="<%= has_rated() %>">
+                                        <div style="position: relative;width: 70px;height: 36px;margin-top: -7px;margin-left: -7px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">
+                                            <%= get_art_number()%>
+                                        </div>
+                                    </pe:if>
+                                    <div style="width: 272px;height: 130px;background-color: #afafaf;">
+                                        <div style="position: relative;width: 272px;height: 130px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#394 211 32 32:9 9 9 9)"></div>
+                                        <div style="<%= 'width: 272px;height: 130px;background: url(' .. (Eval('cover') and Eval('cover') or '') .. ')' %>">
+                                            <pe:if condition="<%= has_username() %>">
+                                                <div style="width: 272px;height: 30px;margin-top: 100px;font-size: 12px;padding-top: 5px;padding-left: 4px;color: #ffffff;background-color: #000000a3">
+                                                    <%= get_user_icon() %>
+                                                    <%= get_username() %>
+                                                </div>
+                                            </pe:if>
+                                        </div>
+                                    </div>
+                                    <div class="work_item_info">
+                                        <div>
+                                            <div class="share_world_name">
+                                                <%=get_world_text(Eval("name"))%>
+                                                <span style="color: #9e9e9e;">
+                                                    #<%= Eval('id') or '' %>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="share_world_info">
+                                                <div style="float:left;width:198px;">
+                                                    <%= get_world_date() %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 12px;base-font-size: 12px;color: #9e9e9e;margin-top: 6px;">
+                                            <div style="float:left">
+                                                <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#383 181 16 12" style="width: 16px;height: 12px;margin-top: 4px;" />
+                                                <div style="float:left;margin-left: 2px;">
+                                                    <%= get_project_views() %>
+                                                </div>
+                                            </div>
+                                            <div style="float:left;margin-left: 8px;">
+                                                <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#358 177 16 16" style="width: 16px;height: 16px;" />
+                                                <div style="float:left;margin-left: 2px;">
+                                                    <%= get_project_thumbs() %>
+                                                </div>
+                                            </div>
+                                            <div style="float:left;margin-left: 8px;">
+                                                <img src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#409 181 18 16" style="width: 18px;height: 16px;margin-top: 3px;" />
+                                                <div style="float:left;margin-left: 2px;">
+                                                    <%= get_project_comments() %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- <div style="margin-top: 5px;float:left;font-size: 12px;">
+                                            <img style="width: 19px;height: 16px;margin-right: 5px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#311 311 19 16" />
+                                            <%= get_school_name() %>
+                                        </div> -->
+                                        <div align="right" class="share_world_info_button"  style="margin-right: 22px;width:30px;height:30px;margin-top: -15x;">
+                                            <!-- ENTER -->
+                                            <input type="button"
+                                                   class="share_button"
+                                                   onclick="enter"
+                                                   tooltip='<%=L"进入"%>'
+                                                   name='<%=Eval("index")%>' />
+                                        </div>
+                                    </div>
+                                    <pe:if condition="<%= is_load_more_items(Eval('index')) %>">
+                                        <pe:custom oncreate="<%=lazy_load%>"></pe:custom>
+                                    </pe:if>
+                                </div>
+                            </Columns>
+                            <PagerSettings Position="Bottom" height="1" />
+                            <PagerTemplate AutoHidePager="true">
+                                <form>
+                                    <label name="page" style="height:18px;margin-left:59px;margin-top:-95px;color:#ffffff;" />
+                                    <input type="button" name="pre"  invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"上一页"%>' style="margin-left:35px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#224 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;224 167 13 15" />
+                                    <input type="button" name="next" invisibleondisabled="false" zorder=2 animstyle="23" tooltip='<%=L"下一页"%>' style="margin-left:40px;margin-top:-93px;width:13px;height:15px;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#249 149 13 15);" Normal_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 149 13 15" Pressed_BG="Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png;249 167 13 15" />
+                                </form>
+                            </PagerTemplate>
+                        </pe:gridview>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </kp:window>
+</pe:mcml>
+</body>
+</html>
