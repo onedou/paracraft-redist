@@ -12,6 +12,10 @@
 
                 function close()
                     page:CloseWindow()
+
+                    if MySchool.callback and type(MySchool.callback) == 'function' then
+                        MySchool.callback()
+                    end
                 end
 
                 function has_joined(index)
@@ -38,7 +42,7 @@
 
                 function join_school()
                     MySchool:ShowJoinSchool()
-                    close()
+                    page:CloseWindow()
                 end
 
                 function join_institute()

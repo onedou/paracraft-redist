@@ -15,10 +15,11 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 
 local MySchool = NPL.export()
 
-function MySchool:Show()
+function MySchool:Show(callback)
     self.hasJoined = nil
     self.schoolData = {}
     self.orgData = {}
+    self.callback = callback
 
     Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
 
