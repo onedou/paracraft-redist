@@ -155,14 +155,14 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         "InternetLoadWorld.ShowPage",
         function(bEnable, bShow)
-            -- local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
+            local worldsharebeat = ParaEngine.GetAppCommandLineByParam("worldsharebeat", nil)
 
-            -- if worldsharebeat and worldsharebeat == 'true' then
-            --     UserConsoleCreate:Show()
-            -- else
-            --     UserConsole:ShowPage()
-            -- end
-            UserConsoleCreate:Show()
+            if worldsharebeat and worldsharebeat == 'true' then
+                UserConsoleCreate:Show()
+            else
+                UserConsole:ShowPage()
+            end
+            -- UserConsoleCreate:Show()
             return false
         end
     )
