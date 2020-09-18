@@ -450,7 +450,7 @@
                 width = 316,
                 height = 30,
                 padding = 0,
-                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#198 132 16 16:4 4 4 4",
+                background = "Texture/Aries/Creator/keepwork/explorer_32bits.png#205 162 32 16:5 5 5 5",
             },
             list_search_bar_radius = {
                 position = 'relative',
@@ -461,7 +461,7 @@
             list_search_textfield = {
                 width = 266,
                 height = 30,
-                background = ''
+                background = '',
             },
             list_search_button = {
                 position = 'relative',
@@ -642,7 +642,7 @@
         <div class="area" name="area">
             <div class="strip" name="strip">
                 <div class="list_search_bar" style="<%=get_english_style('width: 250px;')%>">
-                    <input type="text" name="project_id" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入你搜索的内容"%>' rows="1"/>
+                    <input type="text" name="project_id" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入你要搜索的内容"%>' rows="1" />
                     <div class="list_search_button">
                         <%=L"搜索"%>
                         <input type="button" class="list_search_button_click" DefaultButton="true" onclick="search()" />
@@ -702,7 +702,7 @@
                 </div>
                 <div class="list">
                     <div class="list_content">
-                        <pe:gridview RememberScrollPos="true" name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="180" pagesize="<%=get_page_size%>" ItemsPerLine="3" AllowPaging="false">
+                        <pe:gridview name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="180" pagesize="<%=get_page_size%>" ItemsPerLine="3" AllowPaging="false">
                             <Columns>
                                 <div class="work_item">
                                     <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />

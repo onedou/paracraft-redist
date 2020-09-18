@@ -12,6 +12,10 @@
                         if MySchool.callback and type(MySchool.callback) == 'function' then
                             MySchool.callback()
                         end
+
+                        if MySchool.joinSchoolCallback and type(MySchool.joinSchoolCallback) == 'function' then
+                            MySchool.joinSchoolCallback()
+                        end
                     end
 
                     function record_school()
@@ -137,7 +141,7 @@
                         MySchool:ChangeSchool(curItem.value, function(bSuccessed)
                             Mod.WorldShare.MsgBox:Close()
                             if bSuccessed then
-                                close()
+                                page:CloseWindow()
                                 GameLogic.AddBBS(nil, L"加入学校成功", 3000, "0 255 0")
                             else
                                 GameLogic.AddBBS(nil, L"加入学校失败", 3000, "255 0 0")
@@ -145,6 +149,10 @@
 
                             if MySchool.callback and type(MySchool.callback) == 'function' then
                                 MySchool.callback()
+                            end
+
+                            if MySchool.joinSchoolCallback and type(MySchool.joinSchoolCallback) == 'function' then
+                                MySchool.joinSchoolCallback()
                             end
                         end)
                     end
