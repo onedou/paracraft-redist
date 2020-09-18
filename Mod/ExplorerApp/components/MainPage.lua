@@ -314,7 +314,8 @@ function MainPage:SetWorksTree(categoryItem, sort)
                         id = item.id,
                         name = item.extra and type(item.extra.worldTagName) == 'string' and item.extra.worldTagName or item.name or "",
                         cover = item.extra and type(item.extra.imageUrl) == 'string' and item.extra.imageUrl or "",
-                        username = item.user and type(item.user.username) == 'string' and item.user.username or ""
+                        username = item.user and type(item.user.username) == 'string' and item.user.username or "",
+                        updated_at = item.updatedAt and type(item.updatedAt) == 'string' and item.updatedAt or ""
                     }
                 end
 
