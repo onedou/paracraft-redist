@@ -14,6 +14,7 @@
             UniString = commonlib.gettable("System.Core.UniString")
 
             MainPage.SetPage()
+            page = document:GetPageCtrl()
 
             global_type = type
 
@@ -32,25 +33,32 @@
             end
 
             function select_category(index)
-                if index == 'newest' then
-                    Mod.WorldShare.Store:Set("explorer/selectSortIndex", 3)
-                    MainPage.curPage = 1
-                    MainPage:SetWorksTree({ value = 'all' }, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
-                    return
-                end
-            
-                if index == 'hottest' then
-                    Mod.WorldShare.Store:Set("explorer/selectSortIndex", 4)
-                    MainPage.curPage = 1
-                    MainPage:SetWorksTree({ value = 'all' }, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
-                    return
-                end
+                Mod.WorldShare.MsgBox:Show(L"请稍后...")
 
-                select_value = nil
+                page:GetNode("worksTree"):SetAttribute("DataSource", {})
+                MainPage:Refresh()
 
-                Mod.WorldShare.Store:Set("explorer/selectSortIndex", 1)
-                MainPage.curPage = 1
-                MainPage:SetWorksTree(MainPage.remoteCategoryTree[index], Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+                Mod.WorldShare.Utils.SetTimeOut(function()
+                    if index == 'newest' then
+                        Mod.WorldShare.Store:Set("explorer/selectSortIndex", 3)
+                        MainPage.curPage = 1
+                        MainPage:SetWorksTree({ value = 'all' }, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+                        return
+                    end
+                
+                    if index == 'hottest' then
+                        Mod.WorldShare.Store:Set("explorer/selectSortIndex", 4)
+                        MainPage.curPage = 1
+                        MainPage:SetWorksTree({ value = 'all' }, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+                        return
+                    end
+
+                    select_value = nil
+
+                    Mod.WorldShare.Store:Set("explorer/selectSortIndex", 1)
+                    MainPage.curPage = 1
+                    MainPage:SetWorksTree(MainPage.remoteCategoryTree[index], Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+                end, 100)
             end
 
             function search()
@@ -133,6 +141,8 @@
 
                 MainPage.worksTree[#MainPage.worksTree].isLoaded = true
                 MainPage.curPage = MainPage.curPage + 1
+
+                Mod.WorldShare.MsgBox:Close()
 
                 if MainPage.isSearching then
                     MainPage:Search()
