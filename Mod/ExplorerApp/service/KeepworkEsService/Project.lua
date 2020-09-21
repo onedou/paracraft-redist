@@ -34,7 +34,7 @@ function KeepworkEsServiceProject:Search(query, pages, callback)
         type = 'paracraft',
         page = pages and pages.page and pages.page or 1,
         ["per-page"] = pages and pages.perPage and pages.perPage or 10,
-        q = query
+        q = Mod.WorldShare.Utils.UrlEncode(query)
     }
 
     EsProjectsApi:Projects(params, callback)
