@@ -24,3 +24,18 @@ function KeepworkEsServiceProject:GetEsProjectsByFilter(filter, sort, pages, cal
 
     EsProjectsApi:Projects(params, callback)
 end
+
+function KeepworkEsServiceProject:Search(query, pages, callback)
+    if not query or (type(query) ~= 'string' and type(query) ~= 'number') then
+        return false
+    end
+
+    local params = {
+        type = 'paracraft',
+        page = pages and pages.page and pages.page or 1,
+        ["per-page"] = pages and pages.perPage and pages.perPage or 10,
+        q = query
+    }
+
+    EsProjectsApi:Projects(params, callback)
+end

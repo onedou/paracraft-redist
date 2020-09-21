@@ -216,9 +216,9 @@ function MainPage:SetCategoryTree()
 end
 
 function MainPage:SetWorksTree(categoryItem, sort)
-    local MainPage = Mod.WorldShare.Store:Get("page/MainPage")
+    local MainPagePage = Mod.WorldShare.Store:Get("page/MainPage")
 
-    if not MainPage then
+    if not MainPagePage then
         return false
     end
 
@@ -227,6 +227,9 @@ function MainPage:SetWorksTree(categoryItem, sort)
     end
 
     Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 10)
+    
+    self.isSearching = false
+    MainPagePage:SetValue("search_value", "")
 
     if categoryItem.value == L"收藏" then
         local allFavoriteProjects = ProjectsDatabase:GetAllFavoriteProjects()
@@ -280,7 +283,7 @@ function MainPage:SetWorksTree(categoryItem, sort)
                     self.worksTree = self:HandleWorldsTree(rows)
                 end
 
-                MainPage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
                 self:Refresh()
             end
         )
@@ -343,7 +346,7 @@ function MainPage:SetWorksTree(categoryItem, sort)
                     self.worksTree = self:HandleWorldsTree(rows)
                 end
 
-                MainPage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
 
                 self:Refresh()
             end
@@ -404,51 +407,55 @@ function MainPage:SetWorksTree(categoryItem, sort)
                 self.worksTree = self:HandleWorldsTree(rows)
             end
 
-            MainPage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+            MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
             self:Refresh()
         end
     )
 end
 
 function MainPage:Search()
-    local MainPage = Mod.WorldShare.Store:Get("page/MainPage")
+    local MainPagePage = Mod.WorldShare.Store:Get("page/MainPage")
 
-    if not MainPage then
+    if not MainPagePage then
         return false
     end
 
-    local projectId = tonumber(MainPage:GetValue("project_id"))
+    if not self.isSearching then
+        self.isSearching = true
+        self.searchValue = MainPagePage:GetValue("search_value")
+    end
 
-    if not projectId or projectId == 0 then
+    local searchValue = self.searchValue
+
+    if not searchValue or (type(searchValue) ~= 'string' and type(searchValue) ~= 'number') then
         return false
     end
 
-    KeepworkServiceProject:GetProjectByIds(
-        self.mainId,
-        { projectId },
-        {},
-        function(data, err)
-            if not data or not data.rows then
-                return false
-            end
-
-            -- map to es data format
-            for key, item in ipairs(data.rows) do
-                if item.extra and item.extra.imageUrl then
-                    item.cover = item.extra.imageUrl
-                end
-
-                if item.user and item.user.username then
-                    item.username = item.user.username
-                end
-            end
-
-            self.categorySelected = {}
-            self.worksTree = self:HandleWorldsTree(data.rows)
-            MainPage:GetNode("worksTree"):SetAttribute("DataSource", data.rows)
-            self:Refresh()
+    KeepworkEsServiceProject:Search(searchValue, { page = self.curPage }, function(data, err)
+        if not data or not data.hits then
+            return false
         end
-    )
+
+        Mod.WorldShare.Store:Set('explorer/selectSortIndex', 1)
+        self.categorySelected = {}
+        -- self.worksTree = self:HandleWorldsTree(data.hits)
+        
+        if self.curPage ~= 1 then
+            local rows = {}
+            rows = self:HandleWorldsTree(data.hits)
+
+            for key, item in ipairs(rows) do
+                self.worksTree[#self.worksTree + 1] = item
+            end
+        else
+            self.worksTree = self:HandleWorldsTree(data.hits)
+        end
+
+        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+        MainPagePage:SetValue("search_value", searchValue)
+
+        self:Refresh()
+    end)
 end
 
 function MainPage:HandleWorldsTree(rows)

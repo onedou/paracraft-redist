@@ -54,6 +54,9 @@
             end
 
             function search()
+                MainPage.curPage = 1
+                MainPage.isSearching = false
+
                 MainPage:Search()
             end
 
@@ -130,7 +133,12 @@
 
                 MainPage.worksTree[#MainPage.worksTree].isLoaded = true
                 MainPage.curPage = MainPage.curPage + 1
-                MainPage:SetWorksTree(MainPage.categorySelected, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+
+                if MainPage.isSearching then
+                    MainPage:Search()
+                else
+                    MainPage:SetWorksTree(MainPage.categorySelected, Mod.WorldShare.Store:Getter('explorer/GetSortKey'))
+                end
             end
 
             function get_page_size()
@@ -731,7 +739,7 @@
         <div class="area" name="area">
             <div class="strip" name="strip">
                 <div class="list_search_bar" style="<%=get_english_style('width: 250px;')%>">
-                    <input type="text" name="project_id" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入项目ID"%>' rows="1" />
+                    <input type="text" name="search_value" class="list_search_textfield" spacing="4" EmptyText='<%=L"请输入你要搜索的内容"%>' rows="1" />
                     <div class="list_search_button">
                         <%=L"搜索"%>
                         <input type="button" class="list_search_button_click" DefaultButton="true" onclick="search()" />
