@@ -6,6 +6,7 @@
             -- UI
             MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
             Sort = NPL.load("(gl)Mod/ExplorerApp/components/Sort/Sort.lua")
+            local KpUserTag = NPL.load("(gl)script/apps/Aries/Creator/Game/mcml/keepwork/KpUserTag.lua")
             
             -- service
             KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -73,7 +74,8 @@
             end
 
             function select_project(index)
-                
+                MainPage.curSelected = index
+                page:Refresh(0.01)
             end
 
             function enter(index)
@@ -244,7 +246,13 @@
             end
 
             function has_username()
-                return false
+                local username = Eval('username')
+
+                if username then
+                    return true
+                else
+                    return false
+                end
             end
 
             function get_art_number()
@@ -435,6 +443,56 @@
                     return 0
                 end 
             end
+
+            function get_work_item_style()
+                if MainPage.curSelected == Eval('index') then
+                    return 'work_item_selected'
+                else
+                    return 'work_item'
+                end
+            end
+
+            function get_user_icon()
+                local user = Eval('user')
+
+                if not user or global_type(user) ~= "table" then
+                    return ""
+                end
+
+                local user_info = {}
+                local count = 0
+
+                if user.tLevel >= 1 then
+                    user_info.tLevel = 1
+                    count = count + 1
+                end
+                    
+                if user.student == 1 then
+                    user_info.student = 1
+                    count = count + 1
+                end
+
+                if user.vip == 1 then
+                    user_info.vip = 1
+                    count = count + 1
+                end
+
+                return KpUserTag.GetMcml(user_info)
+            end
+
+            function get_username()
+                local user = Eval('user')
+
+                if not user or global_type(user) ~= "table" then
+                    return Eval('username') or "<%= '暂无' %>"
+                end
+
+                if user.username then
+                    return user.username
+                else
+                    return Eval('username') or "<%= '暂无' %>"
+                end
+            end
         ]]>
     </script>
     <style type="text/mcss">
@@ -610,6 +668,15 @@
                 ['padding-left'] = 8,
                 ['padding-top'] = 8,
                 background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;435 212 30 30:11 11 11 11",
+            },
+            work_item_selected = {
+                height = 240,
+                width = 290,
+                ['margin-right'] = 10,
+                ['margin-bottom'] = 10,
+                ['padding-left'] = 8,
+                ['padding-top'] = 8,
+                background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;471 212 30 30:11 11 11 11",
             },
             work_item_info = {
                 height = 60,
@@ -811,7 +878,7 @@
                     <div class="list_content">
                         <pe:gridview RememberScrollPos="true" name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="180" pagesize="<%=get_page_size%>" ItemsPerLine="3" AllowPaging="false">
                             <Columns>
-                                <div class="work_item">
+                                <div class="<%= get_work_item_style() %>">
                                     <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
                                     <pe:if condition="<%= has_rated() %>">
                                         <div style="position: relative;width: 70px;height: 36px;margin-top: -7px;margin-left: -7px;padding-top: 4px;padding-left: 6px;background: url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#356 136 70 36)">

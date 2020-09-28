@@ -27,6 +27,7 @@ local ProjectsDatabase = NPL.load("../database/Projects.lua")
 
 -- service
 local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceProject = NPL.load("../service/KeepworkService/Project.lua")
 local KeepworkEsServiceProject = NPL.load("../service/KeepworkEsService/Project.lua")
 
@@ -50,6 +51,7 @@ MainPage.worksTree = {}
 MainPage.downloadedGame = "all"
 MainPage.curPage = 1
 MainPage.mainId = 0
+MainPage.curSelected = 1
 
 function MainPage:ShowPage(callback)
     if type(callback) then
@@ -303,7 +305,7 @@ function MainPage:SetWorksTree(categoryItem, sort)
             function(data, err)
                 Mod.WorldShare.MsgBox:Close()
 
-                if not data or err ~= 200 then
+                if not data or type(data) ~= 'table' or not data.rows or type(data.rows) ~= 'table' or err ~= 200 then
                     return false
                 end
 
@@ -318,7 +320,8 @@ function MainPage:SetWorksTree(categoryItem, sort)
                         name = item.extra and type(item.extra.worldTagName) == 'string' and item.extra.worldTagName or item.name or "",
                         cover = item.extra and type(item.extra.imageUrl) == 'string' and item.extra.imageUrl or "",
                         username = item.user and type(item.user.username) == 'string' and item.user.username or "",
-                        updated_at = item.updatedAt and type(item.updatedAt) == 'string' and item.updatedAt or ""
+                        updated_at = item.updatedAt and type(item.updatedAt) == 'string' and item.updatedAt or "",
+                        user = item.user and type(item.user) == 'table' and item.user or {},
                     }
                 end
 
@@ -369,46 +372,79 @@ function MainPage:SetWorksTree(categoryItem, sort)
         sort,
         { page = self.curPage },
         function(data, err)
-            Mod.WorldShare.MsgBox:Close()
-
-            if type(data) ~= 'table' or type(data.hits) ~= 'table' or err ~= 200 then
+            if not data or type(data) ~= 'table' or not data.hits or type(data.hits) ~= 'table' or err ~= 200  then
                 return false
             end
 
-            self.categorySelected = categoryItem
+            local usernames = {}
 
-            for key, item in pairs(data.hits) do
-                if item and item.world_tag_name then
-                    item.name = item.world_tag_name
-                end
-            end
+            for key, item in ipairs(data.hits) do
+                if item and type(item) == 'table' and item.username and type(item.username) == 'string' then
+                    local beExisted = false
 
-            local rows = {}
+                    for uKey, uItem in ipairs(usernames) do
+                        if uItem and type(uItem) == 'string' and uItem == item.username then
+                            beExisted = true
+                        end
+                    end
 
-            if self.downloadedGame == "all" then
-                rows = data.hits
-            elseif self.downloadedGame == "local" then
-                for key, item in ipairs(data.hits) do
-                    if ProjectsDatabase:IsProjectDownloaded(item.id) then
-                        rows[#rows + 1] = item
+                    if not beExisted then
+                        usernames[#usernames + 1] = item.username
                     end
                 end
-            else
-                return false
             end
 
-            if self.curPage ~= 1 then
-                rows = self:HandleWorldsTree(rows)
-
-                for key, item in ipairs(rows) do
-                    self.worksTree[#self.worksTree + 1] = item
+            KeepworkServiceSession:GetUsersByUsernames(usernames, function(usersData, usersErr)
+                if not usersData or type(usersData) ~= 'table' or not usersData.rows or type(usersData.rows) ~= 'table' or err ~= 200  then
+                    return false
                 end
-            else
-                self.worksTree = self:HandleWorldsTree(rows)
-            end
+                Mod.WorldShare.MsgBox:Close()
+                
+                self.categorySelected = categoryItem
+    
+                for key, item in pairs(data.hits) do
+                    if item and type(item) == 'table' then
+                        for uKey, uItem in ipairs(usersData.rows) do
+                            if uItem and type(uItem) == 'table' then
+                                if uItem.username == item.username then
+                                    item.user = commonlib.copy(uItem)
+                                end
+                            end
+                        end
 
-            MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
-            self:Refresh()
+                        if item.world_tag_name then
+                            item.name = item.world_tag_name
+                        end
+                    end
+                end
+    
+                local rows = {}
+    
+                if self.downloadedGame == "all" then
+                    rows = data.hits
+                elseif self.downloadedGame == "local" then
+                    for key, item in ipairs(data.hits) do
+                        if ProjectsDatabase:IsProjectDownloaded(item.id) then
+                            rows[#rows + 1] = item
+                        end
+                    end
+                else
+                    return false
+                end
+    
+                if self.curPage ~= 1 then
+                    rows = self:HandleWorldsTree(rows)
+    
+                    for key, item in ipairs(rows) do
+                        self.worksTree[#self.worksTree + 1] = item
+                    end
+                else
+                    self.worksTree = self:HandleWorldsTree(rows)
+                end
+
+                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                self:Refresh()
+            end)
         end
     )
 end
