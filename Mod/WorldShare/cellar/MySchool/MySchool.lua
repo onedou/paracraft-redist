@@ -20,6 +20,7 @@ function MySchool:Show(callback)
     self.schoolData = {}
     self.orgData = {}
     self.callback = callback
+    self.searchText = ""
 
     Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 6)
 
@@ -347,11 +348,11 @@ function MySchool:GetSearchSchoolResultByName(name, callback)
         return false
     end
 
-    KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, function(data)
+    KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, self.curId, self.kind,function(data)
         self.result = data
 
         for key, item in ipairs(self.result) do
-            item.text = item.name
+            item.text = item.name or ""
             item.value = item.id
         end
 

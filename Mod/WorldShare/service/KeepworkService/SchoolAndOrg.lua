@@ -10,11 +10,11 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 ]]
 
 -- api
-local AccountingOrgApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/Org.lua")
+local LessonOrganizationsApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizations.lua")
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
 local KeepworkRegionsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Regions.lua")
 local KeepworkSchoolsApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Schools.lua")
-local AccountingOrgActivateCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting/OrgActivateCode.lua")
+local LessonOrganizationActivateCodesApi = NPL.load("(gl)Mod/WorldShare/api/Lesson/LessonOrganizationActivateCodes.lua")
 
 local KeepworkServiceSchoolAndOrg = NPL.export()
 
@@ -23,11 +23,11 @@ function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
         return false
     end
 
-    AccountingOrgApi:GetUserAllOrgs(
+    LessonOrganizationsApi:GetUserAllOrgs(
         function(data, err)
             if err == 200 then
-                if data and data.data and type(data.data) == 'table' then
-                    callback(data.data)
+                if data and data.data and type(data.data.allOrgs) == 'table' then
+                    callback(data.data.allOrgs)
                 end
             end
         end,
@@ -128,8 +128,8 @@ function KeepworkServiceSchoolAndOrg:SearchSchool(id, kind, callback)
     end)
 end
 
-function KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, callback)
-    KeepworkSchoolsApi:GetList(name, nil, nil, function(data, err)
+function KeepworkServiceSchoolAndOrg:SearchSchoolByName(name, regionId, kind, callback)
+    KeepworkSchoolsApi:GetList(name, regionId, kind, function(data, err)
         if data and data.rows then
             if type(callback) == "function" then
                 callback(data.rows)
@@ -161,7 +161,7 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
 
     code = string.gsub(code, " ", "")
 
-    AccountingOrgActivateCodeApi:Activate(
+    LessonOrganizationActivateCodesApi:Activate(
         code,
         realname,
         function(data, err)
