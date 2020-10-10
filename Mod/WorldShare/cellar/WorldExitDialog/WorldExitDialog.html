@@ -113,7 +113,10 @@
                 end
 
                 function snapshot()
-                    WorldExitDialog.Snapshot();
+                    -- WorldExitDialog.Snapshot();
+                    local CubeMapRender = NPL.load("(gl)Mod/WorldShare/render/CubeMap.lua")
+
+                    CubeMapRender:Generate()
                 end
 
                 function get_english_style(styleStr)
