@@ -8,10 +8,16 @@
     <pe:mcml>
         <script type="text/npl" src="WorldExitDialog.lua" refresh="false">
             <![CDATA[
-                local WorldExitDialog = NPL.load('./WorldExitDialog.lua')
+                -- UI
+                local WorldExitDialog = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
                 local ShareWorld = NPL.load('(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua')
+                local Grade = NPL.load('Mod/WorldShare/cellar/WorldExitDialog/Grade.lua')
+                local Panorama = NPL.load('Mod/WorldShare/cellar/Panorama/Panorama.lua')
+                
+                -- service
                 local KeepworkService = NPL.load('(gl)Mod/WorldShare/service/KeepworkService.lua')
-                local Grade = NPL.load('./Grade.lua')
+                
+                -- lib
                 local WorldCommon = commonlib.gettable("MyCompany.Aries.Creator.WorldCommon")
                 local os = commonlib.gettable("System.os")
 
@@ -217,6 +223,11 @@
 
                     return default
                 end
+
+                function share_panorama()
+                    on_click_cancel()
+                    Panorama:ShowCreate()
+                end
             ]]>
         </script>
         <style type="text/mcss">
@@ -237,31 +248,29 @@
                 },
                 dialog_container = {
                     width = 610,
-                    height = 400,
-                    background = "Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#267 89 34 34:8 8 8 8"
+                    height = 400
                 },
                 dialog_header = {
                     height = 40
                 }
             }
         </style>
-        <div>
+        <kp:window width="610" height="400" onclose="on_click_cancel()">
             <div class="dialog_container">
                 <div class="dialog_header">
                     <div style="position: relative;margin-top: 9px;margin-left: 8px;color: white;">
                         <%=format("%s", get_cur_world_name() or "") %>
                     </div>
-                    <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
-                        <div style="position: relative;margin-top: 5px;">
+                    <div style="position: relative;margin-top: 5px;">
+                        <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
                             <input type="button" class="mc_light_grey_button_with_fillet" style='<%= get_share_short_video_style() %>' value='<%= L"短视频分享" %>' onclick="share_short_video()" />
-                        </div>
-                    </pe:if>
-                    <input onclick="on_click_cancel()"
-                           style="margin-top:8px;margin-right: 8px;float:left;background:url(Texture/Aries/Creator/Theme/GameCommonIcon_32bits.png#363 59 26 26:7 7 7 7);width:26px;height:26px"
-                           type="button"
-                           align="right" />
+                            <input type="button" class="mc_light_grey_button_with_fillet" style='height: 30px;width: 95px;margin-left: 10px;' value='<%= L"全进图分享" %>' onclick="share_panorama()" />
+                        </pe:if>
+                        <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
+                            <input type="button" class="mc_light_grey_button_with_fillet" style='<%= get_share_short_video_style() %>' value='<%= L"全进图分享" %>' onclick="share_panorama()" />
+                        </pe:if>
+                    </div>
                 </div>
-                <div style="height:2px;" width="100%" class="mc_line"></div>
                 <div>
                     <div style="padding:20px;padding-bottom:5px;color:#ffffff">
                         <div>
@@ -275,15 +284,15 @@
                             </div>
                             <div style="float:right;padding-left:28px;">
                                 <div style="margin-top:-5px;margin-bottom: 20px;">
-                                    <span style="color: #b2b2b2"><%= "项目ID：" %></span>
-                                    <input type="button" style="float:left;color:#FFFFFF;" class="mc_blue_button_with_fillet" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
+                                    <span style="color: #000000"><%= "项目ID：" %></span>
+                                    <input type="button" style="float:left;color:#ffffff;" class="mc_blue_button_with_fillet" value="<%= get_project_id() %>" onclick="open_keepwork_project()" tooltip='<%= L"点击访问作品项目页面" %>' />&nbsp;
                                     <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) %>">
                                         <input type="button" class="mc_light_grey_button_with_fillet" style="font-size: 12px;" value="<%= L'上传' %>" onclick="on_click_share_world()"/>
                                     </pe:if>
                                 </div>
                                 <div>
                                     <div style="float:right;width: 110px;">
-                                        <div style="color: #b2b2b2">
+                                        <div style="color: #000000">
                                             <%= L'本地版本'%>：<%= get_current_revision() %>
                                         </div>
                                     </div>
@@ -329,8 +338,7 @@
                             </div>
                         </div>
                     </div>
-                    <div style="height:1px;margin-left:-5px;" width="99.99%" class="mc_line"></div>
-                    <div style="padding-left:20px;padding-right: 20px;color:#ffffff">
+                    <div style="padding-left:20px;padding-right: 20px;color:#000000">
                         <div style="margin-top:20x;base-font-size:15px;font-size:15px;">
                             <%= L"您上次保存世界是:"%> <span style="color:#ff6a00"><%=format(L"%d秒前", get_elapsed_unsaved_seconds())%></span>
                         </div>
@@ -347,7 +355,7 @@
                     </div>
                 </div>
             </div>
-        </div>      
+        </kp:window>
     </pe:mcml>
 </body>
 </html>

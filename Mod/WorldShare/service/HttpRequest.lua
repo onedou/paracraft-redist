@@ -39,10 +39,10 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
             headers = params.headers
         }
 
-        if formatParams.headers['Content-Type'] or
-           formatParams.headers['content-type'] then
-            formatParams.json = false
-        end
+        -- if formatParams.headers['Content-Type'] or
+        --    formatParams.headers['content-type'] then
+        --     formatParams.json = false
+        -- end
     end
 
     if formatParams.method == "GET" and type(params) == "table" then
@@ -66,9 +66,16 @@ function HttpRequest:GetUrl(params, callback, noTryStatus)
         formatParams.form = params.form or {}
     end
 
+    local requestTime = os.time()
+
     System.os.GetUrl(
         formatParams,
         function(err, msg, data)
+            if err == 0 or (os.time() - requestTime) >= 8 then -- 8 seconds
+                LOG.std("HttpRequest", "debug", "Request", "Connection timeout, Status Code: %s, Method: %s, URL: %s, Params: %s", -1, method, debugUrl, NPL.ToJson(formatParams, true))
+                return
+            end
+
             ---- debug code ----
             local debugUrl = type(params) == "string" and params or formatParams.url
             local method = type(params) == "table" and params.method and params.method or "GET"
@@ -266,7 +273,7 @@ function HttpRequest:PostFields(url, params, headers, success, error)
     end
 
     local boundaryLine = "--WebKitFormBoundary" .. self.boundary .. "\n"
-    local postfields = ""
+    local postfields = "" .. boundaryLine
 
     
     for key, item in ipairs(params) do
