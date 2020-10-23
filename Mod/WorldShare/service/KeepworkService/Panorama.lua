@@ -51,7 +51,7 @@ function KeepworkServicePanorama:Upload(callback, recursive)
 
     StoragePanoramasApi:UploadToken(
         projectId,
-        filename,
+        tostring(self.uploadIndex),
         function(data, err)
             if err ~= 200 or not data or not data.data then
                 callback(false)

@@ -264,10 +264,10 @@
                     <div style="position: relative;margin-top: 5px;">
                         <pe:if condition='<%= System.os.GetPlatform() == "win32" %>'>
                             <input type="button" class="mc_light_grey_button_with_fillet" style='<%= get_share_short_video_style() %>' value='<%= L"短视频分享" %>' onclick="share_short_video()" />
-                            <input type="button" class="mc_light_grey_button_with_fillet" style='height: 30px;width: 95px;margin-left: 10px;' value='<%= L"全进图分享" %>' onclick="share_panorama()" />
+                            <input type="button" class="mc_light_grey_button_with_fillet" style='height: 30px;width: 95px;margin-left: 10px;' value='<%= L"全景图分享" %>' onclick="share_panorama()" />
                         </pe:if>
                         <pe:if condition='<%= System.os.GetPlatform() ~= "win32" %>'>
-                            <input type="button" class="mc_light_grey_button_with_fillet" style='<%= get_share_short_video_style() %>' value='<%= L"全进图分享" %>' onclick="share_panorama()" />
+                            <input type="button" class="mc_light_grey_button_with_fillet" style='<%= get_share_short_video_style() %>' value='<%= L"全景图分享" %>' onclick="share_panorama()" />
                         </pe:if>
                     </div>
                 </div>
@@ -312,7 +312,7 @@
                                 <pe:if condition="<%= not GameLogic.IsReadOnly() and (not has_project_id() or is_user_world()) and has_project_id() %>">
                                     <div>
                                         <div style="float:right;width: 110px;">
-                                            <div style="color: #b2b2b2">
+                                            <div style="color: #000000">
                                                 <%= L'在线版本'%>：<%= get_remote_revision()%>
                                             </div>
                                         </div>
@@ -320,7 +320,7 @@
                                 </pe:if>
                                 <pe:if condition="<%= has_project_id() and not is_user_world() and not is_rated() %>">
                                     <div>
-                                        <div style="color:#b2b2b2"><%= L"为作品打分：" %></div>
+                                        <div style="color:#000000"><%= L"为作品打分：" %></div>
                                         <div class="star_area">
                                             <pe:repeat DataSource="<%=get_star()%>">
                                                 <pe:repeatitem>
