@@ -26,30 +26,43 @@ function MySchool:Show(callback)
 
     local params = Mod.WorldShare.Utils.ShowWindow(600, 380, "(ws)Theme/MySchool/MySchool.html", "Mod.WorldShare.MySchool")
 
-    KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
+    KeepworkServiceSchoolAndOrg:GetUserAllOrgs(function(orgData)
         Mod.WorldShare.MsgBox:Close()
 
-        local hasJoinedSchool = false
-        local hasJoinedOrg = false
-
-        if type(schoolData) == "table" and schoolData.regionId then
-            hasJoinedSchool = true
-            self.schoolData= schoolData
-        end
+        echo(orgData, true)
 
         if type(orgData) == "table" and #orgData > 0 then
-            hasJoinedOrg = true
             self.orgData = orgData
-        end
-
-        if hasJoinedSchool or hasJoinedOrg then
             self.hasJoined = true
-        else
-            self.hasJoined = false
         end
 
         params._page:Refresh(0.01)
     end)
+
+    -- KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
+    --     Mod.WorldShare.MsgBox:Close()
+
+    --     local hasJoinedSchool = false
+    --     local hasJoinedOrg = false
+
+    --     if type(schoolData) == "table" and schoolData.regionId then
+    --         hasJoinedSchool = true
+    --         self.schoolData= schoolData
+    --     end
+
+    --     if type(orgData) == "table" and #orgData > 0 then
+    --         hasJoinedOrg = true
+    --         self.orgData = orgData
+    --     end
+
+    --     if hasJoinedSchool or hasJoinedOrg then
+    --         self.hasJoined = true
+    --     else
+    --         self.hasJoined = false
+    --     end
+
+    --     params._page:Refresh(0.01)
+    -- end)
 end
 
 function MySchool:ShowJoinSchool(callback)
