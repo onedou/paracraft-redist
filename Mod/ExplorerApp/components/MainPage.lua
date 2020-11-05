@@ -228,7 +228,7 @@ function MainPage:SetWorksTree(categoryItem, sort)
         return false
     end
 
-    Mod.WorldShare.MsgBox:Show(L"请稍后...", nil, nil, nil, nil, 10)
+    Mod.WorldShare.MsgBox:Show(L"请稍候...", nil, nil, nil, nil, 10)
     
     self.isSearching = false
     MainPagePage:SetValue("search_value", "")

@@ -7,6 +7,7 @@
             MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
             Sort = NPL.load("(gl)Mod/ExplorerApp/components/Sort/Sort.lua")
             local KpUserTag = NPL.load("(gl)script/apps/Aries/Creator/Game/mcml/keepwork/KpUserTag.lua")
+            local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
             
             -- service
             KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
@@ -34,7 +35,7 @@
             end
 
             function select_category(index)
-                Mod.WorldShare.MsgBox:Show(L"请稍后...")
+                Mod.WorldShare.MsgBox:Show(L"请稍候...")
 
                 page:GetNode("worksTree"):SetAttribute("DataSource", {})
                 MainPage:Refresh()
@@ -493,6 +494,14 @@
                     return Eval('username') or "<%= '暂无' %>"
                 end
             end
+
+            function share(index)
+                local currentWorld = MainPage.worksTree[index]
+
+                if currentWorld and currentWorld.id then
+                    ShareWorld:ShowWorldCode(currentWorld.id)
+                end
+            end
         ]]>
     </script>
     <style type="text/mcss">
@@ -787,10 +796,18 @@
                 ['margin-top'] = 12
             },
             share_button = {
+                float = 'left',
+                width = 38,
+                height = 38,
+                ["margin-right"] = 6,
+                background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;109 459 40 40"
+            },
+            enter_button = {
+                float = 'left',
                 width = 36,
                 height = 37,
                 ["margin-right"] = 6,
-                background ='Texture/Aries/Creator/keepwork/worldshare_32bits.png;419 10 38 38'
+                background = "Texture/Aries/Creator/keepwork/worldshare_32bits.png;419 10 38 38"
             },
             share_world_name = {
                 ["text-singleline"] = "true",
@@ -936,13 +953,19 @@
                                             <img style="width: 19px;height: 16px;margin-right: 5px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#311 311 19 16" />
                                             <%= get_school_name() %>
                                         </div> -->
-                                        <div align="right" class="share_world_info_button"  style="margin-right: 22px;width:30px;height:30px;margin-top: -15x;">
-                                            <!-- ENTER -->
+                                        <div align="right" class="share_world_info_button"  style="margin-right: 11px;width:86px;height:40px;margin-top: -15x;">
+                                            <!-- SHARE -->
                                             <input type="button"
                                                    class="share_button"
+                                                   onclick="share"
+                                                   tooptip='<%= L"分享" %>'
+                                                   name='<%= Eval("index") %>' />
+                                            <!-- ENTER -->
+                                            <input type="button"
+                                                   class="enter_button"
                                                    onclick="enter"
-                                                   tooltip='<%=L"进入"%>'
-                                                   name='<%=Eval("index")%>' />
+                                                   tooltip='<%= L"进入" %>'
+                                                   name='<%= Eval("index") %>' />
                                         </div>
                                     </div>
                                     <pe:if condition="<%= is_load_more_items(Eval('index')) %>">
