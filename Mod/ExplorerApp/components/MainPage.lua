@@ -30,6 +30,7 @@ local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 local KeepworkServiceProject = NPL.load("../service/KeepworkService/Project.lua")
 local KeepworkEsServiceProject = NPL.load("../service/KeepworkEsService/Project.lua")
+local WorldShareKeepworkServiceProject = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Project.lua')
 
 -- UI
 local SyncMain = NPL.load("(gl)Mod/WorldShare/cellar/Sync/Main.lua")
@@ -655,40 +656,68 @@ function MainPage:SelectProject(index)
             return false
         end
 
-        local world = RemoteWorld.LoadFromHref(projectInfo.world.archiveUrl, "self")
-        world:GetLocalFileName()
+        local function Handle()
+            local world = RemoteWorld.LoadFromHref(projectInfo.world.archiveUrl, "self")
+            world:GetLocalFileName()
 
-        local mytimer =
-            commonlib.Timer:new(
-            {
-                callbackFunc = function(timer)
-                    InternetLoadWorld.LoadWorld(
-                        world,
-                        nil,
-                        "never",
-                        function(bSucceed, localWorldPath)
-                            if bSucceed then
-                                if not Mod.WorldShare.Store:Get("world/personalMode") then
-                                    self.playerBalance = self.playerBalance - 1
-                                    self.balance = self.balance - 1
-                                    Wallet:SetPlayerBalance(self.playerBalance)
-                                    Wallet:SetUserBalance(self.balance)
-                                    Mod.WorldShare.Store:Remove("explorer/reduceRemainingTime")
-                                    Mod.WorldShare.Store:Remove("explorer/warnReduceRemainingTime")
-                                    self:HandleGameProcess()
+            -- set remote world value here bacause local path
+            Mod.WorldShare.Store:Set('world/currentRemoteWorld', world)
+
+            local mytimer =
+                commonlib.Timer:new(
+                {
+                    callbackFunc = function(timer)
+                        InternetLoadWorld.LoadWorld(
+                            world,
+                            nil,
+                            "never",
+                            function(bSucceed, localWorldPath)
+                                if bSucceed then
+                                    if not Mod.WorldShare.Store:Get("world/personalMode") then
+                                        self.playerBalance = self.playerBalance - 1
+                                        self.balance = self.balance - 1
+                                        Wallet:SetPlayerBalance(self.playerBalance)
+                                        Wallet:SetUserBalance(self.balance)
+                                        Mod.WorldShare.Store:Remove("explorer/reduceRemainingTime")
+                                        Mod.WorldShare.Store:Remove("explorer/warnReduceRemainingTime")
+                                        self:HandleGameProcess()
+                                    end
+
+                                    MainPage:Close()
                                 end
-
-                                MainPage:Close()
                             end
-                        end
-                    )
-                end
-            }
-        )
+                        )
+                    end
+                }
+            )
 
-        -- prevent recursive calls.
-        mytimer:Change(2, nil)
-        Mod.WorldShare.Store:Set("explorer/mode", "recommend")
+            -- prevent recursive calls.
+            mytimer:Change(2, nil)
+            Mod.WorldShare.Store:Set("explorer/mode", "recommend")
+        end
+    
+        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+    
+        if currentEnterWorld then
+            Mod.WorldShare.MsgBox:Show(L"请稍候...")
+            WorldShareKeepworkServiceProject:GetProject(curItem.id, function(data, err)
+                Mod.WorldShare.MsgBox:Close()
+                if err ~= 200 or not data or type(data) ~='table' or not data.name then
+                    GameLogic.AddBBS(nil, L"无法找到该资源", 300, '255 0 0')
+                    return
+                end
+
+                _guihelper.MessageBox(
+                    format(L"即将离开【%s】进入【%s】", currentEnterWorld.text, data.name),
+                    function(res)
+                        if res and res == _guihelper.DialogResult.Yes then
+                            Handle()
+                        end
+                    end,
+                    _guihelper.MessageBoxButtons.YesNo
+                )
+            end)
+        end
     end
 
     self:CheckoutNewVersion(projectInfo.world, Handle)

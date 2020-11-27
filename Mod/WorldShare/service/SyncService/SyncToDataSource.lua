@@ -20,6 +20,7 @@ local KeepworkServiceProject = NPL.load("../KeepworkService/Project.lua")
 local KeepworkServiceWorld = NPL.load("../KeepworkService/World.lua")
 local KeepworkServiceSession = NPL.load("../KeepworkService/Session.lua")
 local Compare = NPL.load("./Compare.lua")
+local EventTrackingService = NPL.load('../EventTracking.lua')
 
 -- helper
 local KeepworkGen = NPL.load("(gl)Mod/WorldShare/helper/KeepworkGen.lua")
@@ -210,7 +211,7 @@ function SyncToDataSource:CheckReadmeFile()
             if (value.filename == "README.md") then
                 hasReadme = true
             else
-                LocalService:Delete(self.currentWorld.foldername, value.filename)
+                LocalService:Delete(self.currentWorld.worldpath, value.filename)
                 hasReadme = false
             end
         end
@@ -575,6 +576,8 @@ function SyncToDataSource:UpdateRecord(callback)
             end
 
             local function AfterHandlePreview(preview)
+                EventTrackingService:Send(1, 'click.world.after_upload', { blockCount = Mod.WorldShare.Store:Get('world/blockCount') or 0 })
+
                 preview = preview or ""
 
                 worldInfo.extra = {
@@ -605,21 +608,13 @@ function SyncToDataSource:UpdateRecord(callback)
                 KeepworkServiceProject:GetProject(
                     self.currentWorld.kpProjectId,
                     function(data)
-                        local extra = data and data.extra or {}
+                        local extra = {}
 
                         if Mod.WorldShare.Store:Get('world/isPreviewUpdated') then
                             extra.imageUrl = preview
                         end
 
-                        if self.currentWorld.local_tagname and
-                           self.currentWorld.local_tagname ~= self.currentWorld.foldername then
-                            extra.worldTagName = self.currentWorld.local_tagname
-                        end
-
-                        if self.currentWorld.local_tagname and
-                           self.currentWorld.local_tagname == self.currentWorld.foldername then
-                            extra.worldTagName = nil
-                        end
+                        extra.worldTagName = self.currentWorld.local_tagname
 
                         KeepworkServiceProject:UpdateProject(
                             self.currentWorld.kpProjectId,

@@ -43,7 +43,7 @@ function WorldList:RefreshCurrentServerList(callback, statusFilter)
         self:SetRefreshing(false)
 
         if UserConsolePage then
-            UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList)
+            UserConsolePage:GetNode("gw_world_ds"):SetAttribute("DataSource", currentWorldList or {})
             WorldList:OnSwitchWorld(1)
         end
         
@@ -169,8 +169,6 @@ function WorldList:UpdateWorldInfo(worldIndex)
 
             worldTag.size = filesize
             LocalService:SetTag(currentWorld.worldpath, worldTag)
-
-            Mod.WorldShare.Store:Set("world/worldTag", worldTag)
 
             compareWorldList[worldIndex].size = filesize
         else

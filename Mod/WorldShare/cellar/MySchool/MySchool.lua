@@ -16,7 +16,8 @@ local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/Keepwor
 local MySchool = NPL.export()
 
 function MySchool:Show(callback)
-    self.hasJoined = nil
+    self.hasJoined = false
+    self.hasSchoolJoined = false
     self.schoolData = {}
     self.orgData = {}
     self.callback = callback
@@ -34,6 +35,13 @@ function MySchool:Show(callback)
         if type(orgData) == "table" and #orgData > 0 then
             self.orgData = orgData
             self.hasJoined = true
+        
+            for key, item in ipairs(orgData) do
+                if item and item.type == 4 then
+                    self.hasSchoolJoined = true
+                    break
+                end
+            end
         end
 
         params._page:Refresh(0.01)
@@ -408,5 +416,35 @@ function MySchool:SetResult(data)
                 item.name = item.name .. regionString
             end
         end
+    end
+end
+
+function MySchool:OpenTeachingPlanCenter(orgUrl)
+    if not orgUrl or type(orgUrl) ~= 'string' then
+        return false
+    end
+
+    local userType = Mod.WorldShare.Store:Get('user/userType')
+
+    if not userType or type(userType) ~= 'table' then
+        return false
+    end
+
+    if userType.orgAdmin then
+        local url = '/org/' .. orgUrl .. '/admin/packages'
+        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+        return
+    end
+
+    if userType.teacher then
+        local url = '/org/' .. orgUrl .. '/teacher/teach'
+        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+        return
+    end
+
+    if userType.student then
+        local url = '/org/' .. orgUrl .. '/student'
+        Mod.WorldShare.Utils.OpenKeepworkUrlByToken(url)
+        return
     end
 end

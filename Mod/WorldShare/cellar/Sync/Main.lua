@@ -126,7 +126,7 @@ function SyncMain:BackupWorld()
     revision:Backup()
 end
 
-function SyncMain:SyncToLocal(callback, isRefreshWorldList)
+function SyncMain:SyncToLocal(callback, isRefreshWorldList, noShownResult)
     local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld")
 
     if not currentWorld.kpProjectId then
@@ -175,12 +175,18 @@ function SyncMain:SyncToLocal(callback, isRefreshWorldList)
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
                             Progress:SetFinish(true)
                             Progress:UpdateDataBar(1, 1, L"处理完成")
+
+                            if noShownResult then
+                                if callback and type(callback) == 'function' then
+                                    callback()
+                                end
+                            end
                             return false
                         end
                     end
                 end
 
-                if type(callback) == 'function' then
+                if callback and type(callback) == 'function' then
                     callback(result, option)
                 end
 
@@ -320,10 +326,10 @@ function SyncMain:CheckTagName(callback)
     if currentWorld and currentWorld.remote_tagname and currentWorld.worldpath then
         if currentWorld.remote_tagname ~= currentWorld.local_tagname then
             local params = Mod.WorldShare.Utils.ShowWindow(
-                500,
-                190,
-                "Mod/WorldShare/cellar/Sync/Templates/CheckTagName.html?remote_tagname=" .. currentWorld.remote_tagname .. "&local_tagname=" .. currentWorld.local_tagname,
-                "CheckTagName"
+                630,
+                240,
+                "Mod/WorldShare/cellar/Theme/Sync/CheckTagName.html?remote_tagname=" .. currentWorld.remote_tagname .. "&local_tagname=" .. currentWorld.local_tagname,
+                "Mod.WorldShare.Sync.CheckTagName"
             )
             params._page.callback = function(params)
                 if params ~= 'local' and params ~= 'remote' then
@@ -431,15 +437,43 @@ function SyncMain:CheckAndUpdatedBeforeEnterMyHome(callback)
 end
 
 function SyncMain:CheckAndUpdatedByFoldername(foldername, callback)
-    LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
-    self:CheckAndUpdated(callback)
+    local currentWorld = LocalServiceWorld:SetWorldInstanceByFoldername(foldername)
+
+    if not currentWorld or not currentWorld.worldpath then
+        return false
+    end
+
+    local worldTagPath = currentWorld.worldpath .. 'tag.xml'
+
+    if not ParaIO.DoesFileExist(worldTagPath) then
+        return false
+    end
+
+    if currentWorld.kpProjectId then
+        self:CheckAndUpdated(callback)
+    else
+        KeepworkServiceProject:GetProjectIdByWorldName(currentWorld.foldername, false, function(projectId)
+            if projectId and type(projectId) == 'number' then
+                currentWorld.kpProjectId = projectId
+                Mod.WorldShare.Store:Set('world/currentWorld', currentWorld)
+            end
+
+            self:CheckAndUpdated(callback)
+        end)
+    end
 end
 
 function SyncMain:CheckAndUpdated(callback)
+    Mod.WorldShare.MsgBox:Show(L"请稍后...")
     Compare:Init(function(result)
-        self:ShowNewVersionFoundPage(callback)
-        -- if result ~= 2 then
+        Mod.WorldShare.MsgBox:Close()
 
-        -- end
+        if result == 'REMOTEBIGGER' then
+            self:ShowNewVersionFoundPage(callback)
+        else
+            if callback and type(callback) == 'function' then
+                callback()
+            end
+        end
     end)
 end
