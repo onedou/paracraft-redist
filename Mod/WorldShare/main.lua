@@ -60,9 +60,6 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/DesktopMenu.lua')
 
--- include aries creator game GUI
-NPL.load("(gl)script/apps/Aries/Creator/Game/GUI/OpenFileDialog.lua")
-
 -- include aries creator game network
 NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NPLWebServer.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua')
