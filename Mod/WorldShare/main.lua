@@ -55,6 +55,8 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteServerList.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/DownloadWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/RemoteWorld.lua')
 NPL.load('(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherAgent.lua')
+NPL.load("(gl)script/apps/Aries/Creator/Game/Login/TeacherAgent/TeacherIcon.lua")
+NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
 
 -- include aries creator game areas
 NPL.load('(gl)script/apps/Aries/Creator/Game/Areas/ShareWorldPage.lua')
@@ -67,8 +69,8 @@ NPL.load('(gl)script/apps/Aries/Creator/Game/Network/NetworkMain.lua')
 -- include aries creator game world
 NPL.load('(gl)script/apps/Aries/Creator/Game/World/SaveWorldHandler.lua')
 
--- include aries creator game login
-NPL.load('(gl)script/apps/Aries/Creator/Game/Login/ParaWorldLessons.lua')
+-- include aries creator game tasks
+NPL.load("(gl)script/apps/Aries/Creator/Game/Tasks/ParaWorld/ParaWorldLoginAdapter.lua");
 
 -- include aries creator game nplbrowser
 NPL.load('(gl)script/apps/Aries/Creator/Game/NplBrowser/NplBrowserLoaderPage.lua')
@@ -96,7 +98,6 @@ local HistoryManager = NPL.load('(gl)Mod/WorldShare/cellar/HistoryManager/Histor
 local WorldExitDialog = NPL.load('(gl)Mod/WorldShare/cellar/WorldExitDialog/WorldExitDialog.lua')
 local PreventIndulge = NPL.load('(gl)Mod/WorldShare/cellar/PreventIndulge/PreventIndulge.lua')
 local Grade = NPL.load('(gl)Mod/WorldShare/cellar/Grade/Grade.lua')
-local VipNotice = NPL.load('(gl)Mod/WorldShare/cellar/VipNotice/VipNotice.lua')
 local Permission = NPL.load('(gl)Mod/WorldShare/cellar/Permission/Permission.lua')
 local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
 local Menu = NPL.load('(gl)Mod/WorldShare/cellar/Menu/Menu.lua')
@@ -118,6 +119,9 @@ local Utils = NPL.load('(gl)Mod/WorldShare/helper/Utils.lua')
 local WorldShareCommand = NPL.load('(gl)Mod/WorldShare/command/Command.lua')
 local MenuCommand = NPL.load('(gl)Mod/WorldShare/command/Menu.lua')
 
+-- filters
+local Filters = NPL.load('(gl)Mod/WorldShare/filters/Filters.lua')
+
 local WorldShare = commonlib.inherit(commonlib.gettable('Mod.ModBase'), commonlib.gettable('Mod.WorldShare'))
 
 WorldShare:Property({'Name', 'WorldShare', 'GetName', 'SetName', { auto = true }})
@@ -136,6 +140,9 @@ WorldShare.Utils = Utils
 LOG.std(nil, 'info', 'WorldShare', 'world share version %s', WorldShare.version)
 
 function WorldShare:init()
+    -- init all filters
+    Filters:Init()
+
     -- replace load world page
     GameLogic.GetFilters():add_filter(
         'ShowLoginModePage',
@@ -220,15 +227,6 @@ function WorldShare:init()
         'save_world_info',
         function(ctx, node)
             LocalService:SaveWorldInfo(ctx, node)
-        end
-    )
-
-    -- vip notice
-    GameLogic.GetFilters():add_filter(
-        'VipNotice',
-        function(bEnabled, callback)
-            VipNotice:Init(bEnabled, callback)
-            return true
         end
     )
 
@@ -404,6 +402,8 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'on_exit',
         function(bForceExit, bRestart, callback)
+            EventTrackingService:SaveToDisk()
+
             if callback and type(callback) == 'function' then
                 callback()
             end
@@ -457,6 +457,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'qiniu_upload_file',
         function(token, key, filename, content, callback)
+            local QiniuRootApi = NPL.load("(gl)Mod/WorldShare/api/Qiniu/Root.lua")
             QiniuRootApi:Upload(token, key, filename, content, callback, callback)
         end
     )
@@ -513,16 +514,6 @@ function WorldShare:init()
         end
     )
 
-    -- filter show school page
-    GameLogic.GetFilters():add_filter(
-        'show_school_page',
-        function()
-            local MySchool = NPL.load("(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua")
-            MySchool:Show()
-            return Mod.WorldShare.Store:Get('page/Mod.WorldShare.MySchool')
-        end
-    )
-
     -- filter show server page
     GameLogic.GetFilters():add_filter(
         'show_server_page',
@@ -570,7 +561,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'login_with_token',
         function(callback)
-            local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/Login/UserInfo.lua")
+            local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
             UserInfo:LoginWithToken(callback)
         end
     )
@@ -616,6 +607,14 @@ function WorldShare:init()
         function()
             local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
             return KeepworkService:GetCoreApi()
+        end
+    )
+
+    -- filter show certificate icon
+    GameLogic.GetFilters():add_filter(
+        'show_certificate',
+        function(callback)
+            Certificate:Init(callback)
         end
     )
 
@@ -668,8 +667,6 @@ function WorldShare:OnWorldLoad()
     Store:Set('world/loadWorldFinish', true)
 
     UserConsole:ClosePage()
-    HistoryManager:OnWorldLoad()
-    Certificate:OnWorldLoad()
 
     local curLesson = Store:Getter('lesson/GetCurLesson')
 
@@ -677,6 +674,9 @@ function WorldShare:OnWorldLoad()
     if not curLesson then
         SyncMain:OnWorldLoad()
     end
+
+    HistoryManager:OnWorldLoad()
+    -- Certificate:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()
@@ -692,14 +692,6 @@ function WorldShare:OnWorldLoad()
 
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
-    if GameLogic.GameMode:GetMode() == 'editor' then
-        EventTrackingService:Send(1, 'click.world.edit')
-        EventTrackingService:Send(2, 'duration.world.edit', { started = true })
-    else
-        EventTrackingService:Send(1, 'click.world.play')
-        EventTrackingService:Send(2, 'duration.world.play', { started = true })
-    end
-
     Mod.WorldShare.Store:Remove("world/currentRemoteWorld")
 end
 
@@ -710,12 +702,8 @@ function WorldShare:OnLeaveWorld()
 
     if isEnterWorld then
         EventTrackingService:Send(2, 'duration.world.stay', { ended = true })
-
-        if GameLogic.GameMode:GetMode() == 'editor' then
-            EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
-        else
-            EventTrackingService:Send(2, 'duration.world.play', { ended = true })
-        end
+        EventTrackingService:Send(2, 'duration.world.edit', { ended = true })
+        EventTrackingService:Send(2, 'duration.world.play', { ended = true })
     end
 
     Store:Remove('world/currentWorld')

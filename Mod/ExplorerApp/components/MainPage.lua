@@ -277,17 +277,22 @@ function MainPage:SetWorksTree(categoryItem, sort)
                 end
 
                 if self.curPage ~= 1 then
-                    rows = self:HandleWorldsTree(rows)
-        
-                    for key, item in ipairs(rows) do
-                        self.worksTree[#self.worksTree + 1] = item
-                    end
-                else
-                    self.worksTree = self:HandleWorldsTree(rows)
-                end
+                    self:HandleWorldsTree(rows, function(rows)
+                        for key, item in ipairs(rows) do
+                            self.worksTree[#self.worksTree + 1] = item
+                        end
 
-                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
-                self:Refresh()
+                        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                        self:Refresh()
+                    end)
+                else
+                    self:HandleWorldsTree(rows, function(rows)
+                        self.worksTree = rows
+
+                        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                        self:Refresh()
+                    end)
+                end
             end
         )
 
@@ -341,18 +346,24 @@ function MainPage:SetWorksTree(categoryItem, sort)
                 end
 
                 if self.curPage ~= 1 then
-                    rows = self:HandleWorldsTree(rows)
+                    self:HandleWorldsTree(rows, function(rows)
+                        for key, item in ipairs(rows) do
+                            self.worksTree[#self.worksTree + 1] = item
+                        end
 
-                    for key, item in ipairs(rows) do
-                        self.worksTree[#self.worksTree + 1] = item
-                    end
+                        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                        self:Refresh()
+                    end)
                 else
-                    self.worksTree = self:HandleWorldsTree(rows)
+                    self:HandleWorldsTree(rows, function(rows)
+                        self.worksTree = rows
+
+                        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                        self:Refresh()
+                    end)
                 end
 
-                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
-
-                self:Refresh()
+                
             end
         )
         return true
@@ -434,17 +445,22 @@ function MainPage:SetWorksTree(categoryItem, sort)
                 end
     
                 if self.curPage ~= 1 then
-                    rows = self:HandleWorldsTree(rows)
-    
-                    for key, item in ipairs(rows) do
-                        self.worksTree[#self.worksTree + 1] = item
-                    end
-                else
-                    self.worksTree = self:HandleWorldsTree(rows)
-                end
+                    self:HandleWorldsTree(rows, function(rows)
+                        for key, item in ipairs(rows) do
+                            self.worksTree[#self.worksTree + 1] = item
+                        end
 
-                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
-                self:Refresh()
+                        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                        self:Refresh()
+                    end)
+                else
+                    self:HandleWorldsTree(rows, function(rows)
+                        self.worksTree = rows
+
+                        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                        self:Refresh()
+                    end)
+                end
             end)
         end
     )
@@ -475,30 +491,37 @@ function MainPage:Search()
 
         Mod.WorldShare.Store:Set('explorer/selectSortIndex', 1)
         self.categorySelected = {}
-        -- self.worksTree = self:HandleWorldsTree(data.hits)
         
         if self.curPage ~= 1 then
-            local rows = {}
-            rows = self:HandleWorldsTree(data.hits)
+            self:HandleWorldsTree(data.hits, function(rows)
+                for key, item in ipairs(rows) do
+                    self.worksTree[#self.worksTree + 1] = item
+                end
 
-            for key, item in ipairs(rows) do
-                self.worksTree[#self.worksTree + 1] = item
-            end
+                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                MainPagePage:SetValue("search_value", searchValue)
+
+                self:Refresh()
+            end)
         else
-            self.worksTree = self:HandleWorldsTree(data.hits)
+            self:HandleWorldsTree(data.hits, function(rows)
+                self.worksTree = rows
+
+                MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
+                MainPagePage:SetValue("search_value", searchValue)
+
+                self:Refresh()
+            end)
         end
-
-        MainPagePage:GetNode("worksTree"):SetAttribute("DataSource", self.worksTree)
-        MainPagePage:SetValue("search_value", searchValue)
-
-        self:Refresh()
     end)
 end
 
-function MainPage:HandleWorldsTree(rows)
+function MainPage:HandleWorldsTree(rows, callback)
     if not rows or type(rows) ~= "table" then
         return false
     end
+
+    local projectIds = {}
 
     for key, item in ipairs(rows) do
         if ProjectsDatabase:IsProjectDownloaded(item.id) then
@@ -507,14 +530,47 @@ function MainPage:HandleWorldsTree(rows)
             item.downloaded = false
         end
 
-        if ProjectsDatabase:IsFavoriteProject(item.id) then
-            item.favorite = true
-        else
-            item.favorite = false
-        end
+        item.isFavorite = false
+
+        projectIds[#projectIds + 1] = item.id
     end
 
-    return rows
+    if KeepworkServiceSession:IsSignedIn() then
+        keepwork.project.favorite_search({
+            objectType = 5,
+            objectId = {
+                ["$in"] = projectIds,
+            }, 
+            userId = Mod.WorldShare.Store:Get('user/userId'),
+        }, function(status, msg, data)
+            if not data or
+               type(data) ~= 'table' or
+               not data.rows or
+               type(data.rows) ~= 'table' or
+               #data.rows == 0 then
+                if callback and type(callback) == 'function' then
+                    callback(rows)
+                end
+                return
+            end
+
+            for key, item in ipairs(rows) do
+                for dKey, dItem in ipairs(data.rows) do
+                    if tonumber(item.id) == tonumber(dItem.objectId) then
+                        item.isFavorite = true
+                    end
+                end
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(rows)
+            end
+        end)
+    else
+        if callback and type(callback) == 'function' then
+            callback(rows)
+        end
+    end
 end
 
 function MainPage:DownloadWorld(index)
@@ -554,8 +610,6 @@ function MainPage:DownloadWorld(index)
                     if bSuccess then
                         Toast:ShowPage(L"下载成功")
                         ProjectsDatabase:SetDownloadedProject(data)
-                        -- self:HandleWorldsTree(self.worksTree)
-                        -- self:Refresh()
                         self:SelectProject(index)
                     else
                         Toast:ShowPage(L"文件下载失败，请确认世界是否存在")
@@ -586,8 +640,9 @@ function MainPage:SetFavorite(index)
         ProjectsDatabase:RemoveFavoriteProject(curItem.id)
     end
 
-    self:HandleWorldsTree(self.worksTree)
-    self:Refresh()
+    self:HandleWorldsTree(self.worksTree, function()
+        self:Refresh()
+    end)
 end
 
 function MainPage:SetCoins()

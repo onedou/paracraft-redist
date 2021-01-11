@@ -24,6 +24,7 @@ local EventTrackingDatabase = NPL.load("(gl)Mod/WorldShare/database/EventTrackin
 local EventTrackingService = NPL.export()
 
 EventTrackingService.firstInit = false
+EventTrackingService.firstSave = false
 EventTrackingService.timeInterval = 10000 * 6 -- 60 seconds
 EventTrackingService.currentLoop = nil
 EventTrackingService.map = {
@@ -89,6 +90,14 @@ EventTrackingService.map = {
             actor = {
                 addNPC = 'click.world.actor.addNPC', -- 添加NPC
                 edit = 'click.world.actor.edit', -- 编辑角色
+            },
+            certificate = {
+                certificate_now = 'click.world.certificate.certificate_now', -- 我要认证
+                sel_school = 'click.world.certificate.sel_school', -- 我在学校
+                sel_my_home = 'click.world.certificate.sel_my_home', -- 我在家里
+                get_phone_captcha = 'click.world.certificate.get_phone_captcha', -- 我在家里-获取验证码
+                bind = 'click.world.certificate.bind', -- 我在家里-确认实名
+                send_msg_to_parent = 'click.world.certificate.send_msg_to_parent', -- 发送短信给父母
             }
         },
         mini_map = { -- 小地图
@@ -203,6 +212,42 @@ EventTrackingService.map = {
             continue_game = "click.system_setting.continue_game", -- 继续创作
             create_new_world = "click.system_setting.create_new_world", -- 新建世界
             open_server_page = "click.system_setting.open_server_page", -- 架设私服
+        },
+        quest_action = { -- 任务系统
+            setvalue = 'click.quest_action.setvalue', -- 设置任务虚拟目标进度
+            do_finish = 'click.quest_action.do_finish', -- 执行完成任务
+            when_finish = 'click.quest_action.when_finish', -- 任务状态变更
+            click_go_button = 'click.quest_action.click_go_button', -- 任务“前往”按键点击次数
+        },
+        promotion = { -- 活动
+            announcement = 'click.promotion.announcement', -- 公告点击次数
+            horm = 'click.promotion.horm', -- 喇叭点击次数
+            knowledge_bean = 'click.promotion.knowledge_bean', -- 知识豆兑换次数
+            skin = 'click.promotion.skin', -- 皮肤兑换次数
+            partake = 'click.promotion.partake', -- 参与活动人数（记录用户获取的第一个帽子）
+            turnable = 'click.promotion.turnable', -- 活动转盘点击次数
+            weekend = 'click.promotion.weekend', -- 点击周末创造
+        },
+        home = { -- 家园
+            click_avatar = 'click.home.click_avatar', -- 头像点击次数
+            click_code_block = 'click.home.click_code_block', -- 代码方块点击次数
+            thumbs_up = 'click.home.click.thumbs_up', -- 点赞点击次数
+            favorited = 'click.home.click.favorited', -- 收藏点击次数
+        },
+        sun_s_art_of_war_game = { -- 孙子兵法
+            night_road = 'click.sun_s_art_of_war_game.night_road', -- 关卡“夜路前行”点击次数
+            click_pay = 'click.sun_s_art_of_war_game.click_pay', -- 孙子兵法中点击已完成支付用户会员人数
+        },
+        vip = { -- VIP
+            vip_popup = 'click.vip.vip_popup', -- 弹出会员弹窗次数(废弃)
+            parents_help = 'click.vip.parents_help', -- "找家长续费" 点击次数
+            payment_completed = 'click.vip.payment_completed', -- “已完成支付” 点击次数
+            funnel = {
+                open = 'click.vip.funnel.open' -- 弹出会员弹窗次数
+            }
+        },
+        beginner = {
+            catation = 'click.beginner.catation' -- 领取奖状
         }
     }
 }
@@ -296,6 +341,10 @@ function EventTrackingService:GetAction(action)
     end
 end
 
+function EventTrackingService:SaveToDisk()
+    EventTrackingDatabase:SaveToDisk()
+end
+
 -- eventType: 1 is one click event, 2 is duration event
 function EventTrackingService:Send(eventType, action, extra, offlineMode)
     if not offlineMode and not KeepworkServiceSession:IsSignedIn() then
@@ -324,8 +373,9 @@ function EventTrackingService:Send(eventType, action, extra, offlineMode)
             return false
         end
 
-        -- prevent send not started event
-        if extra.ended and dataPacket.duration == 0 then
+        -- prevent send and remove not started event 
+        if extra.ended and (dataPacket.duration == 0 or dataPacket.endAt == 0) then
+            EventTrackingDatabase:RemovePacket(userId, action, dataPacket)
             return false
         end
     end
@@ -378,6 +428,24 @@ function EventTrackingService:Loop()
                 callbackFunc = function()
                     -- send not finish event
                     local allData = EventTrackingDatabase:GetAllData()
+                    local finishedCount = 0
+                    local dataTatol = 0
+
+                    for key, item in ipairs(allData) do
+                        local unitinfo = item.unitinfo
+                        dataTatol = dataTatol + #unitinfo
+                    end
+
+                    local function firstTimeSave()
+                        if firstSave then
+                            return
+                        end
+
+                        if finishedCount == dataTatol then
+                            EventTrackingDatabase:SaveToDisk()
+                            firstSave = true
+                        end
+                    end
 
                     for key, item in ipairs(allData) do
                         local userId = item.userId
@@ -397,22 +465,33 @@ function EventTrackingService:Loop()
                                         uItem.packet,
                                         nil,
                                         function(data, err)
+                                            finishedCount = finishedCount + 1
+
                                             if err ~= 200 then
+                                                firstTimeSave()
                                                 return false
                                             end
 
                                             -- remove packet
                                             -- we won't remove record if endAt == 0
+                                            local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
 
-                                            if uItem.packet.endAt and uItem.packet.endAt == 0 then
-                                                return
+                                            if currentEnterWorld and
+                                               currentEnterWorld.kpProjectId and
+                                               tonumber(currentEnterWorld.kpProjectId) == tonumber(uItem.packet.projectId) then
+                                                if uItem.packet.endAt and uItem.packet.endAt == 0 then
+                                                    firstTimeSave()
+                                                    return
+                                                end
                                             end
 
                                             EventTrackingDatabase:RemovePacket(userId, uItem.action, uItem.packet)
+                                            firstTimeSave()
                                         end,
                                         function(data, err)
                                             -- fail
                                             -- do nothing...
+                                            firstTimeSave()
                                         end
                                     )
                                 end

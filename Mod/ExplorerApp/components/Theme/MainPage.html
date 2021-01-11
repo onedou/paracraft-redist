@@ -4,19 +4,20 @@
     <script refresh="false" type="text/npl" src="MainPage.lua">
         <![CDATA[
             -- UI
-            MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
-            Sort = NPL.load("(gl)Mod/ExplorerApp/components/Sort/Sort.lua")
+            local MainPage = NPL.load("(gl)Mod/ExplorerApp/components/MainPage.lua")
+            local Sort = NPL.load("(gl)Mod/ExplorerApp/components/Sort/Sort.lua")
             local KpUserTag = NPL.load("(gl)script/apps/Aries/Creator/Game/mcml/keepwork/KpUserTag.lua")
             local ShareWorld = NPL.load("(gl)Mod/WorldShare/cellar/ShareWorld/ShareWorld.lua")
+            local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua')
             
             -- service
-            KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
+            local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
 
             -- lib
-            UniString = commonlib.gettable("System.Core.UniString")
+            local UniString = commonlib.gettable("System.Core.UniString")
 
             MainPage.SetPage()
-            page = document:GetPageCtrl()
+            local page = document:GetPageCtrl()
 
             global_type = type
 
@@ -502,6 +503,38 @@
                     ShareWorld:ShowWorldCode(currentWorld.id)
                 end
             end
+
+            function get_like_button_style()
+                if Eval('isFavorite') then
+                    return 'unlike_button'
+                else
+                    return 'like_button'
+                end
+            end
+
+            function like(index)
+                LoginModal:CheckSignedIn(desc, function(result)
+                    if result then
+                        local worldinfo = MainPage.worksTree[index]
+
+                        if worldinfo.isFavorite then
+                            worldinfo.isFavorite = false
+
+                            keepwork.world.unfavorite({objectType = 5, objectId = worldinfo.id}, function(status)
+                                -- do nothing...
+                            end)
+                        else
+                            worldinfo.isFavorite = true
+
+                            keepwork.world.favorite({objectType = 5, objectId = worldinfo.id}, function(status)
+                                -- do nothing...
+                            end)
+                        end
+
+                        page:Refresh(0.01)
+                    end
+                end)
+            end
         ]]>
     </script>
     <style type="text/mcss">
@@ -795,6 +828,20 @@
                 height = 5,
                 ['margin-top'] = 12
             },
+            like_button = {
+                float = 'left',
+                width = 38,
+                height = 38,
+                ['margin-right'] = 6,
+                background = 'Texture/Aries/Creator/keepwork/ggs/user/renwuqiehuan/btn_shoucang_40X40_32bits.png#0 0 40 40'
+            },
+            unlike_button = {
+                float = 'left',
+                width = 38,
+                height = 38,
+                ['margin-right'] = 6,
+                background = 'Texture/Aries/Creator/keepwork/ggs/user/renwuqiehuan/btn_yishoucang_40X40_32bits.png#0 0 40 40'
+            },
             share_button = {
                 float = 'left',
                 width = 38,
@@ -893,7 +940,7 @@
                 </div>
                 <div class="list">
                     <div class="list_content">
-                        <pe:gridview RememberScrollPos="true" name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="180" pagesize="<%=get_page_size%>" ItemsPerLine="3" AllowPaging="false">
+                        <pe:gridview RememberScrollPos="true" name="worksTree" style="position:relative;text-align:left" DefaultNodeHeight="250" pagesize="<%=get_page_size%>" ItemsPerLine="3" AllowPaging="false">
                             <Columns>
                                 <div class="<%= get_work_item_style() %>">
                                     <input type="button" class="click" name='<%=Eval("index")%>' onclick="select_project" />
@@ -953,7 +1000,13 @@
                                             <img style="width: 19px;height: 16px;margin-right: 5px;" src="Texture/Aries/Creator/keepwork/worldshare_32bits.png#311 311 19 16" />
                                             <%= get_school_name() %>
                                         </div> -->
-                                        <div align="right" class="share_world_info_button"  style="margin-right: 11px;width:86px;height:40px;margin-top: -15x;">
+                                        <div align="right" class="share_world_info_button"  style="margin-right: 11px;width:134px;height:40px;margin-top: -15x;">
+                                            <!-- LIKE -->
+                                            <input type="button"
+                                                   class="<%= get_like_button_style() %>"
+                                                   onclick="like"
+                                                   tooptip='<%= L"喜欢" %>'
+                                                   name='<%= Eval("index") %>' />
                                             <!-- SHARE -->
                                             <input type="button"
                                                    class="share_button"
