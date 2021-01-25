@@ -312,13 +312,13 @@ function WorldShare:init()
     )
 
     -- filter show certificate page
-    GameLogic.GetFilters():add_filter(
-        'show_certificate_page',
-        function(callback)
-            Beginner:Show(callback)
-            return false
-        end
-    )
+    -- GameLogic.GetFilters():add_filter(
+    --     'show_certificate_page',
+    --     function(callback)
+    --         Beginner:Show(callback)
+    --         return false
+    --     end
+    -- )
 
     -- filter is signed in
     GameLogic.GetFilters():add_filter(
@@ -386,6 +386,7 @@ function WorldShare:init()
     GameLogic.GetFilters():add_filter(
         'get_keepwork_url',
         function()
+            local KeepworkService = NPL.load("(gl)Mod/WorldShare/service/KeepworkService.lua")
             return KeepworkService:GetKeepworkUrl()
         end
     )
@@ -663,8 +664,10 @@ function WorldShare:OnLogin()
 end
 
 function WorldShare:OnWorldLoad()
-    Store:Set('world/isEnterWorld', true)
-    Store:Set('world/loadWorldFinish', true)
+    if System.options.loginmode ~= 'offline' then
+        -- open from MainLogin:EnterUserConsole
+        Mod.WorldShare.MsgBox:Close()
+    end
 
     UserConsole:ClosePage()
 
@@ -676,7 +679,8 @@ function WorldShare:OnWorldLoad()
     end
 
     HistoryManager:OnWorldLoad()
-    -- Certificate:OnWorldLoad()
+    WorldShareCommand:OnWorldLoad()
+    Beginner:OnWorldLoad()
 
     Store:Subscribe('user/Logout', function()
         Compare:RefreshWorldList(function()
@@ -693,6 +697,8 @@ function WorldShare:OnWorldLoad()
     EventTrackingService:Send(2, 'duration.world.stay', { started = true })
 
     Mod.WorldShare.Store:Remove("world/currentRemoteWorld")
+    Mod.WorldShare.Store:Set('world/isEnterWorld', true)
+    Mod.WorldShare.Store:Set('world/loadWorldFinish', true)
 end
 
 function WorldShare:OnLeaveWorld()

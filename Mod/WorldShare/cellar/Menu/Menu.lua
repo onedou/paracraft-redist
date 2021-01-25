@@ -27,23 +27,23 @@ function Menu:Init(menuItems)
         end
     end
 
-    local currentWorld = Mod.WorldShare.Store:Get("world/currentWorld") or {}
+    local currentEnterWorld = Mod.WorldShare.Store:Get("world/currentEnterWorld") or {}
     local projectMenu = {}
 
-    if currentWorld and currentWorld.kpProjectId then
+    if currentEnterWorld and currentEnterWorld.kpProjectId then
         if KeepworkServiceSession:IsSignedIn() then
             local username = Mod.WorldShare.Store:Get("user/username")
 
-            if currentWorld and
-               currentWorld.user and
-               currentWorld.user.username and
-               currentWorld.user.username == username then
+            if currentEnterWorld and
+               currentEnterWorld.user and
+               currentEnterWorld.user.username and
+               currentEnterWorld.user.username == username then
                 projectMenu = {
                     text = L"项目", order=3, name="project", children = 
                     {
-                        {text = currentWorld.text or "", name = "project.name", Enable = false, onclick = nil},
-                        {text = format(L"项目ID：%d", currentWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
-                        {text = format(L"派生自：%d", currentWorld.fromProjectId or 0),name = "project.ppid", Enable = false, onclick = nil},
+                        {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
+                        {text = format(L"项目ID：%d", currentEnterWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
+                        {text = format(L"派生自：%d", currentEnterWorld.fromProjectId or 0),name = "project.ppid", Enable = false, onclick = nil},
                         {Type = "Separator"},
                         {text = L"上传分享", name = "project.share", onclick = nil},
                         {Type = "Separator"},
@@ -55,32 +55,52 @@ function Menu:Init(menuItems)
                         {Type = "Separator"},
                         {text = L"项目设置", name = "project.setting", onclick = nil},
                         {text = L"成员管理", name = "project.member", onclick = nil},
-                        {Type = "Separator"},
-                        {text = L"申请加入", name = "project.apply", onclick = nil}
                     }
                 }
             else
                 projectMenu = {
                     text = L"项目", order=3, name="project", children = 
                     {
-                        {text = currentWorld.text or "", name = "project.name", Enable = false, onclick = nil},
-                        {text = format(L"项目ID：%d", currentWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
-                        {text = format(L"派生自：%d", currentWorld.fromProjectId or 0),name = "project.ppid", Enable = false, onclick = nil},
+                        {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
+                        {text = format(L"项目ID：%d", currentEnterWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
+                        {text = format(L"派生自：%d", currentEnterWorld.fromProjectId or 0),name = "project.ppid", Enable = false, onclick = nil},
                         {Type = "Separator"},
                         {text = L"项目首页", name = "project.index", onclick = nil},
                         {text = L"项目作者", name = "project.author", onclick = nil},
-                        {Type = "Separator"},
-                        {text = L"申请加入", name = "project.apply", onclick = nil}
                     }
                 }
+
+                if currentEnterWorld.memberCount and type(currentEnterWorld.memberCount) == 'number' and currentEnterWorld.memberCount > 1 then
+                    if currentEnterWorld.members and type(currentEnterWorld.members) == 'table' then
+                        local canApply = true
+
+                        for key, item in ipairs(currentEnterWorld.members) do
+                            if item == username then
+                                canApply = false
+                                break
+                            end
+                        end
+
+                        if canApply then
+                            projectMenu.children[#projectMenu.children + 1] = { Type = "Separator" }
+                            projectMenu.children[#projectMenu.children + 1] = { text = L"申请加入", name = "project.apply", onclick = nil }
+                        end
+                    else
+                        projectMenu.children[#projectMenu.children + 1] = { Type = "Separator" }
+                        projectMenu.children[#projectMenu.children + 1] = { text = L"申请加入", name = "project.apply", onclick = nil }
+                    end
+                else
+                    projectMenu.children[#projectMenu.children + 1] = { Type = "Separator" }
+                    projectMenu.children[#projectMenu.children + 1] = { text = L"申请加入", name = "project.apply", onclick = nil }
+                end
             end
         else
             projectMenu = {
                 text = L"项目", order=3, name="project", children = 
                 {
-                    {text = currentWorld.text or "", name = "project.name", Enable = false, onclick = nil},
-                    {text = format(L"项目ID：%d", currentWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
-                    {text = format(L"派生自：%d", currentWorld.fromProjectId or 0),name = "project.ppid", Enable = false, onclick = nil},
+                    {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
+                    {text = format(L"项目ID：%d", currentEnterWorld.kpProjectId or 0), name = "project.pid", Enable = false, onclick = nil},
+                    {text = format(L"派生自：%d", currentEnterWorld.fromProjectId or 0),name = "project.ppid", Enable = false, onclick = nil},
                     {Type = "Separator"},
                     {text = L"项目首页", name = "project.index", onclick = nil},
                     {text = L"项目作者", name = "project.author", onclick = nil},
@@ -93,7 +113,7 @@ function Menu:Init(menuItems)
         projectMenu = {
             text = L"项目", order=3, name="project", children = 
             {
-                {text = currentWorld.text or "", name = "project.name", Enable = false, onclick = nil},
+                {text = Mod.WorldShare.Utils.WordsLimit(currentEnterWorld.text) or "", name = "project.name", Enable = false, onclick = nil},
                 {Type = "Separator"},
                 {text = L"上传分享", name = "project.share", onclick = nil},
                 {Type = "Separator"},

@@ -159,7 +159,7 @@
                         RegisterModal.bindphone = nil
 
                         RegisterModal.callback = function()
-                            MySchool:ShowJoinSchool(function()
+                            MySchool:ShowJoinSchoolAfterRegister(function()
                                 MainLogin:EnterUserConsole()
                                 WorldList:RefreshCurrentServerList()
                             end)
@@ -236,12 +236,12 @@
                         RegisterModal.account = account
                         RegisterModal.password = phonepassword
                         RegisterModal.phonenumber = phonenumber
-                        RegisterModal.captcha = ""
+                        RegisterModal.captcha = ''
                         RegisterModal.phonecaptcha = phonecaptcha
                         RegisterModal.bindphone = true
 
                         RegisterModal.callback = function()
-                            MySchool:ShowJoinSchool(function()
+                            MySchool:ShowJoinSchoolAfterRegister(function()
                                 MainLogin:EnterUserConsole()
                                 WorldList:RefreshCurrentServerList()
                             end)

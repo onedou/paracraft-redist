@@ -34,6 +34,9 @@ EventTrackingService.map = {
             edit = 'duration.world.edit', -- 用户编辑世界时间
             play = 'duration.world.play'  -- 用户播放世界时间
         },
+        macro = { -- 宏
+            task = 'duration.macro.task', -- 任务
+        },
         learning_daily = 'duration.learning_daily' -- 成长日记
     },
     click = {
@@ -227,6 +230,15 @@ EventTrackingService.map = {
             partake = 'click.promotion.partake', -- 参与活动人数（记录用户获取的第一个帽子）
             turnable = 'click.promotion.turnable', -- 活动转盘点击次数
             weekend = 'click.promotion.weekend', -- 点击周末创造
+            winter_camp = {
+                lessons = {
+                    ai = 'click.promotion.winter_camp.lessons.ai', -- AI云游学
+                    epidemic = 'click.promotion.winter_camp.lessons.epidemic', -- 防疫教学
+                    hour_of_code = 'click.promotion.winter_camp.lessons.hour_of_code', -- 一小时编程课程
+                },
+                first_page = 'click.promotion.winter_camp.first_page', -- 冬令营主页
+                notification = 'click.promotion.winter_camp.notification', -- 冬令营通知
+            }
         },
         home = { -- 家园
             click_avatar = 'click.home.click_avatar', -- 头像点击次数
@@ -245,6 +257,9 @@ EventTrackingService.map = {
             funnel = {
                 open = 'click.vip.funnel.open' -- 弹出会员弹窗次数
             }
+        },
+        macro = { -- 宏
+            task = 'click.macro.task', -- 任务
         },
         beginner = {
             catation = 'click.beginner.catation' -- 领取奖状

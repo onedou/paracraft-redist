@@ -14,6 +14,7 @@ local KeepworkService = NPL.load("../KeepworkService.lua")
 local GitGatewayService = NPL.load("../GitGatewayService.lua")
 local KpChatChannel = NPL.load("(gl)script/apps/Aries/Creator/Game/Areas/ChatSystem/KpChatChannel.lua")
 local KeepworkServiceSchoolAndOrg = NPL.load("(gl)Mod/WorldShare/service/KeepworkService/SchoolAndOrg.lua")
+local SyncServiceCompare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 
 -- api
 local KeepworkUsersApi = NPL.load("(gl)Mod/WorldShare/api/Keepwork/Users.lua")
@@ -213,12 +214,13 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     end
 
     -- login api success ↓
-    local token = response["token"] or System.User.keepworktoken
+    local token = response["token"]
     local userId = response["id"] or 0
     local username = response["username"] or ""
     local nickname = response["nickname"] or ""
     local realname = response['realname'] or ""
     local paraWorldId = response['paraWorldId'] or nil
+    local isVipSchool = false
 
     if not response.realname then
         Mod.WorldShare.Store:Set("user/isVerified", false)
@@ -240,6 +242,10 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         Mod.WorldShare.Store:Set("user/isVip", true)
     else
         Mod.WorldShare.Store:Set("user/isVip", false)
+    end
+
+    if response.school and response.school.isVip == 1 then
+        isVipSchool = true
     end
 
     Mod.WorldShare.Store:Set('user/bLoginSuccessed', true)
@@ -267,6 +273,7 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
     -- for follow api
     Mod.WorldShare.Store:Set('user/token', token)
 
+    -- get user orginfo
     KeepworkServiceSchoolAndOrg:GetMyAllOrgsAndSchools(function(schoolData, orgData)
         if not schoolData and not orgData then
             if callback and type(callback) == "function" then
@@ -294,11 +301,20 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         end
 
         local Login = Mod.WorldShare.Store:Action("user/Login")
-        Login(token, userId, username, nickname, realname)
+        Login(token, userId, username, nickname, realname, isVipSchool)
 
-        if callback and type(callback) == "function" then
-            callback(true)
-        end
+        -- update enter world info
+        if Mod.WorldShare.Store:Get('world/isEnterWorld') then
+            SyncServiceCompare:GetCurrentWorldInfo(function()
+                if callback and type(callback) == "function" then
+                    callback(true)
+                end
+            end)
+        else
+            if callback and type(callback) == "function" then
+                callback(true)
+            end
+        end        
     end)
 
     self:ResetIndulge()
