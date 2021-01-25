@@ -18,9 +18,9 @@ local ClientUpdateDialogFilter = NPL.export()
 function ClientUpdateDialogFilter:Init()
     GameLogic.GetFilters():add_filter(
         'cellar.client_update_dialog.show',
-        function(callback)
-            MySchool:Show(callback)
-            return Mod.WorldShare.Store:Get('page/Mod.WorldShare.MySchool')
+        function(bEnabled, updater, gamename)
+            ClientUpdateDialog:Show(updater, gamename)
+            return true
         end
     )
 end

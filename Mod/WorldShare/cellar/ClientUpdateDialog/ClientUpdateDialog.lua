@@ -11,10 +11,10 @@ local ClientUpdateDialog = NPL.load('(gl)Mod/WorldShare/cellar/ClientUpdateDialo
 
 local ClientUpdateDialog = NPL.export()
 
-function ClientUpdateDialog:Show(callback)
+function ClientUpdateDialog:Show(updater, gamename)
     System.App.Commands.Call("File.MCMLWindowFrame", {
-        url = format("script/apps/Aries/Creator/Game/Login/ClientUpdateDialog.html?latestVersion=%s&curVersion=%s&curGame=%s", updater:getLatestVersion(), updater:getCurVersion(), gamename), 
-        name = "ClientUpdateDialog", 
+        url = format("Mod/WorldShare/cellar/ClientUpdateDialog/ClientUpdateDialog.html?latestVersion=%s&curVersion=%s&curGame=%s", updater:getLatestVersion(), updater:getCurVersion(), gamename), 
+        name = "Mod.WorldShare.ClientUpdateDialog", 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
         style = CommonCtrl.WindowFrame.ContainerStyle,
@@ -26,6 +26,6 @@ function ClientUpdateDialog:Show(callback)
             x = -210,
             y = -100,
             width = 420,
-            height = 250,
+            height = 300,
     });
 end
