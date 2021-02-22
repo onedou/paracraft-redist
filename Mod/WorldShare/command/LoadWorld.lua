@@ -101,6 +101,26 @@ function LoadWorldCommand:Init()
                     return false
                 end
 
+                if cmd_text == 'back' then
+                    local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
+
+                    if not lastWorld then
+                        _guihelper.MessageBox(L'没有上一级的世界了')
+                        return
+                    end
+
+                    _guihelper.MessageBox(
+                        format(L"是否返回世界：%s？", lastWorld.text or ''),
+                        function(res)
+                            if res and res == _guihelper.DialogResult.Yes then
+                                CommandManager:RunCommand('/loadworld -s back')
+                            end
+                        end,
+                        _guihelper.MessageBoxButtons.YesNo
+                    )
+                    return false
+                end
+
                 local pid = string.match(cmd_text, '(%d+)')
                 if pid then
                     Mod.WorldShare.MsgBox:Show(L"请稍候...")
@@ -146,6 +166,29 @@ function LoadWorldCommand:Init()
 
             if cmd_text:match("^https?://") then
                 return cmd_text
+            end
+
+            if cmd_text == 'back' then
+                local lastWorld = Mod.WorldShare.Store:Get('world/lastWorld')
+
+                if not lastWorld then
+                    _guihelper.MessageBox(L'没有上一级的世界了')
+                    return
+                end
+
+                if lastWorld.kpProjectId then
+                    local userId = Mod.WorldShare.Store:Get('world/userId')
+
+                    if tonumber(lastWorld.user.id) == tonumber(userId) then
+                        GameLogic.RunCommand(format('/loadworld -s -personal %d', lastWorld.kpProjectId))
+                    else
+                        GameLogic.RunCommand(format('/loadworld -s -force %d', lastWorld.kpProjectId))
+                    end
+                else
+                    WorldCommon.OpenWorld(lastWorld.worldpath)
+                end
+
+                return
             end
 
             if options and options.personal then

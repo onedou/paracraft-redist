@@ -6,7 +6,7 @@ place: Foshan
 Desc: 
 use the lib:
 ------------------------------------------------------------
-local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionData.lua")
+local SessionsData = NPL.load("(gl)Mod/WorldShare/database/SessionsData.lua")
 ------------------------------------------------------------
 ]] local Utils = NPL.load("(gl)Mod/WorldShare/helper/Utils.lua")
 local Store = NPL.load("(gl)Mod/WorldShare/store/Store.lua")
@@ -29,6 +29,13 @@ local SessionsData = NPL.export()
                 rememberMe = true,
                 token = "jwttoken",
                 tokenExpire = 12345678
+            },
+            allPositions = {
+                {
+                    projectId = 1111,
+                    lastPosition = { x = 19200, y = 6, x = 19200 },
+                    orientation = { CameraLiftupAngle = 0.11111, CameraRotY = 0.22222 }
+                }
             }
         },
         {
@@ -94,6 +101,14 @@ function SessionsData:SaveSession(session)
         return false
     end
 
+    if not session.allPositions then
+        local oldSession = self:GetSessionByUsername(session.account)
+
+        if oldSession and oldSession.allPositions then
+            session.allPositions = oldSession.allPositions
+        end
+    end
+
     session.account = string.lower(session.account)
 
     local sessionsData = self:GetSessions()
@@ -150,4 +165,92 @@ function SessionsData:GetDeviceUUID()
     local machineID = ParaEngine.GetAttributeObject():GetField("MachineID","")
 
     return sessionsData.softwareUUID .. "-" .. machineID
+end
+
+function SessionsData:GetUserLastPosition(projectId, username)
+    if not username then
+        username = Mod.WorldShare.Store:Get('user/username')
+    end
+
+    if not projectId then
+        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+        if not currentEnterWorld or not currentEnterWorld.kpProjectId then
+            return
+        end
+
+        projectId = currentEnterWorld.kpProjectId
+    end
+
+    local session = self:GetSessionByUsername(username)
+
+    if not session or type(session) ~= 'table' then
+        return
+    end
+
+    if session.allPositions and type(session.allPositions) == 'table' then
+        for key, item in ipairs(session.allPositions) do
+            if tonumber(item.projectId) == tonumber(projectId) then
+                return item
+            end
+        end
+    end
+end
+
+function SessionsData:SetUserLastPosition(x, y, z, cameraLiftupAngle, cameraRotY, projectId, username)
+    if not x or not y or not z or not cameraLiftupAngle or not cameraRotY then
+        return
+    end
+
+    if not username then
+        username = Mod.WorldShare.Store:Get('user/username')
+    end
+
+    if not projectId then
+        local currentEnterWorld = Mod.WorldShare.Store:Get('world/currentEnterWorld')
+
+        if not currentEnterWorld or not currentEnterWorld.kpProjectId then
+            return
+        end
+
+        projectId = currentEnterWorld.kpProjectId
+    end
+
+    local session = self:GetSessionByUsername(username)
+
+    if not session or type(session) ~= 'table' then
+        return
+    end
+
+    local beExist = false
+    local curItem = {}
+
+    if session.allPositions and type(session.allPositions) == 'table' then
+        for key, item in ipairs(session.allPositions) do
+            if tonumber(item.projectId) == tonumber(projectId) then
+                beExist = true
+                curItem = item
+                break
+            end
+        end
+    end
+
+    if beExist then
+        curItem.position = { x = x, y = y, z = z }
+        curItem.orientation = { cameraLiftupAngle = cameraLiftupAngle , cameraRotY = cameraRotY }
+    else
+        curItem = {
+            projectId = projectId,
+            position = { x = x, y = y, z = z },
+            orientation = { cameraLiftupAngle = cameraLiftupAngle , cameraRotY = cameraRotY }
+        }
+
+        if not session.allPositions or type(session.allPositions) ~= 'table' then
+            session.allPositions = {}
+        end
+
+        session.allPositions[#session.allPositions + 1] = curItem
+    end
+
+    self:SaveSession(session)
 end

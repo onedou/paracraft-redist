@@ -101,12 +101,15 @@ EventTrackingService.map = {
                 get_phone_captcha = 'click.world.certificate.get_phone_captcha', -- 我在家里-获取验证码
                 bind = 'click.world.certificate.bind', -- 我在家里-确认实名
                 send_msg_to_parent = 'click.world.certificate.send_msg_to_parent', -- 发送短信给父母
-            }
+            },
+            npc = 'click.world.npc', -- 点击世界中的NPC
         },
         mini_map = { -- 小地图
             paraworld_list = 'click.mini_map.paraworld_list', -- 显示所有并行世界
             local_worldinfo = 'click.mini_map.local_worldinfo', -- 显示当前并行世界选地窗口
             spawn_point = 'click.mini_map.spawn_point', -- 回到出生点
+            env_time = 'click.mini_map.env_time', -- 调整光线强度
+            enable_sound = 'click.mini_map.enable_sound', -- 是否打开背景音乐
         },
         dock = { -- 并行世界DOCK栏
             character = 'click.dock.character', -- 人物
@@ -223,7 +226,8 @@ EventTrackingService.map = {
             click_go_button = 'click.quest_action.click_go_button', -- 任务“前往”按键点击次数
         },
         promotion = { -- 活动
-            announcement = 'click.promotion.announcement', -- 公告点击次数
+            -- 公告点击次数 访问营地|go_to_camp, 人工智能课程|AI_class, 换装系统|clothes_sys, 春节资源|sf_res, 实名认证|realname
+            announcement = 'click.promotion.announcement', 
             horm = 'click.promotion.horm', -- 喇叭点击次数
             knowledge_bean = 'click.promotion.knowledge_bean', -- 知识豆兑换次数
             skin = 'click.promotion.skin', -- 皮肤兑换次数
@@ -474,6 +478,10 @@ function EventTrackingService:Loop()
                             for uKey, uItem in ipairs(unitinfo) do
                                 if uItem and uItem.packet then
                                     if uItem.packet.endAt and uItem.packet.endAt == 0 then
+                                        if not self:GetServerTime() or not uItem.packet.beginAt then
+                                            return
+                                        end
+
                                         uItem.packet.duration = self:GetServerTime() - uItem.packet.beginAt
                                     end
 

@@ -166,6 +166,9 @@ function LocalServiceWorld:GetSharedWorldList()
                                         IsFolder=true, time_text=item.time_text,
                                         text = worldUsername .. "/" .. display_name,
                                         shared = true,
+                                        user = {
+                                            username = worldUsername,
+                                        },
                                     }
                                 )
         
@@ -327,3 +330,39 @@ function LocalServiceWorld:GetMainWorldProjectId()
         return false
     end
 end
+
+function LocalServiceWorld:SetCommunityWorld(bValue)
+    WorldCommon.SetWorldTag('communityWorld', bValue)
+end
+
+function LocalServiceWorld:IsCommunityWorld()
+    return WorldCommon.GetWorldTag('communityWorld')
+end
+
+-- exec from save_world_info filter
+function LocalServiceWorld:SaveWorldInfo(ctx, node)
+    if (type(ctx) ~= 'table' or
+        type(node) ~= 'table' or
+        type(node.attr) ~= 'table') then
+        return false
+    end
+
+    node.attr.clientversion = LocalService:GetClientVersion() or ctx.clientversion
+    node.attr.vipEnabled = ctx.vipEnabled or false
+    node.attr.institueVipEnabled = ctx.institueVipEnabled or false
+    node.attr.communityWorld = ctx.communityWorld or false
+
+    local currentWorld = Mod.WorldShare.Store:Get('world/currentWorld')
+    node.attr.kpProjectId = currentWorld and currentWorld.kpProjectId or ctx.kpProjectId
+end
+
+function LocalServiceWorld:LoadWorldInfo(ctx, node)
+    if (type(ctx) ~= 'table' or
+        type(node) ~= 'table' or
+        type(node.attr) ~= 'table') then
+        return false
+    end
+
+    ctx.communityWorld = ctx.communityWorld == 'true' or ctx.communityWorld == true
+end
+

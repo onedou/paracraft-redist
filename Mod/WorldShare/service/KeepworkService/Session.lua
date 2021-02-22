@@ -292,6 +292,13 @@ function KeepworkServiceSession:LoginResponse(response, err, callback)
         if type(orgData) == "table" and #orgData > 0 then
             hasJoinedOrg = true
             Mod.WorldShare.Store:Set('user/myOrg', orgData[1] or {})
+
+            for key, item in ipairs(orgData) do
+                if item and item.type and item.type == 4 then
+                    hasJoinedSchool = true
+                    break
+                end
+            end
         end
 
         if hasJoinedSchool then
@@ -700,7 +707,7 @@ function KeepworkServiceSession:RenewToken()
 end
 
 function KeepworkServiceSession:PreventIndulge(callback)
-    local currentServerTime = 0
+    local currentServerTime = os.time()
 
     local function Handle()
         currentServerTime = currentServerTime + 1
@@ -737,23 +744,37 @@ function KeepworkServiceSession:PreventIndulge(callback)
         end
     end
 
-    KeepworkKeepworksApi:CurrentTime(function(data, err)
-        if not data or not data.timestamp then
-            return
+    KeepworkKeepworksApi:CurrentTime(
+        function(data, err)
+            if not data or not data.timestamp then
+                return
+            end
+
+            currentServerTime = math.floor(data.timestamp / 1000)
+
+            if not self.preventInduleTimer then
+                self.preventInduleTimer = commonlib.Timer:new(
+                    {
+                        callbackFunc = Handle
+                    }
+                )
+
+                self.preventInduleTimer:Change(0, 1000)
+            end
+        end,
+        function()
+            -- degraded mode
+            if not self.preventInduleTimer then
+                self.preventInduleTimer = commonlib.Timer:new(
+                    {
+                        callbackFunc = Handle
+                    }
+                )
+
+                self.preventInduleTimer:Change(0, 1000)
+            end
         end
-
-        currentServerTime = math.floor(data.timestamp / 1000)
-
-        if not self.preventInduleTimer then
-            self.preventInduleTimer = commonlib.Timer:new(
-                {
-                    callbackFunc = Handle
-                }
-            )
-
-            self.preventInduleTimer:Change(0, 1000)
-        end
-    end)
+    )
 end
 
 function KeepworkServiceSession:ResetIndulge()
@@ -867,7 +888,7 @@ function KeepworkServiceSession:ActiveVipByCode(key, callback)
         return false
     end
 
-    AccountingVipCodeApi:Activate(key, callback, callback)
+    AccountingVipCodeApi:Activate(Mod.WorldShare.Utils.RemoveLineEnding(key), callback, callback)
 end
 
 function KeepworkServiceSession:GetUsersByUsernames(usernames, callback)

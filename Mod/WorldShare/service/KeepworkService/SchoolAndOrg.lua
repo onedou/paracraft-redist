@@ -19,6 +19,9 @@ local AccountingOrgActivateCodeApi = NPL.load("(gl)Mod/WorldShare/api/Accounting
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
 
+-- libs
+local KeepWorkItemManager = NPL.load("(gl)script/apps/Aries/Creator/HttpAPI/KeepWorkItemManager.lua");
+
 local KeepworkServiceSchoolAndOrg = NPL.export()
 
 function KeepworkServiceSchoolAndOrg:GetUserAllOrgs(callback)
@@ -172,6 +175,9 @@ function KeepworkServiceSchoolAndOrg:ChangeSchool(schoolId, callback)
                     local SetIsVipSchool = Mod.WorldShare.Store:Action("user/SetIsVipSchool")
                     SetIsVipSchool(isVipSchool)
 
+                    -- 1. for 柴桑小学 2. updated libs info
+                    KeepWorkItemManager.school = response.school
+
                     callback(true)
                 end)
             else
@@ -189,9 +195,7 @@ function KeepworkServiceSchoolAndOrg:JoinInstitute(code, callback)
         realname = Mod.WorldShare.Store:Get("user/username")
     end
 
-    code = string.gsub(code, " ", "")
-    code = string.gsub(code, "\r", "")
-    code = string.gsub(code, "\n", "")
+    code = Mod.WorldShare.Utils.RemoveLineEnding(code)
 
     AccountingOrgActivateCodeApi:Activate(
         code,
