@@ -110,6 +110,7 @@ EventTrackingService.map = {
             spawn_point = 'click.mini_map.spawn_point', -- 回到出生点
             env_time = 'click.mini_map.env_time', -- 调整光线强度
             enable_sound = 'click.mini_map.enable_sound', -- 是否打开背景音乐
+            click_map = 'click.mini_map.click_map', -- 点击小地图
         },
         dock = { -- 并行世界DOCK栏
             character = 'click.dock.character', -- 人物
