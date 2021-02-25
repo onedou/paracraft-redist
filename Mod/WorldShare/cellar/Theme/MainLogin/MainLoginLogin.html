@@ -1,0 +1,127 @@
+<html>
+    <body> 
+        <pe:mcml>
+            <script type="text/npl">
+                <![CDATA[
+                    -- load UI
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+
+                    function get_history_users()
+                        return MainLogin:GetHistoryUsers()
+                    end
+
+                    function remove_account(username)
+                        MainLogin:RemoveAccount(username)
+                    end
+
+                    function is_support_third_party_login()
+                        if System.os.GetPlatform() == 'win32' or System.os.GetPlatform() == 'mac' then
+                            return true
+                        else
+                            return false
+                        end
+                    end
+
+                    function login_with_wx()
+                        ThirdPartyLogin:Init('WECHAT', function()
+                            UserConsole.notFirstTimeShown = nil
+                            MainLogin:EnterUserConsole()
+                            WorldList:RefreshCurrentServerList()
+                        end)
+                    end
+
+                    function login_with_qq()
+                        ThirdPartyLogin:Init('QQ', function()
+                            UserConsole.notFirstTimeShown = nil
+                            MainLogin:EnterUserConsole()
+                            WorldList:RefreshCurrentServerList()
+                        end)
+                    end
+                ]]>
+            </script>
+            <style type="text/mcss">
+                {
+                    container = {
+                        ['margin-left'] = -160,
+                        ['margin-top'] = -95,
+                        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#602 12 339 382:80 80 80 80'
+                    },
+                    session_window = {
+                        width = 320,
+                        ['min-height'] = 320,
+                        ["base-font-size"] = 16,
+                        ["font-size"] = 16,
+                        color = "#ffffff",
+                        ["padding-top"] = 20,
+                        ["padding-left"] = 30,
+                        ["padding-right"] = 30,
+                    },
+                }
+            </style>
+            <pe:container alignment="_ct" ClickThrough="true" class="container">
+                <div name="login" class="session_window">
+                    <pe:container name="account_field_error" visible="false" style="display:none;background:">
+                        <!-- error message -->
+                        <div>
+                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="account_field_error_msg" />
+                        </div>
+                    </pe:container>
+                    <div>
+                        <div style="<%='float:left;min-width:65px;' %>"><%= L"账号：" %></div>
+                        <select name="account"
+                                DataSource="<%= get_history_users() %>"
+                                EmptyText='<%= L"账户名/邮箱/手机号" %>'
+                                onselect="<%= select_account %>"
+                                onremove="<%= remove_account %>"
+                                class="bbs_text text_field"
+                                style="height: 30px;">
+                        </select>
+                        <input name="showaccount"
+                                onchange="write_accout"
+                                type="text"
+                                class="bbs_text"
+                                style="height: 30px;margin-left: -165px; width: 140px;"
+                                EmptyText='<%= L"账户名/邮箱/手机号" %>'
+                                MoveViewWhenAttachWithIME="true" />
+                    </div>
+                    <pe:container name="password_field_error" visible="false" style="display:none;background:">
+                        <!-- error message -->
+                        <div>
+                            <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="password_field_error_msg" />
+                        </div>
+                    </pe:container>
+                    <div style="margin-bottom:12px;">
+                        <div style="float:left;min-width:65px"><%= L"密码：" %></div>
+                        <input type="text"
+                                PasswordChar="*"
+                                SkipAutoBadWordFilter="true"
+                                class="bbs_text text_field"
+                                style="height: 30px;"
+                                name="password"
+                                MoveViewWhenAttachWithIME="true" />
+                    </div>
+                    <div>
+                        <div style="float:left;margin-left: 85px;" onclick="forget_password()">找回密码</div>
+                    </div>
+                    <div style="margin-top:15px;margin-bottom:15px;">
+                        <input type="button" class="offline_button mc_light_grey_button_with_fillet" onclick="use_offline()" value="<%= L'离线模式' %>" />
+                        <input type="button" DefaultButton="true" class="login_button" onclick="login()" value='<%= L"登 录"%>' />
+                    </div>
+                    <pe:if condition="<%= is_support_third_party_login() %>">
+                        <div>
+                            <div style="base-font-size: 14px;font-size: 14px;">
+                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 20px;margin-right: 2px;"></div>
+                                <%= L"第三方账号登录" %>
+                                <div style="width: 50px;height: 1px;background-color: #6d6d6e;float:left;margin-top: 10px;margin-left: 2px;"></div>
+                            </div>
+                            <div style="margin-top: 5px;margin-bottom: 5px;">
+                                <div onclick="login_with_wx()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#245 135 44 44);float: left;margin-left: 40px;"></div>
+                                <div onclick="login_with_qq()" style="width: 44px;height: 44px;background:url(Texture/Aries/Creator/keepwork/worldshare_32bits.png#301 135 44 44);float: left;margin-left: 80x;"></div>
+                            </div>
+                        </div>
+                    </pe:if>>
+                </div>
+            </pe:container>
+        </pe:mcml>
+    </body>
+</html>

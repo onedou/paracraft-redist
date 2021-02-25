@@ -27,7 +27,7 @@ MainLogin.curTab = 1
 
 function MainLogin:Show()
     Mod.WorldShare.Utils.ShowWindow({
-        url = 'Mod/WorldShare/cellar/MainLogin/MainLogin.html', 
+        url = 'Mod/WorldShare/cellar/Theme/MainLogin/MainLogin.html', 
         name = 'MainLogin', 
         isShowTitleBar = false,
         DestroyOnClose = true, -- prevent many ViewProfile pages staying in memory
@@ -35,11 +35,11 @@ function MainLogin:Show()
         zorder = -1,
         allowDrag = false,
         directPosition = true,
-            align = '_fi',
-            x = 0,
-            y = 0,
-            width = 0,
-            height = 0,
+        align = '_fi',
+        x = 0,
+        y = 0,
+        width = 0,
+        height = 0,
         cancelShowAnimation = true,
     })
 
@@ -49,57 +49,46 @@ function MainLogin:Show()
         return false
     end
 
-    local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
+    self:ShowLogin()
 
-    if PWDInfo then
-        MainLoginPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
-        MainLoginPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
-        MainLoginPage:SetValue('password', PWDInfo.password or '')
-        MainLoginPage:SetValue('showaccount', PWDInfo.account or '')
-        self.account = PWDInfo.account
-    end
+    -- local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
-    self:Refresh()
-
-    -- if not self.notFirstTimeShown then
-    --     self.notFirstTimeShown = true
-
-    --     if System.User.keepworktoken then
-    --         Mod.WorldShare.MsgBox:Show(L'正在登录，请稍候...', 24000, L'链接超时', 300, 120)
-
-    --         KeepworkServiceSession:LoginWithToken(
-    --             System.User.keepworktoken,
-    --             function(response, err)
-    --                 Mod.WorldShare.MsgBox:Close()
-
-    --                 if(err == 200 and type(response) == 'table' and response.username) then
-    --                     self:EnterUserConsole()
-    --                 else
-    --                     -- token expired
-    --                     System.User.keepworktoken = nil;
-    --                 end
-    --             end
-    --         )
-
-    --         Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-	-- 			-- OnKeepWorkLogin
-	-- 			GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
-	-- 		end)
-
-    --         return
-    --     end
-
-    --     -- if PWDInfo and PWDInfo.autoLogin then
-    --     --     Mod.WorldShare.Utils.SetTimeOut(function()
-    --     --         self:EnterUserConsole()
-    --     --     end, 100)
-    --     -- end
+    -- if PWDInfo then
+    --     MainLoginPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
+    --     MainLoginPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
+    --     MainLoginPage:SetValue('password', PWDInfo.password or '')
+    --     MainLoginPage:SetValue('showaccount', PWDInfo.account or '')
+    --     self.account = PWDInfo.account
     -- end
 
-    Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-        -- OnKeepWorkLogin
-        GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
-    end)
+    -- self:Refresh()
+
+    -- Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
+    --     -- OnKeepWorkLogin
+    --     GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
+    -- end)
+end
+
+function MainLogin:ShowSelect()
+    -- Mod.WorldShare.Utils.ShowWindow()
+end
+
+function MainLogin:ShowLogin()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginLogin.html',
+        'Mod.WorldShare.cellar.MainLogin.Login',
+        0,
+        0,
+        '_fi',
+        false,
+        5
+    )
+end
+
+function MainLogin:ShowRegister()
+
 end
 
 function MainLogin:Refresh(times)
