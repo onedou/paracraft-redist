@@ -49,7 +49,7 @@ function MainLogin:Show()
         return false
     end
 
-    self:ShowLogin()
+    self:ShowSelect()
 
     -- local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
 
@@ -70,7 +70,17 @@ function MainLogin:Show()
 end
 
 function MainLogin:ShowSelect()
-    -- Mod.WorldShare.Utils.ShowWindow()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginSelect.html',
+        'Mod.WorldShare.cellar.MainLogin.Select',
+        0,
+        0,
+        '_fi',
+        false,
+        5
+    )
 end
 
 function MainLogin:ShowLogin()
@@ -104,6 +114,12 @@ function MainLogin:Close()
 
     if MainLoginPage then
         MainLoginPage:CloseWindow()
+    end
+
+    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+
+    if MainLoginLoginPage then
+        MainLoginLoginPage:CloseWindow()
     end
 end
 
@@ -241,11 +257,7 @@ function MainLogin:EnterUserConsole(isOffline)
         System.options.loginmode = 'offline'
     end
 
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
-
-    if MainLoginPage then
-        MainLoginPage:CloseWindow()
-    end
+    self:Close()
 
     if System.options.loginmode ~= 'offline' then
         -- close at on world load

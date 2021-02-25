@@ -32,13 +32,6 @@
                     local be_show_password = false
                     local be_show_phone_password = false
 
-                    -- @param name: 'local', 'internet'
-                    function use_offline()
-                        KeepworkServiceSession:Logout()
-                        MainLogin:EnterUserConsole(true)
-                        EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField('MachineID','') }, true)
-                    end
-
                     function OnOpenModulePage()
                         NPL.load('(gl)script/apps/Aries/Creator/Game/Login/SelectModulePage.lua');
                         local SelectModulePage = commonlib.gettable('MyCompany.Aries.Game.MainLogin.SelectModulePage')

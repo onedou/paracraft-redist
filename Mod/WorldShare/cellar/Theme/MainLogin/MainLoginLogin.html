@@ -3,8 +3,12 @@
         <pe:mcml>
             <script type="text/npl">
                 <![CDATA[
-                    -- load UI
+                    -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
+                    local EventTrackingService = NPL.load('(gl)Mod/WorldShare/service/EventTracking.lua')
 
                     function get_history_users()
                         return MainLogin:GetHistoryUsers()
@@ -37,16 +41,22 @@
                             WorldList:RefreshCurrentServerList()
                         end)
                     end
+
+                    -- @param name: 'local', 'internet'
+                    function use_offline()
+                        KeepworkServiceSession:Logout()
+                        MainLogin:EnterUserConsole(true)
+                        EventTrackingService:Send(1, 'click.main_login.offline_enter', { machineId = ParaEngine.GetAttributeObject():GetField('MachineID','') }, true)
+                    end
                 ]]>
             </script>
-            <style type="text/mcss">
+            <style type="text/mcss" src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
                 {
-                    container = {
+                    container_size = {
                         ['margin-left'] = -160,
                         ['margin-top'] = -95,
-                        background = 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#602 12 339 382:80 80 80 80'
                     },
-                    session_window = {
+                    main_area = {
                         width = 320,
                         ['min-height'] = 320,
                         ["base-font-size"] = 16,
@@ -58,8 +68,9 @@
                     },
                 }
             </style>
-            <pe:container alignment="_ct" ClickThrough="true" class="container">
-                <div name="login" class="session_window">
+            <pe:container alignment="_ct" ClickThrough="true" class="main_login_container_bg container_size">
+                <div>LOGIN</div>
+                <div class="main_area">
                     <pe:container name="account_field_error" visible="false" style="display:none;background:">
                         <!-- error message -->
                         <div>
