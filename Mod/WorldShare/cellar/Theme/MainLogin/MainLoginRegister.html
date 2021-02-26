@@ -176,9 +176,9 @@
                     end
 
                     function phone_register()
-                        if MainLogin.phoneAccountExist then
-                            page:SetUIValue('phone_register_account_field_error_msg', L'*账号已存在，请使用其他账号')
-                            page:FindControl('phone_register_account_field_error').visible = true
+                        if phone_account_exist then
+                            page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
+                            page:FindControl('phone_field_error').visible = true
                             return false
                         end
 
@@ -280,11 +280,11 @@
 
                         KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
                             if bIsExist then
-                                phonenumberExist = true
+                                phone_account_exist = true
                                 page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
                                 page:FindControl('phone_field_error').visible = true
                             else
-                                phonenumberExist = false
+                                phone_account_exist = false
                                 page:FindControl('phone_field_error').visible = false
                             end
                         end)
@@ -340,13 +340,13 @@
 
                     function get_phone_captcha()
                         if #page:GetValue('phonenumber') ~= 11 then
-                            page:SetUIValue('phone_field_error_msg', L'手机号码位数不对')
+                            page:SetUIValue('phone_field_error_msg', L'*手机号码位数不对')
                             page:FindControl('phone_field_error').visible = true
                             return false
                         end
 
-                        if phonenumberExist then
-                            page:SetUIValue('phone_field_error_msg', L'手机号码已存在')
+                        if phone_account_exist then
+                            page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
                             page:FindControl('phone_field_error').visible = true
                             return false
                         end
