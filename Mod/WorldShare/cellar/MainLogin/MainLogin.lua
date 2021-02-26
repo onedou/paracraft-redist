@@ -23,7 +23,14 @@ local RegisterModal = NPL.load('(gl)Mod/WorldShare/cellar/RegisterModal/Register
 
 local MainLogin = NPL.export()
 
-MainLogin.curTab = 1
+-- for register
+MainLogin.m_mode = "account"
+MainLogin.account = ""
+MainLogin.password = ""
+MainLogin.phonenumber = ""
+MainLogin.phonepassword = ""
+MainLogin.phonecaptcha = ""
+MainLogin.bindphone = nil
 
 function MainLogin:Show()
     Mod.WorldShare.Utils.ShowWindow({
@@ -113,11 +120,31 @@ function MainLogin:ShowRegister()
 end
 
 function MainLogin:ShowParent()
-
+    Mod.WorldShare.Utils.ShowWindow(
+        300,
+        130,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginParent.html',
+        'Mod.WorldShare.cellar.MainLogin.Parent',
+        600,
+        260,
+        '_rb',
+        false,
+        1
+    )
 end
 
 function MainLogin:ShowWhere()
-
+    Mod.WorldShare.Utils.ShowWindow(
+        300,
+        130,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginWhere.html',
+        'Mod.WorldShare.cellar.MainLogin.Where',
+        600,
+        260,
+        '_rb',
+        false,
+        1
+    )
 end
 
 function MainLogin:ShowExtra()

@@ -87,65 +87,6 @@
                         ForgetPassword:ShowPage()
                     end
 
-                    function register()
-                        if MainLogin.accountExist then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
-                            page:FindControl('register_account_field_error').visible = true
-                            return false
-                        end
-
-                        local account = page:GetValue('register_account')
-                        local password = page:GetValue('register_account_password')
-                        local captcha = page:GetValue('captcha')
-                        local agree = page:GetValue('agree')
-
-                        if not agree then
-                            page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
-                            page:FindControl('agree_field_error_error').visible = true
-                            return false
-                        end
-
-                        if not account or account == '' then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号不能为空')
-                            page:FindControl('register_account_field_error').visible = true
-                            return false
-                        end
-
-                        if #password < 6 then
-                            page:SetUIValue('register_account_password_field_error_msg', L'*密码最少为6位')
-                            page:FindControl('egister_account_password_field_error').visible = true
-                            return false
-                        end
-
-                        if not captcha or captcha == '' then
-                            page:SetUIValue('captcha_field_error_msg', L'*验证码不能为空')
-                            page:FindControl('captcha_field_error').visible = true
-                            return false
-                        end
-
-                        RegisterModal.account = account
-                        RegisterModal.password = password
-                        RegisterModal.captcha = captcha
-                        RegisterModal.agree = agree
-                        RegisterModal.phonenumber = ''
-                        RegisterModal.phonecaptcha = ''
-                        RegisterModal.bindphone = nil
-
-                        RegisterModal.callback = function()
-                            MySchool:ShowJoinSchoolAfterRegister(function()
-                                MainLogin:EnterUserConsole()
-                                WorldList:RefreshCurrentServerList()
-                            end)
-                        end
-
-                        RegisterModal:Register(page, function(_result)
-                            if _result == false then
-                                page:SetUIValue('captcha_field_error_msg', L'*验证码错误')
-                                page:FindControl('captcha_field_error').visible = true
-                            end
-                        end)
-                    end
-
                     function next()
                         local phonenumber = page:GetValue('phonenumber')
                         local phonecaptcha = page:GetValue('phonecaptcha')
@@ -275,10 +216,6 @@
                         end, 200)
 
                         update_captcha()
-                    end
-
-                    function get_register_mode()
-                        return RegisterModal.m_mode
                     end
 
                     function user_agreement()
@@ -557,28 +494,6 @@
                         end
 
                         page:FindControl('phonepassword_field_error').visible = false
-                    end
-
-                    function set_show_password()
-                        if be_show_password then
-                            be_show_password = false
-
-                            local val = page:GetValue('register_account_password_show')
-                            page:SetValue('register_account_password_hide', val)
-                            page:SetValue('register_account_password', val)
-
-                            page:FindControl('register_account_password_show').visible = false
-                            page:FindControl('register_account_password_hide').visible = true
-                        else
-                            be_show_password = true
-
-                            local val = page:GetValue('register_account_password_hide')
-                            page:SetValue('register_account_password_show', val)
-                            page:SetValue('register_account_password', val)
-
-                            page:FindControl('register_account_password_show').visible = true
-                            page:FindControl('register_account_password_hide').visible = false
-                        end
                     end
 
                     function set_show_password1()
