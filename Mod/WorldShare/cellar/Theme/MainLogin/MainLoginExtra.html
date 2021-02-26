@@ -41,14 +41,18 @@
                    
                 }
             </style>
-            <div style="background-color: #ff0000">
+            <div>
                 <pe:if condition='<%= System.options.isDevEnv == false %>'>
                     <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" and System.os.GetPlatform() ~= "android" %>'>
-                        <input type="button" value='<%=L"插件管理" .. GetModCountAsString() %>' class="mc_big_button" align="right" style="margin-right:10px;color:#572712;font-size:14px;min-width:120px;height:36px;" onclick="OnOpenModulePage" />    
+                        <input type="button"
+                               style="width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 523 80 44)"
+                               onclick="OnOpenModulePage" /> 
                     </pe:if>        
                 </pe:if>
-                <input type="button" value='<%=L"语言..." %>' spacing="20" align="right" class="mc_big_button" style="margin-top:5px;margin-right:10px;color:#572712;font-size:14px;min-width:120px;height:36px;" onclick="OnChangeLanguagePage" />
-                <input type="button" value='<%=L"客服"%>' align="right" style="margin-right:10px;margin-top:5px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCustomerService" />
+                <!-- <input type="button" value='<%=L"语言..." %>' spacing="20" class="mc_big_button" style="margin-top:5px;margin-right:10px;color:#572712;font-size:14px;min-width:120px;height:36px;" onclick="OnChangeLanguagePage" /> -->
+                <input type="button"
+                       style="margin-left: 20px;width: 80px;height: 44px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#284 471 80 44)"
+                       onclick="OnClickCustomerService" />
                 <!-- <input type="button" value='<%=L"致谢"%>' align="right" style="position:relative;margin-right:10px;margin-top:45px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCredits" /> -->
                 <!--<pe:if condition='<%=Rebranding:GetValue("donation")~="false"%>'>
                     <input type="button" value='<%=L"捐赠" %>' align="right" spacing="20" class="mc_light_grey_button_with_fillet" style="font-size:14px;height:36px;margin-right:20px" onclick="OnClickDonate" />

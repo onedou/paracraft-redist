@@ -121,29 +121,29 @@ end
 
 function MainLogin:ShowParent()
     Mod.WorldShare.Utils.ShowWindow(
-        300,
-        130,
+        0,
+        0,
         'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginParent.html',
         'Mod.WorldShare.cellar.MainLogin.Parent',
-        600,
-        260,
-        '_rb',
+        0,
+        0,
+        '_fi',
         false,
-        1
+        -1
     )
 end
 
 function MainLogin:ShowWhere()
     Mod.WorldShare.Utils.ShowWindow(
-        300,
-        130,
+        0,
+        0,
         'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginWhere.html',
         'Mod.WorldShare.cellar.MainLogin.Where',
-        600,
-        260,
-        '_rb',
+        0,
+        0,
+        '_fi',
         false,
-        1
+        -1
     )
 end
 
@@ -153,8 +153,8 @@ function MainLogin:ShowExtra()
         130,
         'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginExtra.html',
         'Mod.WorldShare.cellar.MainLogin.Extra',
-        600,
-        260,
+        700,
+        160,
         '_rb',
         false,
         1
@@ -187,6 +187,12 @@ function MainLogin:Close()
 
     if MainLoginRegisterPage then
         MainLoginRegisterPage:CloseWindow()
+    end
+
+    local MainLoginParentPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Parent')
+
+    if MainLoginParentPage then
+        MainLoginParentPage:CloseWindow()
     end
 
     local MainLoginSelectPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Select')
