@@ -218,10 +218,6 @@
                         update_captcha()
                     end
 
-                    function user_agreement()
-                        RegisterModal:ShowUserAgreementPage()
-                    end
-
                     function set_register_mode()
                         local beSeted = false
 
@@ -494,28 +490,6 @@
                         end
 
                         page:FindControl('phonepassword_field_error').visible = false
-                    end
-
-                    function set_show_password1()
-                        if be_show_phone_password then
-                            be_show_phone_password = false
-
-                            local val = page:GetValue('phonepassword_show')
-                            page:SetValue('phonepassword_hide', val)
-                            page:SetValue('phonepassword', val)
-
-                            page:FindControl('phonepassword_show').visible = false
-                            page:FindControl('phonepassword_hide').visible = true
-                        else
-                            be_show_phone_password = true
-
-                            local val = page:GetValue('phonepassword_hide')
-                            page:SetValue('phonepassword_show', val)
-                            page:SetValue('phonepassword', val)
-
-                            page:FindControl('phonepassword_show').visible = true
-                            page:FindControl('phonepassword_hide').visible = false
-                        end
                     end
                 ]]>
             </script>
