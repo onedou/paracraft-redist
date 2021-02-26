@@ -32,21 +32,6 @@
                     local be_show_password = false
                     local be_show_phone_password = false
 
-                    function OnOpenModulePage()
-                        NPL.load('(gl)script/apps/Aries/Creator/Game/Login/SelectModulePage.lua');
-                        local SelectModulePage = commonlib.gettable('MyCompany.Aries.Game.MainLogin.SelectModulePage')
-                        SelectModulePage.ShowPage()
-                    end
-
-                    function OnChangeLanguagePage()
-                        NPL.load('(gl)script/apps/Aries/Creator/Game/Common/Translation.lua')
-
-                        local Translation = commonlib.gettable('MyCompany.Aries.Game.Common.Translation')
-                        Translation.ShowPage(function()
-                            page:Refresh(0.01)
-                        end)
-                    end
-
                     function GetModDes()
                         local modname = ParaEngine.GetAppCommandLineByParam('mod','')
                         local s = string.format(L'当前Mod:%s',modname)
@@ -64,23 +49,6 @@
 
                     function OnClickCredits()
                         ParaGlobal.ShellExecute('open', L'https://keepwork.com/official/paracraft/credits', '', '', 1)
-                    end
-                        
-                    function GetModCountAsString()
-                        NPL.load('(gl)script/apps/Aries/Creator/Game/Mod/ModManager.lua')
-                        local ModManager = commonlib.gettable('Mod.ModManager')
-                        local pluginloader = ModManager:GetLoader()
-                        local nCount = pluginloader:GetActiveModCount()
-
-                        if nCount > 0 then
-                            return format('(%d)', nCount)
-                        else
-                            return ''
-                        end
-                    end
-
-                    function OnClickCustomerService()
-                        ParaGlobal.ShellExecute('open', L'https://keepwork.com/official/docs/FAQ/questions', '', '', 1)
                     end
 
                     function login_text()
@@ -693,22 +661,6 @@
                         <%= GetModDes()%>
                     </div>
                 </pe:if>
-            </pe:container>
-            <pe:container alignment="_rb" ClickThrough="true" style="position:relative;background:;width:300px;height:130px;">
-                <pe:if condition='<%= System.options.isDevEnv == false %>'>
-                    <pe:if  condition='<%= System.os.GetPlatform() ~= "ios" %>'>
-                        <input type="button" value='<%=L"插件管理"..GetModCountAsString() %>' class="mc_big_button" align="right" style="margin-right:10px;color:#572712;font-size:14px;min-width:120px;height:36px;" onclick="OnOpenModulePage" />    
-                    </pe:if>        
-                </pe:if>
-                <input type="button" value='<%=L"语言..." %>' spacing="20" align="right" class="mc_big_button" style="margin-top:5px;margin-right:10px;color:#572712;font-size:14px;min-width:120px;height:36px;" onclick="OnChangeLanguagePage" />
-                <input type="button" value='<%=L"客服"%>' align="right" style="margin-right:10px;margin-top:5px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCustomerService" />
-                <!-- <input type="button" value='<%=L"致谢"%>' align="right" style="position:relative;margin-right:10px;margin-top:45px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080" onclick="OnClickCredits" /> -->
-                <!--<pe:if condition='<%=Rebranding:GetValue("donation")~="false"%>'>
-                    <input type="button" value='<%=L"捐赠" %>' align="right" spacing="20" class="mc_light_grey_button_with_fillet" style="font-size:14px;height:36px;margin-right:20px" onclick="OnClickDonate" />
-                </pe:if>-->
-                <!--<div style="position:relative;margin-left:0px;margin-top:5px;padding:5px;padding-left:10px;padding-right:10px;font-size:14px;font-weight:bold;color:#ffffffcc;background:url(Texture/whitedot.png);background-color:#00000080">
-                    <%=L"点击任意位置继续"%>
-                </div>-->
             </pe:container>
         </pe:mcml>
     </body>

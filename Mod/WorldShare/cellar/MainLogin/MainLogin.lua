@@ -49,6 +49,7 @@ function MainLogin:Show()
         return false
     end
 
+    self:ShowExtra()
     self:ShowSelect()
 
     -- local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
@@ -79,7 +80,7 @@ function MainLogin:ShowSelect()
         0,
         '_fi',
         false,
-        5
+        -1
     )
 end
 
@@ -93,12 +94,45 @@ function MainLogin:ShowLogin()
         0,
         '_fi',
         false,
-        5
+        -1
     )
 end
 
 function MainLogin:ShowRegister()
+    Mod.WorldShare.Utils.ShowWindow(
+        0,
+        0,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginRegister.html',
+        'Mod.WorldShare.cellar.MainLogin.Register',
+        0,
+        0,
+        '_fi',
+        false,
+        -1
+    )
+end
 
+function MainLogin:ShowParent()
+
+end
+
+function MainLogin:ShowWhere()
+
+end
+
+function MainLogin:ShowExtra()
+    Mod.WorldShare.Utils.ShowWindow(
+        300,
+        130,
+        'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginExtra.html',
+        'Mod.WorldShare.cellar.MainLogin.Extra',
+        600,
+        260,
+        '_rb',
+        false,
+        1
+    )
+    
 end
 
 function MainLogin:Refresh(times)
@@ -120,6 +154,18 @@ function MainLogin:Close()
 
     if MainLoginLoginPage then
         MainLoginLoginPage:CloseWindow()
+    end
+
+    local MainLoginRegisterPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Register')
+
+    if MainLoginRegisterPage then
+        MainLoginRegisterPage:CloseWindow()
+    end
+
+    local MainLoginSelectPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Select')
+
+    if MainLoginSelectPage then
+        MainLoginSelectPage:CloseWindow()
     end
 end
 
