@@ -5,8 +5,20 @@
                 <![CDATA[
                     -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+                    local MySchool = NPL.load('(gl)Mod/WorldShare/cellar/MySchool/MySchool.lua')
+
+                    -- service
+                    local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
+
+                    -- helper
+                    local Validated = NPL.load('(gl)Mod/WorldShare/helper/Validated.lua')
 
                     local page = document:GetPageCtrl()
+
+                    local be_show_password = false
+                    local account_agree = true
+                    local phone_agree = true
+                    local is_clicked_get_phone_captcha = false
 
                     function close()
                         local MainLoginRegisterPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Register')
@@ -121,13 +133,7 @@
                         page:FindControl('phonepassword_hide').visible = true
                     end, 0)
 
-                    function register()
-                        set_finish()
-
-                        if true then
-                            return
-                        end
-
+                    function account_register()
                         if MainLogin.accountExist then
                             page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
                             page:FindControl('register_account_field_error').visible = true
@@ -135,13 +141,11 @@
                         end
 
                         local account = page:GetValue('register_account')
-                        local password = page:GetValue('register_account_password')
-                        local captcha = page:GetValue('captcha')
-                        local agree = page:GetValue('agree')
+                        local password = page:GetValue('register_account_password') or ''
 
-                        if not agree then
+                        if not account_agree then
                             page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
-                            page:FindControl('agree_field_error_error').visible = true
+                            page:FindControl('agree_field_error').visible = true
                             return false
                         end
 
@@ -151,39 +155,49 @@
                             return false
                         end
 
-                        if #password < 6 then
-                            page:SetUIValue('register_account_password_field_error_msg', L'*密码最少为6位')
-                            page:FindControl('egister_account_password_field_error').visible = true
+                        if #password < 4 then
+                            page:SetUIValue('register_account_password_field_error_msg', L'*密码最少为4位')
+                            page:FindControl('register_account_password_field_error').visible = true
                             return false
                         end
 
-                        if not captcha or captcha == '' then
-                            page:SetUIValue('captcha_field_error_msg', L'*验证码不能为空')
-                            page:FindControl('captcha_field_error').visible = true
-                            return false
-                        end
+                        MainLogin.account = account
+                        MainLogin.password = password
+                        MainLogin.agree = agree
 
-                        RegisterModal.account = account
-                        RegisterModal.password = password
-                        RegisterModal.captcha = captcha
-                        RegisterModal.agree = agree
-                        RegisterModal.phonenumber = ''
-                        RegisterModal.phonecaptcha = ''
-                        RegisterModal.bindphone = nil
-
-                        RegisterModal.callback = function()
+                        MainLogin.callback = function()
                             MySchool:ShowJoinSchoolAfterRegister(function()
                                 MainLogin:EnterUserConsole()
                                 WorldList:RefreshCurrentServerList()
                             end)
                         end
 
-                        RegisterModal:Register(page, function(_result)
-                            if _result == false then
-                                page:SetUIValue('captcha_field_error_msg', L'*验证码错误')
-                                page:FindControl('captcha_field_error').visible = true
-                            end
-                        end)
+                        MainLogin:RegisterWithAccount()
+                    end
+
+                    function phone_register()
+                        if MainLogin.phoneAccountExist then
+                            page:SetUIValue('phone_register_account_field_error_msg', L'*账号已存在，请使用其他账号')
+                            page:FindControl('phone_register_account_field_error').visible = true
+                            return false
+                        end
+
+                        local phonenumber = page:GetValue('phonenumber')
+                        local phonecaptcha = page:GetValue('phonecaptcha')
+                        local phonepassword = page:GetValue('phonepassword')
+
+                        MainLogin.phonenumber = phonenumber
+                        MainLogin.password = phonepassword
+                        MainLogin.phonecaptcha = phonecaptcha
+
+                        MainLogin.callback = function()
+                            MySchool:ShowJoinSchoolAfterRegister(function()
+                                MainLogin:EnterUserConsole()
+                                WorldList:RefreshCurrentServerList()
+                            end)
+                        end
+
+                        MainLogin:RegisterWithPhone()
                     end
 
                     function user_agreement()
@@ -194,6 +208,181 @@
                     function finish()
                         close()
                         MainLogin:ShowWhere()
+                    end
+
+                    function set_register_agree()
+                        account_agree = not account_agree
+
+                        if not account_agree then
+                            page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
+                            page:FindControl('agree_field_error').visible = true
+                        else
+                            page:FindControl('agree_field_error').visible = false
+                        end
+                    end
+
+                    function hide_notice()
+                        local username = page:GetValue('register_account')
+
+                        if not username or #username == 0 then
+                            page:SetUIValue('register_account_field_error_msg', L'*账号不能为空')
+                            page:FindControl('register_account_field_error').visible = true
+                            return false
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
+                            if bIsExist then
+                                MainLogin.accountExist = true
+                                page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
+                                page:FindControl('register_account_field_error').visible = true
+                                return false
+                            else
+                                MainLogin.accountExist = false
+                                page:FindControl('register_account_field_error').visible = false
+                                return false
+                            end
+                        end)
+                    end
+
+                    function check_register_password()
+                        local password
+
+                        if be_show_password then
+                            password = page:GetValue('register_account_password_show')
+                        else
+                            password = page:GetValue('register_account_password_hide')
+                        end
+
+                        page:SetValue('register_account_password', password)
+
+                        if #password < 4 then
+                            page:SetUIValue('register_account_password_field_error_msg', L'*密码最少为4位')
+                            page:FindControl('register_account_password_field_error').visible = true
+                        else
+                            page:FindControl('register_account_password_field_error').visible = false
+                        end
+                    end
+
+                    function check_phone_number()
+                        local phonenumber = page:GetValue('phonenumber')
+
+                        if phonenumber and #phonenumber == 0 then
+                            page:SetUIValue('phone_field_error_msg', L'*手机号不能为空')
+                            page:FindControl('phone_field_error').visible = true
+                            return                           
+                        end
+
+                        if not Validated:Phone(phonenumber) then
+                            page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
+                            page:FindControl('phone_field_error').visible = true
+                            return false
+                        end
+
+                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
+                            if bIsExist then
+                                phonenumberExist = true
+                                page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
+                                page:FindControl('phone_field_error').visible = true
+                            else
+                                phonenumberExist = false
+                                page:FindControl('phone_field_error').visible = false
+                            end
+                        end)
+                    end
+
+                    function checkout_phonecaptcha()
+                        local photocaptcha = page:GetValue('phonecaptcha')
+
+                        if photocaptcha and #photocaptcha == 0 then
+                            page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
+                            page:FindControl('phone_field_error').visible = true
+                        else
+                            page:FindControl('phone_field_error').visible = false
+                        end
+                    end
+
+                    function check_phone_password()
+                        local phonepassword
+
+                        if be_show_phone_password then
+                            phonepassword = page:GetValue('phonepassword_show')
+                        else
+                            phonepassword = page:GetValue('phonepassword_hide')
+                        end
+
+                        page:SetValue('phonepassword', phonepassword)
+
+                        if phonepassword and #phonepassword == 0 then
+                            page:SetUIValue('phone_field_error_msg', L'*密码不能为空')
+                            page:FindControl('phone_field_error').visible = true
+                            return
+                        end
+
+                        if #phonepassword < 4 then
+                            page:SetUIValue('phone_field_error_msg', L'*密码少于6位')
+                            page:FindControl('phone_field_error').visible = true
+                            return
+                        end
+
+                        page:FindControl('phone_field_error').visible = false
+                    end
+
+                    function set_phone_agree()
+                        phone_agree = not phone_agree
+
+                        if not phone_agree then
+                            page:SetUIValue('phone_agree_field_error_msg', L'*您未同意用户协议')
+                            page:FindControl('phone_agree_field_error').visible = true
+                        else
+                            page:FindControl('phone_agree_field_error').visible = false
+                        end
+                    end
+
+                    function get_phone_captcha()
+                        if #page:GetValue('phonenumber') ~= 11 then
+                            page:SetUIValue('phone_field_error_msg', L'手机号码位数不对')
+                            page:FindControl('phone_field_error').visible = true
+                            return false
+                        end
+
+                        if phonenumberExist then
+                            page:SetUIValue('phone_field_error_msg', L'手机号码已存在')
+                            page:FindControl('phone_field_error').visible = true
+                            return false
+                        end
+
+                        if is_clicked_get_phone_captcha then
+                           return false 
+                        end
+
+                        is_clicked_get_phone_captcha = true
+
+                        local times = 60
+
+                        local timer = commonlib.Timer:new({
+                            callbackFunc = function(timer)
+                                page:SetValue('get_phone_captcha', format('%s(%ds)', L'重新发送', times))
+
+                                if times == 0 then
+                                    is_clicked_get_phone_captcha = false
+                                    page:SetValue('get_phone_captcha', L'获取验证码')
+                                    timer:Change(nil, nil)
+                                end
+
+                                times = times - 1
+                            end
+                        })
+
+                        KeepworkServiceSession:GetPhoneCaptcha(page:GetValue('phonenumber'), function(data, err)
+                            if err == 400 and data and data.code and data.message then
+                                is_clicked_get_phone_captcha = false
+                                page:SetValue('getPhonecaptcha', L'获取验证码')
+                                GameLogic.AddBBS(nil, format('%s%s(%d)', L'获取验证码失败，错误信息：', data.message, data.code), 3000, '255 0 0')
+                                timer:Change(nil, nil)
+                            end
+                        end)
+
+                        timer:Change(1000, 1000)
                     end
                 ]]>
             </script>
@@ -227,7 +416,7 @@
                 </div>
                 <div class='main_area'>
                     <!-- register finish -->
-                    <pe:container name='register_not_finish' visible='true' style='width: 240px;height: 230px;background:;'>
+                    <pe:container name='register_not_finish' visible='true' style='width: 240px;height: 260px;background:;'>
                         <div style="width: 240px;height: 24.37px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#5 345 256 26)">
                             <input type='button'
                                 name='account_button'
@@ -239,28 +428,25 @@
                                 style="width: 120px;height: 24.37px;color: #FFFFFF;background:;"
                                 value='<%= "手机注册" %>'
                                 onclick='set_phone_mode'/>
-                            
                         </div>
                         <!-- account -->
-                        <pe:container name='account_register_mode' visible='true' style="width: 240px;height: 200px;background:;">
+                        <pe:container name='account_register_mode' visible='true' style="width: 240px;height: 260px;background:;">
                             <pe:container name="register_account_field_error" visible="false" style="display:none;background:">
                                 <!-- error message -->
                                 <div>
-                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="register_account_field_error_msg" />
+                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="register_account_field_error_msg" />
                                 </div>
                             </pe:container>
                             <pe:container name="register_account_password_field_error" visible="false" style="display:none;background:">
                                 <!-- error message -->
                                 <div>
-                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="register_account_password_field_error_msg" />
+                                    <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="register_account_password_field_error_msg" />
                                 </div>
                             </pe:container>
                             <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
                                 <div>
                                     <input type="text"
-                                        onfocusin="show_notice()"
                                         onfocusout="hide_notice()"
-                                        onchange="set_personal_web"
                                         EmptyText='<%= L"请输入字母、数字组合形式的账号" %>'
                                         style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
                                         name="register_account" />
@@ -301,14 +487,14 @@
                                 </div>
                             </pe:container>
                             <div style="width: 240px;margin-top: 0px;margin-bottom: 5px;">
-                                <input type="checkbox"
-                                    iconsize="12"
-                                    CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
-                                    UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
-                                    style="float:left;margin-top:3px;min-width:90px;"
-                                    name="agree"
-                                    onclick="set_register_agree"
-                                    checked="checked"/>
+                                <input name="agree"
+                                       type="checkbox"
+                                       checked="true"
+                                       iconsize="12"
+                                       CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
+                                       UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
+                                       style="float:left;margin-top:3px;min-width:90px;"
+                                       onclick="set_register_agree" />
                                 <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">
                                     <div style="float:left;width: 2px;"></div>
                                     <%= L"我同意" %>
@@ -318,31 +504,21 @@
                             </div>
                             <div>
                                 <input type="button"
-                                    class="main_login_blue_button"
-                                    style="margin-top: 10px;"
-                                    onclick="register()"
-                                    value='<%= L"注册"%>' />
+                                       class="main_login_blue_button"
+                                       style="margin-top: 10px;"
+                                       onclick="account_register()"
+                                       value='<%= L"注册"%>' />
                             </div>
                         </pe:container>
                         <!-- phone number register -->
-                        <pe:container name='phone_register_mode' visible='false' style='position: relative;width: 240px;height: 230px;background:;margin-top: -200px;'>
+                        <pe:container name='phone_register_mode' visible='false' style='position: relative;width: 240px;height: 240px;background:;margin-top: -260px;'>
                             <div style="color: #FFFFFF;">
-                                <pe:container name="phonenumber_field_error" visible="false" style="display:none;background:">
+                                <pe:container name="phone_field_error" visible="false" style="display:none;background:">
                                     <!-- error message -->
                                     <div>
-                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phonenumber_field_error_msg" />
+                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_field_error_msg" />
                                     </div>
                                 </pe:container>
-                                <!-- <pe:container name="phonecaptcha_field_error" visible="false" style="display:none;background:">
-                                    <div>
-                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phonecaptcha_field_error_msg" />
-                                    </div>
-                                </pe:container>
-                                <pe:container name="phonepassword_field_error" visible="false" style="display:none;background:">
-                                    <div>
-                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phonepassword_field_error_msg" />
-                                    </div>
-                                </pe:container> -->
                                 <div style='width: 240px;height: 131.25px;padding-left: 10px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 96 256 140)'>
                                     <div>
                                         <input type="text"
@@ -412,7 +588,7 @@
                                         CheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#275 79 12 12"
                                         UncheckedBG="Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#295 79 12 12"
                                         style="float:left;margin-top:3px;min-width:90px;"
-                                        name="agree"
+                                        name="phone_agree"
                                         onclick="set_phone_agree"
                                         checked="checked"/>
                                     <div style="float:left; color: white;base-font-size: 11px;font-size: 11px;margin-left: 4px;">

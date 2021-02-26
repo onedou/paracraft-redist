@@ -5,6 +5,7 @@
                 <![CDATA[
                     -- bottles
                     local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
+                    local ForgetPassword = NPL.load('(gl)Mod/WorldShare/cellar/ForgetPassword/ForgetPassword.lua')
 
                     -- service
                     local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
@@ -61,6 +62,30 @@
                         close()
                         MainLogin:ShowSelect()
                     end
+
+                    function forget_password()
+                        ForgetPassword:ShowPage()
+                    end
+
+                    function login()
+                        MainLogin:LoginAction(function(b_succeed)
+                            if not b_succeed then
+                                return
+                            end
+
+                            MainLogin:ShowWhere(function(where)
+                                -- TODO: record where
+
+                                if not Mod.WorldShare.Store:Get('user/hasJoinedSchool') then
+                                    MySchool:ShowJoinSchoolAfterRegister(function()
+                                        MainLogin:EnterUserConsole()
+                                    end)
+                                else
+                                    MainLogin:EnterUserConsole()
+                                end
+                            end)
+                        end)
+                    end
                 ]]>
             </script>
             <style type='text/mcss' src='Mod/WorldShare/cellar/Theme/Mcss/MainLoginMcss.mcss'>
@@ -94,19 +119,19 @@
                     <pe:container name='account_field_error' visible='false' style='display:none;background:'>
                         <!-- error message -->
                         <div>
-                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;' name='account_field_error_msg' />
+                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='account_field_error_msg' />
                         </div>
                     </pe:container>
                     <pe:container name='password_field_error' visible='false' style='display:none;background:'>
                         <!-- error message -->
                         <div>
-                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;' name='password_field_error_msg' />
+                            <label style='font-size: 12px;base-font-size: 12px;color: #EB2222;' name='password_field_error_msg' />
                         </div>
                     </pe:container>
                     <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
                         <div>
                             <input type='text'
-                                   name='showaccount'
+                                   name='account'
                                    style='background:;textcolor: #FFFFFF;height: 30px;width: 190px;margin-top: 10px;font-size: 16px;'
                                    EmptyText='<%= L"请输入您的账号/手机号" %>'
                                    MoveViewWhenAttachWithIME='true' />

@@ -12,6 +12,7 @@ local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
 -- libs
 local ParaWorldLessons = commonlib.gettable('MyCompany.Aries.Game.MainLogin.ParaWorldLessons')
 local GameMainLogin = commonlib.gettable('MyCompany.Aries.Game.MainLogin')
+local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
 
 -- service
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepWorkService/Session.lua')
@@ -59,16 +60,6 @@ function MainLogin:Show()
     self:ShowExtra()
     self:ShowSelect()
 
-    -- local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
-
-    -- if PWDInfo then
-    --     MainLoginPage:SetValue('autoLogin', PWDInfo.autoLogin or false)
-    --     MainLoginPage:SetValue('rememberMe', PWDInfo.rememberMe or false)
-    --     MainLoginPage:SetValue('password', PWDInfo.password or '')
-    --     MainLoginPage:SetValue('showaccount', PWDInfo.account or '')
-    --     self.account = PWDInfo.account
-    -- end
-
     -- self:Refresh()
 
     -- Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
@@ -103,6 +94,19 @@ function MainLogin:ShowLogin()
         false,
         -1
     )
+
+    local MainLoginLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
+
+    if not MainLoginLoginPage then
+        return
+    end
+
+    local PWDInfo = KeepworkServiceSession:LoadSigninInfo()
+
+    if PWDInfo then
+        MainLoginLoginPage:SetUIValue('account', PWDInfo.account or '')
+        self.account = PWDInfo.account
+    end
 end
 
 function MainLogin:ShowRegister()
@@ -133,8 +137,8 @@ function MainLogin:ShowParent()
     )
 end
 
-function MainLogin:ShowWhere()
-    Mod.WorldShare.Utils.ShowWindow(
+function MainLogin:ShowWhere(callback)
+    local params = Mod.WorldShare.Utils.ShowWindow(
         0,
         0,
         'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginWhere.html',
@@ -145,6 +149,12 @@ function MainLogin:ShowWhere()
         false,
         -1
     )
+
+    params._page.callback = function(where)
+        if callback and type(callback) == 'function' then
+            callback(where)
+        end
+    end
 end
 
 function MainLogin:ShowExtra()
@@ -203,45 +213,45 @@ function MainLogin:Close()
 end
 
 function MainLogin:SaveField()
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
+    -- local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
 
-    if not MainLoginPage then
-        return false
-    end
+    -- if not MainLoginPage then
+    --     return false
+    -- end
 
-    -- login
-    local showAccount = MainLoginPage:GetValue('showaccount')
-    local account = MainLoginPage:GetValue('account')
-    local password = MainLoginPage:GetValue('password')
-    local autoLogin = MainLoginPage:GetValue('autoLogin')
-    local rememberMe = MainLoginPage:GetValue('rememberMe')
+    -- -- login
+    -- local showAccount = MainLoginPage:GetValue('showaccount')
+    -- local account = MainLoginPage:GetValue('account')
+    -- local password = MainLoginPage:GetValue('password')
+    -- local autoLogin = MainLoginPage:GetValue('autoLogin')
+    -- local rememberMe = MainLoginPage:GetValue('rememberMe')
 
-    MainLoginPage:SetValue('showaccount', showAccount)
-    MainLoginPage:SetValue('account', account)
-    MainLoginPage:SetValue('password', password)
-    MainLoginPage:SetValue('autoLogin', autoLogin)
-    MainLoginPage:SetValue('rememberMe', rememberMe)
+    -- MainLoginPage:SetValue('showaccount', showAccount)
+    -- MainLoginPage:SetValue('account', account)
+    -- MainLoginPage:SetValue('password', password)
+    -- MainLoginPage:SetValue('autoLogin', autoLogin)
+    -- MainLoginPage:SetValue('rememberMe', rememberMe)
 
-    -- register
-    local registerAccount = MainLoginPage:GetValue('register_account')
-    local registerAccountPassword = MainLoginPage:GetValue('register_account_password')
-    local captcha = MainLoginPage:GetValue('captcha')
-    local agree = MainLoginPage:GetValue('agree')
-    local phonenumber = MainLoginPage:GetValue('phonenumber')
-    local phonecaptcha = MainLoginPage:GetValue('phonecaptcha')
-    local phonepassword = MainLoginPage:GetValue('phonepassword')
+    -- -- register
+    -- local registerAccount = MainLoginPage:GetValue('register_account')
+    -- local registerAccountPassword = MainLoginPage:GetValue('register_account_password')
+    -- local captcha = MainLoginPage:GetValue('captcha')
+    -- local agree = MainLoginPage:GetValue('agree')
+    -- local phonenumber = MainLoginPage:GetValue('phonenumber')
+    -- local phonecaptcha = MainLoginPage:GetValue('phonecaptcha')
+    -- local phonepassword = MainLoginPage:GetValue('phonepassword')
 
-    MainLoginPage:SetValue('register_account', registerAccount)
-    MainLoginPage:SetValue('register_account_password', registerAccountPassword)
-    MainLoginPage:SetValue('captcha', captcha)
-    MainLoginPage:SetValue('agree', agree)
-    MainLoginPage:SetValue('phonenumber', phonenumber)
-    MainLoginPage:SetValue('phonecaptcha', phonecaptcha)
-    MainLoginPage:SetValue('phonepassword', phonepassword)
+    -- MainLoginPage:SetValue('register_account', registerAccount)
+    -- MainLoginPage:SetValue('register_account_password', registerAccountPassword)
+    -- MainLoginPage:SetValue('captcha', captcha)
+    -- MainLoginPage:SetValue('agree', agree)
+    -- MainLoginPage:SetValue('phonenumber', phonenumber)
+    -- MainLoginPage:SetValue('phonecaptcha', phonecaptcha)
+    -- MainLoginPage:SetValue('phonepassword', phonepassword)
 end
 
 function MainLogin:LoginAction(callback)
-    local MainLoginPage = Mod.WorldShare.Store:Get('page/MainLogin')
+    local MainLoginPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Login')
 
     if not MainLoginPage then
         return false
@@ -321,6 +331,108 @@ function MainLogin:LoginAction(callback)
             KeepworkServiceSession:LoginResponse(response, err, HandleLogined)
         end
     )
+end
+
+function MainLogin:RegisterWithAccount(callback)
+    if not self.account or self.account == "" then
+        return false
+    end
+
+    if #self.password < 4 then
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
+
+    KeepworkServiceSession:RegisterWithAccount(self.account, self.password, function(state)
+        Mod.WorldShare.MsgBox:Close()
+
+        if not state then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return
+        end
+
+        if state.id then
+            if state.code then
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+            else
+                -- set default user role
+                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                GameLogic.options:SetMainPlayerAssetName(filename)
+
+                -- register success
+                -- OnKeepWorkLogin
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
+                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+            end
+
+            if self.callback and type(self.callback) == 'function' then
+                self.callback(true)
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(true)
+            end
+
+            return
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+    end)
+end
+
+function MainLogin:RegisterWithPhone(callback)
+    if not self.phonenumber or self.phonenumber == "" then
+        return false
+    end
+
+    if not self.phonecaptcha or self.phonecaptcha == "" then
+        return false
+    end
+
+    if #self.password < 4 then
+        return false
+    end
+
+    Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
+
+    KeepworkServiceSession:RegisterWithPhone(self.phonenumber, self.phonecaptcha, self.password, function(state)
+        Mod.WorldShare.MsgBox:Close()
+
+        if not state then
+            GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
+            return
+        end
+
+        if state.id then
+            if state.code then
+                GameLogic.AddBBS(nil, format("%s%s(%d)", L"错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+            else
+                -- set default user role
+                local filename = UserInfo.GetValidAvatarFilename('boy01')
+                GameLogic.options:SetMainPlayerAssetName(filename)
+
+                -- register success
+                -- OnKeepWorkLogin
+                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
+
+                GameLogic.AddBBS(nil, L"注册成功", 5000, "0 255 0")
+            end
+
+            if self.callback and type(self.callback) == 'function' then
+                self.callback(true)
+            end
+
+            if callback and type(callback) == 'function' then
+                callback(true)
+            end
+
+            return
+        end
+
+        GameLogic.AddBBS(nil, format("%s%s(%d)", L"注册失败，错误信息：", state.message or "", state.code or 0), 5000, "255 0 0")
+    end)
 end
 
 function MainLogin:EnterUserConsole(isOffline)
