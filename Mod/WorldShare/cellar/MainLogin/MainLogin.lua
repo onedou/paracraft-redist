@@ -436,12 +436,6 @@ function MainLogin:RegisterWithPhone(callback)
 end
 
 function MainLogin:EnterUserConsole(isOffline)
-    -- ParaWorldLessons.CheckShowOnStartup(function(bBeginLessons)
-    --     if not bBeginLessons then
-            
-    --     end
-    -- end)
-
     System.options.loginmode = 'local'
 
     if isOffline then
