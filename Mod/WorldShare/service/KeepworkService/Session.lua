@@ -434,7 +434,7 @@ function KeepworkServiceSession:RegisterWithPhone(cellphone, cellphoneCaptcha, p
         function(registerData, err)
             if registerData.id then
                 self:Login(
-                    username,
+                    cellphone,
                     password,
                     function(loginData, err)
                         if err ~= 200 then
@@ -467,7 +467,6 @@ function KeepworkServiceSession:RegisterWithPhone(cellphone, cellphoneCaptcha, p
             end
         end,
         function(data, err)
-            echo(data, true)
             if type(callback) == 'function' then
                 if type(data) == 'table' and data.code then
                     callback(data)
