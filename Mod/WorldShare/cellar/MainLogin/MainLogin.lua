@@ -64,11 +64,6 @@ function MainLogin:Show()
     self:ShowSelect()
 
     -- self:Refresh()
-
-    -- Mod.WorldShare.Store:Set('user/AfterLogined', function(bIsSucceed)
-    --     -- OnKeepWorkLogin
-    --     GameLogic.GetFilters():apply_filters('OnKeepWorkLogin', bIsSucceed)
-    -- end)
 end
 
 function MainLogin:ShowSelect()
@@ -364,8 +359,6 @@ function MainLogin:RegisterWithAccount(callback)
                 GameLogic.options:SetMainPlayerAssetName(filename)
 
                 -- register success
-                -- OnKeepWorkLogin
-                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
             end
 
             if self.callback and type(self.callback) == 'function' then
@@ -415,8 +408,6 @@ function MainLogin:RegisterWithPhone(callback)
                 GameLogic.options:SetMainPlayerAssetName(filename)
 
                 -- register success
-                -- OnKeepWorkLogin
-                GameLogic.GetFilters():apply_filters("OnKeepWorkLogin", true)
             end
 
             if self.callback and type(self.callback) == 'function' then
