@@ -62,8 +62,6 @@ function MainLogin:Show()
 
     self:ShowExtra()
     self:ShowSelect()
-
-    -- self:Refresh()
 end
 
 function MainLogin:ShowSelect()
@@ -156,13 +154,30 @@ function MainLogin:ShowWhere(callback)
 end
 
 function MainLogin:ShowExtra()
+    local width
+    local height
+    local left
+    local top
+
+    if Mod.WorldShare.Utils.IsEnglish() then
+        width = 500
+        height = 130
+        left = 1000
+        top = 160
+    else
+        width = 300
+        height = 130
+        left = 700
+        top = 160
+    end
+
     Mod.WorldShare.Utils.ShowWindow(
-        300,
-        130,
+        width,
+        height,
         'Mod/WorldShare/cellar/Theme/MainLogin/MainLoginExtra.html',
         'Mod.WorldShare.cellar.MainLogin.Extra',
-        700,
-        160,
+        left,
+        top,
         '_rb',
         false,
         1
@@ -207,6 +222,12 @@ function MainLogin:Close()
 
     if MainLoginSelectPage then
         MainLoginSelectPage:CloseWindow()
+    end
+
+    local MainLoginExtraPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Extra')
+
+    if MainLoginExtraPage then
+        MainLoginExtraPage:CloseWindow()
     end
 end
 
