@@ -332,11 +332,11 @@ function MainLogin:LoginAction(callback)
 end
 
 function MainLogin:RegisterWithAccount(callback)
-    if not self.account or self.account == "" then
+    if not Validated:Account(self.account) then
         return false
     end
 
-    if #self.password < 4 then
+    if not Validated:Password(self.password) then
         return false
     end
 
@@ -377,7 +377,15 @@ function MainLogin:RegisterWithAccount(callback)
 end
 
 function MainLogin:RegisterWithPhone(callback)
-    if not self.phonenumber or self.phonenumber == "" then
+    if not Validated:Phone(self.phonenumber) then
+        return false
+    end
+
+    if not Validated:Password(self.password) then
+        return false
+    end
+
+    if not Validated:Account(self.account) then
         return false
     end
 
@@ -385,13 +393,9 @@ function MainLogin:RegisterWithPhone(callback)
         return false
     end
 
-    if #self.password < 4 then
-        return false
-    end
-
     Mod.WorldShare.MsgBox:Show(L"正在注册，请稍候...", 10000, L"链接超时", 500, 120)
 
-    KeepworkServiceSession:RegisterWithPhone(self.phonenumber, self.phonecaptcha, self.password, function(state)
+    KeepworkServiceSession:RegisterWithPhone(self.account, self.phonenumber, self.phonecaptcha, self.password, function(state)
         Mod.WorldShare.MsgBox:Close()
 
         if not state then

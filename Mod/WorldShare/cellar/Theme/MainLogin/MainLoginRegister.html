@@ -19,6 +19,9 @@
                     local account_agree = true
                     local phone_agree = true
                     local is_clicked_get_phone_captcha = false
+                    local phone_show_field = ''
+                    local b_next_button_right = true
+                    local phone_account_exist = false
 
                     function close()
                         local MainLoginRegisterPage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.cellar.MainLogin.Register')
@@ -174,22 +177,40 @@
                         MainLogin:RegisterWithAccount()
                     end
 
-                    function phone_register()
-                        if phone_account_exist then
-                            page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
-                            page:FindControl('phone_field_error').visible = true
-                            return false
+                    function phone_register_next()
+                        if not b_next_button_right then
+                            return
                         end
 
                         local phonenumber = page:GetValue('phonenumber')
                         local phonecaptcha = page:GetValue('phonecaptcha')
+
+                        KeepworkServiceSession:CellphoneCaptchaVerify(phonenumber, phonecaptcha, function(data, err)
+                            if err == 400 then
+                                page:SetUIValue('phone_field_error_msg', L"*手机验证码错误")
+                                page:FindControl('phone_field_error').visible = true
+                                return
+                            end
+
+                            page:FindControl('phone_register_mode_step_1').visible = false
+                            page:FindControl('phone_register_mode_step_2').visible = true
+                        end)
+                    end
+
+                    function phone_register()
+                        local phonenumber = page:GetValue('phonenumber')
+                        local phonecaptcha = page:GetValue('phonecaptcha')
                         local phonepassword = page:GetValue('phonepassword')
+                        local username = page:GetValue('phone_register_account')
 
                         MainLogin.phonenumber = phonenumber
                         MainLogin.password = phonepassword
                         MainLogin.phonecaptcha = phonecaptcha
+                        MainLogin.account = username
 
                         MainLogin.callback = function()
+                            page:SetValue('account_result', username)
+                            page:SetValue('password_result', phonepassword)
                             set_finish()
                         end
 
@@ -220,112 +241,6 @@
                         else
                             page:FindControl('agree_field_error').visible = false
                         end
-                    end
-
-                    function hide_notice()
-                        local username = page:GetValue('register_account')
-
-                        if not username or #username == 0 then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号不能为空')
-                            page:FindControl('register_account_field_error').visible = true
-                            return false
-                        end
-
-                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
-                            if bIsExist then
-                                MainLogin.accountExist = true
-                                page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
-                                page:FindControl('register_account_field_error').visible = true
-                                return false
-                            else
-                                MainLogin.accountExist = false
-                                page:FindControl('register_account_field_error').visible = false
-                                return false
-                            end
-                        end)
-                    end
-
-                    function check_register_password()
-                        local password
-
-                        if be_show_password then
-                            password = page:GetValue('register_account_password_show')
-                        else
-                            password = page:GetValue('register_account_password_hide')
-                        end
-
-                        page:SetValue('register_account_password', password)
-
-                        if #password < 4 then
-                            page:SetUIValue('register_account_password_field_error_msg', L'*密码最少为4位')
-                            page:FindControl('register_account_password_field_error').visible = true
-                        else
-                            page:FindControl('register_account_password_field_error').visible = false
-                        end
-                    end
-
-                    function check_phone_number()
-                        local phonenumber = page:GetValue('phonenumber')
-
-                        if phonenumber and #phonenumber == 0 then
-                            page:SetUIValue('phone_field_error_msg', L'*手机号不能为空')
-                            page:FindControl('phone_field_error').visible = true
-                            return                           
-                        end
-
-                        if not Validated:Phone(phonenumber) then
-                            page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
-                            page:FindControl('phone_field_error').visible = true
-                            return false
-                        end
-
-                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
-                            if bIsExist then
-                                phone_account_exist = true
-                                page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
-                                page:FindControl('phone_field_error').visible = true
-                            else
-                                phone_account_exist = false
-                                page:FindControl('phone_field_error').visible = false
-                            end
-                        end)
-                    end
-
-                    function checkout_phonecaptcha()
-                        local photocaptcha = page:GetValue('phonecaptcha')
-
-                        if photocaptcha and #photocaptcha == 0 then
-                            page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
-                            page:FindControl('phone_field_error').visible = true
-                        else
-                            page:FindControl('phone_field_error').visible = false
-                        end
-                    end
-
-                    function check_phone_password()
-                        local phonepassword
-
-                        if be_show_phone_password then
-                            phonepassword = page:GetValue('phonepassword_show')
-                        else
-                            phonepassword = page:GetValue('phonepassword_hide')
-                        end
-
-                        page:SetValue('phonepassword', phonepassword)
-
-                        if phonepassword and #phonepassword == 0 then
-                            page:SetUIValue('phone_field_error_msg', L'*密码不能为空')
-                            page:FindControl('phone_field_error').visible = true
-                            return
-                        end
-
-                        if #phonepassword < 4 then
-                            page:SetUIValue('phone_field_error_msg', L'*密码少于6位')
-                            page:FindControl('phone_field_error').visible = true
-                            return
-                        end
-
-                        page:FindControl('phone_field_error').visible = false
                     end
 
                     function set_phone_agree()
@@ -384,6 +299,203 @@
                         end)
 
                         timer:Change(1000, 1000)
+                    end
+
+                    function check_account(callback)
+                        if not callback or type(callback) ~='function' then
+                            return false
+                        end
+
+                        local username = page:GetValue('register_account')
+
+                        if not Validated:Account(username) then
+                            page:SetUIValue('register_account_field_error_msg', L'*请输入以字母开头、字母、数字组合形式的账号')
+                            page:FindControl('register_account_field_error').visible = true
+                            callback(false)
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
+                            if bIsExist then
+                                MainLogin.accountExist = true
+                                page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
+                                page:FindControl('register_account_field_error').visible = true
+                                callback(false)
+                            else
+                                MainLogin.accountExist = false
+                                page:FindControl('register_account_field_error').visible = false
+                                callback(true)
+                            end
+                        end)
+                    end
+
+                    function check_register_password()
+                        local password
+
+                        if be_show_password then
+                            password = page:GetValue('register_account_password_show')
+                        else
+                            password = page:GetValue('register_account_password_hide')
+                        end
+
+                        page:SetValue('register_account_password', password)
+
+                        if not Validated:Password(password) then
+                            page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
+                            page:FindControl('register_account_password_field_error').visible = true
+                            return false
+                        else
+                            page:FindControl('register_account_password_field_error').visible = false
+                            return true
+                        end
+                    end
+
+                    function update_register_account_button_status()
+                        local bRight = true    
+
+                        if not check_register_password() then
+                            bRight = false
+                        end
+
+                        check_account(function(result)
+                            if not result then
+                                bRight = false
+                            end
+
+                            if bRight then
+                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                            else
+                                page:SetUIBackground('account_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                            end
+                        end)
+                    end
+
+                    function check_phone_number(callback)
+                        if not callback or type(callback) ~='function' then
+                            return false
+                        end
+
+                        local phonenumber = page:GetValue('phonenumber')
+
+                        if not Validated:Phone(phonenumber) then
+                            if phone_show_field == 'phonenumber' then
+                                page:SetUIValue('phone_field_error_msg', L'*手机号码格式错误')
+                                page:FindControl('phone_field_error').visible = true
+                            end
+                            callback(false)
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckPhonenumberExist(phonenumber, function(bIsExist)
+                            if bIsExist then
+                                phone_account_exist = true
+                                if phone_show_field == 'phonenumber' then
+                                    page:SetUIValue('phone_field_error_msg', L'*手机号码已存在')
+                                    page:FindControl('phone_field_error').visible = true
+                                end
+                                callback(false)
+                            else
+                                phone_account_exist = false
+                                if phone_show_field == 'phonenumber' then
+                                    page:FindControl('phone_field_error').visible = false
+                                end
+                                callback(true)
+                            end
+                        end)
+                    end
+
+                    function checkout_phonecaptcha(callback)
+                        local phonecaptcha = page:GetValue('phonecaptcha')
+
+                        if phonecaptcha and #phonecaptcha == 0 then
+                            if phone_show_field == 'phonecaptcha' then
+                                page:SetUIValue('phone_field_error_msg', L'*手机验证码不能为空')
+                                page:FindControl('phone_field_error').visible = true
+                            end
+                            return false
+                        else
+                            if phone_show_field == 'phonecaptcha' then
+                                page:FindControl('phone_field_error').visible = false
+                            end
+                            return true
+                        end
+                    end
+
+                    function check_phone_password()
+                        local phonepassword
+
+                        if be_show_phone_password then
+                            phonepassword = page:GetValue('phonepassword_show')
+                        else
+                            phonepassword = page:GetValue('phonepassword_hide')
+                        end
+
+                        page:SetValue('phonepassword', phonepassword)
+
+                        if not Validated:Password(phonepassword) then
+                            if phone_show_field == 'phonepassword_show' or phone_show_field == 'phonepassword_hide' then
+                                page:SetUIValue('phone_field_error_msg', L'*密码不合法')
+                                page:FindControl('phone_field_error').visible = true
+                            end
+                            return false
+                        else
+                            if phone_show_field == 'phonepassword_show' or phone_show_field == 'phonepassword_hide' then
+                                page:FindControl('phone_field_error').visible = false
+                            end
+                            return true
+                        end
+                    end
+
+                    function set_phone_register_show_field(name)
+                        phone_show_field = name
+                    end
+
+                    function update_register_phone_next_button_status()
+                        b_next_button_right = true
+
+                        if not checkout_phonecaptcha() then
+                            b_next_button_right = false
+                        end
+
+                        if not check_phone_password() then
+                            b_next_button_right = false
+                        end
+
+                        check_phone_number(function(result)
+                            if not result then
+                                b_next_button_right = false
+                            end
+
+                            if b_next_button_right then
+                                page:SetUIBackground('phone_register_next_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                            else
+                                page:SetUIBackground('phone_register_next_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                            end
+                        end)
+                    end
+
+                    function update_register_phone_button_status()
+                        local username = page:GetValue('phone_register_account')
+
+                        if not Validated:Account(username) then
+                            page:SetUIValue('phone_account_field_error_msg', L'*请输入以字母开头、字母、数字组合形式的账号')
+                            page:FindControl('phone_account_field_error').visible = true
+                            page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                            return
+                        end
+
+                        KeepworkServiceSession:CheckUsernameExist(username, function(b_is_exist)
+                            if b_is_exist then
+                                MainLogin.accountExist = true
+                                page:SetUIValue('phone_account_field_error_msg', L'*账号已存在，请使用其他账号')
+                                page:FindControl('phone_account_field_error').visible = true
+                                page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 197 258 44')
+                            else
+                                MainLogin.accountExist = false
+                                page:FindControl('phone_account_field_error').visible = false
+                                page:SetUIBackground('phone_register_button', 'Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#271 98 258 44')
+                            end
+                        end)
                     end
                 ]]>
             </script>
@@ -447,22 +559,22 @@
                             <div style='width: 240px; height: 88.1px;padding-left: 35px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 0 256 94)'>
                                 <div>
                                     <input type="text"
-                                        onfocusout="hide_notice()"
-                                        EmptyText='<%= L"请输入字母、数字组合形式的账号" %>'
-                                        style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
-                                        name="register_account" />
+                                           onchange='update_register_account_button_status'
+                                           EmptyText='<%= L"请输入字母、数字组合形式的账号" %>'
+                                           style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
+                                           name="register_account" />
                                 </div>
                                 <div>
                                     <div style="float: left;width: 200px;">
                                         <input type="text"
-                                            onfocusout="check_register_password"
+                                            onchange="update_register_account_button_status"
                                             SkipAutoBadWordFilter="true"
                                             EmptyText='<%= L"请输入4位数字或以上的密码" %>'
                                             style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 10px;font-size: 12px;'
                                             name="register_account_password_show"
                                             visible="false" />
                                         <input type="text"
-                                            onfocusout="check_register_password"
+                                            onchange="update_register_account_button_status"
                                             PasswordChar="*"
                                             SkipAutoBadWordFilter="true"
                                             EmptyText='<%= L"请输入4位数字或以上的密码" %>'
@@ -505,7 +617,8 @@
                             </div>
                             <div>
                                 <input type="button"
-                                       class="main_login_blue_button"
+                                       name='account_register_button'
+                                       class="main_login_gray_button"
                                        style="margin-top: 10px;"
                                        onclick="account_register()"
                                        value='<%= L"注册"%>' />
@@ -513,9 +626,9 @@
                         </pe:container>
                         <!-- phone number register -->
                         <pe:container name='phone_register_mode' visible='false' style='position: relative;width: 240px;height: 240px;background:;margin-top: -260px;'>
-                            <pe:container name='phone_register_mode_step_1' visible='true' style='position: relative;'>
+                            <pe:container name='phone_register_mode_step_1' visible='true' style='position: relative;background:;'>
                                 <div style="color: #FFFFFF;">
-                                    <pe:container name="phone_field_error" visible="false" style="display:none;background:">
+                                    <pe:container name="phone_field_error" visible="false" style="background:;">
                                         <!-- error message -->
                                         <div>
                                             <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_field_error_msg" />
@@ -524,16 +637,18 @@
                                     <div style='width: 240px;height: 131.25px;padding-left: 10px;background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 96 256 140)'>
                                         <div>
                                             <input type="text"
-                                                EmptyText='<%= L"请输入手机号" %>'
-                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
-                                                onfocusout="check_phone_number()"
-                                                name="phonenumber" />
+                                                   EmptyText='<%= L"请输入手机号" %>'
+                                                   style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
+                                                   onchange='update_register_phone_next_button_status'
+                                                   onfocusin='set_phone_register_show_field'
+                                                   name="phonenumber" />
                                         </div>
                                         <div>
                                             <input type="text"
-                                                onfocusout="checkout_phonecaptcha"
+                                                onchange='update_register_phone_next_button_status'
                                                 EmptyText='<%= L"请输入验证码" %>'
-                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 130px;margin-top: 12px;font-size: 12px;'
+                                                style='background:;textcolor: #FFFFFF;height: 30px;width: 120px;margin-top: 12px;font-size: 12px;'
+                                                onfocusin='set_phone_register_show_field'
                                                 name="phonecaptcha" />
                                             <input
                                                 type="button"
@@ -543,7 +658,7 @@
                                                     color: #3E9CE5;
                                                     font-size: 12px;
                                                     base-font-size: 12px;
-                                                    width: 80px;
+                                                    width: 90px;
                                                     height:30px;
                                                     background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#331 70 90 22:5 5 5 5)"
                                                 onclick="get_phone_captcha()"
@@ -554,17 +669,19 @@
                                         <div>
                                             <div style="float: left;width: 200px;">
                                                 <input type="text"
-                                                    onfocusout="check_phone_password"
+                                                    onchange='update_register_phone_next_button_status'
                                                     EmptyText='<%= L"请输入4位数字或以上的密码" %>'
                                                     style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;'
                                                     name="phonepassword_show"
+                                                    onfocusin='set_phone_register_show_field'
                                                     visible="false" />
                                                 <input type="text"
-                                                    onfocusout="check_phone_password"
+                                                    onchange='update_register_phone_next_button_status'
                                                     PasswordChar="*"
                                                     EmptyText='<%= L"请输入4位数字或以上的密码" %>'
                                                     style='background:;textcolor: #FFFFFF;height: 30px;width: 200px;margin-top: 12px;font-size: 12px;margin-left: -200px;'
                                                     name="phonepassword_hide"
+                                                    onfocusin='set_phone_register_show_field'
                                                     visible="true" />
                                                 <input type="hidden" name="phonepassword" value="" />
                                             </div>
@@ -578,7 +695,7 @@
                                                     onclick="set_show_password1"/>
                                         </div>
                                     </div>
-                                    <pe:container name="phone_agree_field_error" visible="false" style="display:none;background:">
+                                    <pe:container name="phone_agree_field_error" visible="false" style="background:">
                                         <!-- error message -->
                                         <div>
                                             <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;margin-left: 62px;" name="phone_agree_field_error_msg" />
@@ -601,16 +718,46 @@
                                         </div>
                                     </div>
                                     <div>
-                                        <input type="button"
-                                            class="main_login_blue_button"
-                                            style="margin-top: 10px"
-                                            onclick="phone_register()"
-                                            value='<%= L"下一步"%>' />
+                                        <input type='button'
+                                               name='phone_register_next_button'
+                                               class='main_login_gray_button'
+                                               style='margin-top: 10px'
+                                               onclick='phone_register_next()'
+                                               value='<%= L"下一步"%>' />
                                     </div>
                                 </div>
                             </pe:container>
-                            <pe:container name='phone_register_mode_step_2' visible='false' style="position: relative;">
-                                
+                            <pe:container name='phone_register_mode_step_2' visible='false' style="position: relative;background:;">
+                                <pe:container name="phone_account_field_error" visible="false" style="background:;margin-top: 5px;">
+                                    <!-- error message -->
+                                    <div>
+                                        <label style="font-size: 12px;base-font-size: 12px;color: #EB2222;" name="phone_account_field_error_msg" />
+                                    </div>
+                                </pe:container>
+                                <div style="width: 240px;
+                                            height: 46.87px;
+                                            padding-left: 15px;
+                                            padding-top: 12px;
+                                            background: url(Texture/Aries/Creator/paracraft/paracraft_login_32bits.png#9 951 256 50);">
+                                    <input type='text'
+                                        name='phone_register_account'
+                                        onchange='update_register_phone_button_status'
+                                        EmptyText='<%= L"为自己取一个个性账号名吧" %>'
+                                        style='width: 210px;
+                                               height: 30px;
+                                               textcolor: #FFFFFF;
+                                               base-font-size: 12px;
+                                               font-size: 12px;
+                                               background:; ' />
+                                </div>
+                                <div>
+                                    <input type='button'
+                                           name='phone_register_button'
+                                           class='main_login_gray_button'
+                                           style='margin-top: 130px'
+                                           onclick='phone_register()'
+                                           value='<%= L"注册"%>' />
+                                </div>
                             </pe:container>
                         </pe:container>
                     </pe:container>
