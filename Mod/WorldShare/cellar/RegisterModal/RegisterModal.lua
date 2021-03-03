@@ -88,7 +88,7 @@ function RegisterModal:RegisterWithAccount(callback)
 
     KeepworkServiceSession:RegisterWithAccount(self.account, self.password, function(state)
         Mod.WorldShare.MsgBox:Close()
-echo(state, true)
+
         if not state then
             GameLogic.AddBBS(nil, L"未知错误", 5000, "0 255 0")
             return
