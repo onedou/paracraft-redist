@@ -17,12 +17,14 @@ local LoginModal = NPL.load('(gl)Mod/WorldShare/cellar/LoginModal/LoginModal.lua
 local VipTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/VipTypeWorld.lua')
 local ShareTypeWorld = NPL.load('(gl)Mod/WorldShare/cellar/Common/LoadWorld/ShareTypeWorld.lua')
 local SyncMain = NPL.load('(gl)Mod/WorldShare/cellar/Sync/Main.lua')
+local DeleteWorld = NPL.load('(gl)Mod/WorldShare/cellar/DeleteWorld/DeleteWorld.lua')
 
 -- service
 local Compare = NPL.load('(gl)Mod/WorldShare/service/SyncService/Compare.lua')
 local LocalService = NPL.load('(gl)Mod/WorldShare/service/LocalService.lua')
 local LocalServiceWorld = NPL.load('(gl)Mod/WorldShare/service/LocalService/LocalServiceWorld.lua')
 local KeepworkServiceSession = NPL.load('(gl)Mod/WorldShare/service/KeepworkService/Session.lua')
+local SyncToLocal = NPL.load('(gl)Mod/WorldShare/service/SyncService/SyncToLocal.lua')
 
 local Create = NPL.export()
 
@@ -32,7 +34,7 @@ function Create:Show()
     local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
 
     if CreatePage then
-        self:GetWorldList()
+        self:GetWorldList(self.statusFilter)
         return true
     end
 
@@ -40,10 +42,12 @@ function Create:Show()
 
     Mod.WorldShare.Utils.ShowWindow(920, 530, '(ws)Create/Create.html', 'Mod.WorldShare.Create')
 
-    self:GetWorldList()
+    self:GetWorldList(self.statusFilter)
 end
 
 function Create:Close()
+    self.statusFilter = nil
+
     local CreatePage = Mod.WorldShare.Store:Get('page/Mod.WorldShare.Create')
 
     if not CreatePage then
@@ -143,13 +147,13 @@ function Create:Sync()
 
         if result == Compare.JUSTLOCAL then
             SyncMain:SyncToDataSource(function()
-                self:GetWorldList()
+                self:GetWorldList(self.statusFilter)
             end)
         end
 
         if result == Compare.JUSTREMOTE then
             SyncMain:SyncToLocal(function()
-                self:GetWorldList()
+                self:GetWorldList(self.statusFilter)
             end)
         end
 
@@ -157,7 +161,7 @@ function Create:Sync()
            result == Compare.LOCALBIGGER or
            result == Compare.EQUAL then
             SyncMain:ShowStartSyncPage(nil, function()
-                self:GetWorldList()
+                self:GetWorldList(self.statusFilter)
             end)
         end
 
@@ -203,7 +207,7 @@ function Create:EnterWorld(index, allowOffline)
     if VipTypeWorld:IsVipWorld(currentSelectedWorld) then
         local isSignedIn = LoginModal:CheckSignedIn(L'此世界为VIP世界，需要登陆后才能继续', function(bIsSuccessed)
             if bIsSuccessed then
-                self:GetWorldList(nil, function()
+                self:GetWorldList(self.statusFilter, function()
                     local index = Compare:GetWorldIndexByFoldername(
                         currentSelectedWorld.foldername,
                         currentSelectedWorld.shared,
@@ -227,7 +231,7 @@ function Create:EnterWorld(index, allowOffline)
     if ShareTypeWorld:IsSharedWorld(currentSelectedWorld) and not allowOffline then
         if not LoginModal:CheckSignedIn(L'此世界为多人世界，请先登录', function(bIsSuccessed)
             if bIsSuccessed then
-                self:GetWorldList(nil, function()
+                self:GetWorldList(self.statusFilter, function()
                     local index = Compare:GetWorldIndexByFoldername(
                         currentSelectedWorld.foldername,
                         currentSelectedWorld.shared,
@@ -265,7 +269,7 @@ function Create:EnterWorld(index, allowOffline)
             if result then
                 if result == 'THIRD' then
                     return function()
-                        self:GetWorldList(nil, function()
+                        self:GetWorldList(self.statusFilter, function()
                             local index = Compare:GetWorldIndexByFoldername(
                                 currentSelectedWorld.foldername,
                                 currentSelectedWorld.shared,
@@ -277,7 +281,7 @@ function Create:EnterWorld(index, allowOffline)
                 end
 
                 -- refresh world list after login
-                self:GetWorldList(nil, function()
+                self:GetWorldList(self.statusFilter, function()
                     local index = Compare:GetWorldIndexByFoldername(
                         currentSelectedWorld.foldername,
                         currentSelectedWorld.shared,
@@ -324,7 +328,7 @@ function Create:EnterWorld(index, allowOffline)
 
                     if type(option) == 'table' then
                         if option.method == 'UPDATE-PROGRESS-FINISH' then
-                            if not LocalServiceWorld:CheckWorldIsCorrect(world) then
+                            if not LocalServiceWorld:CheckWorldIsCorrect(currentWorld) then
                                 _guihelper.MessageBox(L'文件损坏，请再试一次。如果还是出现问题，请联系作者或者管理员。')
                                 return false
                             end
@@ -378,4 +382,13 @@ function Create:EnterWorld(index, allowOffline)
             end
         end)
     end
+end
+
+function Create:DeleteWorld(worldIndex)
+    self:OnSwitchWorld(worldIndex)
+
+    DeleteWorld:DeleteWorld(function()
+        echo(11111111111, true)
+        self:GetWorldList(self.statusFilter)
+    end)
 end

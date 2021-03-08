@@ -167,7 +167,7 @@
                     end
 
                     function refresh()
-                        Create:GetWorldList()
+                        Create:GetWorldList(Create.statusFilter)
                     end
 
                     function username()
@@ -238,7 +238,7 @@
                     end
 
                     function delete_world(index)
-                        WorldList:DeleteWorld(index)
+                        Create:DeleteWorld(index)
                     end
 
                     function sync(index)
@@ -366,10 +366,13 @@
                         index = tonumber(index)
 
                         if index == 1 then
+                            Create.statusFilter = nil
                             Create:GetWorldList()
                         elseif index == 2 then
+                            Create.statusFilter = 'ONLINE'
                             Create:GetWorldList('ONLINE')
                         elseif index == 3 then
+                            Create.statusFilter = 'LOCAL'
                             Create:GetWorldList('LOCAL')
                         end
                     end
