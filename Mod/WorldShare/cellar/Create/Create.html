@@ -9,8 +9,9 @@
                     local InternetLoadWorld = commonlib.gettable("MyCompany.Aries.Creator.Game.Login.InternetLoadWorld")
                     local UniString = commonlib.gettable("System.Core.UniString")
 
-                    -- UI
-                    local UserConsoleCreate = NPL.load("./Create.lua")
+                    -- bottles
+                    local Create = NPL.load('./Create.lua')
+                    local MainLogin = NPL.load('(gl)Mod/WorldShare/cellar/MainLogin/MainLogin.lua')
                     local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
                     local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
                     local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
@@ -65,7 +66,7 @@
                     end
 
                     function be_selected()
-                        return Eval("index") == WorldList.worldIndex
+                        return Eval("index") == Create.worldIndex
                     end
 
                     function get_world_status(index)
@@ -166,7 +167,7 @@
                     end
 
                     function refresh()
-                        WorldList:RefreshCurrentServerList()
+                        Create:GetWorldList()
                     end
 
                     function username()
@@ -214,35 +215,22 @@
                         return styleStr
                     end
 
-                    function logout()
-                        UserInfo:Logout()
-                    end
-
                     function close()
-                        if System.options.mc == true then
-                            if Mod.WorldShare.Store:Get("world/isEnterWorld") then
-                                UserConsole:ClosePage()
-                            else
-                                if is_signed_in() then
-                                    logout()
-                                end
+                        Create:Close()
 
-                                UserConsole:ClosePage()
-                                UserConsole:EnterMainLogin()
-                            end
-                        else
-                            UserConsole:ClosePage()
+                        if not Mod.WorldShare.Store:Get("world/isEnterWorld") then
+                            MainLogin:Init()
                         end
                     end
 
                     function is_list_refreshing()
-                        return WorldList:IsRefreshing()
+                        return Create:IsRefreshing()
                     end
 
                     function switch_world(index)
                         do_modify = false
                         current_item_index = index
-                        WorldList:OnSwitchWorld(index)
+                        Create:OnSwitchWorld(index)
                     end
 
                     function is_signed_in()
@@ -254,11 +242,11 @@
                     end
 
                     function sync(index)
-                        WorldList:Sync(index)
+                        Create:Sync(index)
                     end
 
                     function enter(index)
-                        WorldList:EnterWorld(index)
+                        Create:EnterWorld(index)
                     end
 
                     function create_new_world()
@@ -361,7 +349,7 @@
                     end
 
                     function is_current_menu_select(index)
-                        if tonumber(index) == tonumber(UserConsoleCreate.currentMenuSelectIndex) then
+                        if tonumber(index) == tonumber(Create.currentMenuSelectIndex) then
                             return true
                         else
                             return false
@@ -369,21 +357,20 @@
                     end
 
                     function select_type(index)
-                        UserConsoleCreate.currentMenuSelectIndex = index
+                        Create.currentMenuSelectIndex = index
 
                         if not index or (type(index) ~= 'string' and type(index) ~= 'number') then
                             return false
                         end
 
                         index = tonumber(index)
-                        local statusFilter
 
                         if index == 1 then
-                            WorldList:RefreshCurrentServerList(function() page:Refresh(0.01) end)
+                            Create:GetWorldList()
                         elseif index == 2 then
-                            WorldList:RefreshCurrentServerList(function() page:Refresh(0.01) end, 'ONLINE')
+                            Create:GetWorldList('ONLINE')
                         elseif index == 3 then
-                            WorldList:RefreshCurrentServerList(function() page:Refresh(0.01) end, 'LOCAL')
+                            Create:GetWorldList('LOCAL')
                         end
                     end
 

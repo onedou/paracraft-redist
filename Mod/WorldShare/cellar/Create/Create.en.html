@@ -10,7 +10,7 @@
                     local UniString = commonlib.gettable("System.Core.UniString")
 
                     -- UI
-                    local UserConsoleCreate = NPL.load("./Create.lua")
+                    local Create = NPL.load("./Create.lua")
                     local UserConsole = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/Main.lua")
                     local WorldList = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/WorldList.lua")
                     local UserInfo = NPL.load("(gl)Mod/WorldShare/cellar/UserConsole/UserInfo.lua")
@@ -361,7 +361,7 @@
                     end
 
                     function is_current_menu_select(index)
-                        if tonumber(index) == tonumber(UserConsoleCreate.currentMenuSelectIndex) then
+                        if tonumber(index) == tonumber(Create.currentMenuSelectIndex) then
                             return true
                         else
                             return false
@@ -369,7 +369,7 @@
                     end
 
                     function select_type(index)
-                        UserConsoleCreate.currentMenuSelectIndex = index
+                        Create.currentMenuSelectIndex = index
 
                         if not index or (type(index) ~= 'string' and type(index) ~= 'number') then
                             return false
